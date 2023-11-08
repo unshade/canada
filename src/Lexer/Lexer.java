@@ -134,30 +134,16 @@ public class Lexer {
     }
 
     private Token matchToken(String lexeme) throws InvalidToken {
-        for (Map.Entry<Pattern, Tag> entry : this.keywords.entrySet()) {
-            Pattern pattern = entry.getKey();
-            Tag tag = entry.getValue();
+        List<Map<Pattern, Tag>> patterns = List.of(this.keywords, this.ruledTerminals, this.operators);
 
-            if (pattern.matcher(lexeme).matches()) {
-                return new Token(tag, this.currentLine, lexeme);
-            }
-        }
+        for (Map<Pattern, Tag> pattern : patterns) {
+            for (Map.Entry<Pattern, Tag> entry : pattern.entrySet()) {
+                Pattern p = entry.getKey();
+                Tag tag = entry.getValue();
 
-        for (Map.Entry<Pattern, Tag> entry : this.ruledTerminals.entrySet()) {
-            Pattern pattern = entry.getKey();
-            Tag tag = entry.getValue();
-
-            if (pattern.matcher(lexeme).matches()) {
-                return new Token(tag, this.currentLine, lexeme);
-            }
-        }
-
-        for (Map.Entry<Pattern, Tag> entry : this.operators.entrySet()) {
-            Pattern pattern = entry.getKey();
-            Tag tag = entry.getValue();
-
-            if (pattern.matcher(lexeme).matches()) {
-                return new Token(tag, this.currentLine, lexeme);
+                if (p.matcher(lexeme).matches()) {
+                    return new Token(tag, this.currentLine, lexeme);
+                }
             }
         }
 
