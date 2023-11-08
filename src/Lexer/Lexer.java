@@ -17,11 +17,15 @@ public class Lexer {
     private Map<Pattern, Tag> ruledTerminals;
     private Map<Pattern, Tag> operators;
 
-    public Lexer(File file) throws FileNotFoundException {
+    private int currentChar;
+    private int previousChar;
+
+    public Lexer(File file) throws IOException {
 
         this.reader = new BufferedReader(new FileReader(file));
         this.tokens = new ArrayList<>();
         this.currentLine = 1;
+        this.currentChar = this.reader.read();
 
         this.keywords = Map.ofEntries(
                 Map.entry(Pattern.compile("procedure"), Tag.PROCEDURE),
@@ -76,6 +80,78 @@ public class Lexer {
                 Pattern.compile("[0-9]+"), Tag.ENTIER,
                 Pattern.compile("'[A-Za-z]'"), Tag.CARACTERE
         );
+    }
+
+    public Token nextToken() throws IOException {
+
+        StringBuilder lexeme = new StringBuilder();
+
+        while (this.currentChar != -1) {
+
+            this.previousChar = this.currentChar;
+
+            this.currentChar = this.reader.read();
+
+            if ((Character.isLetterOrDigit((char) currentChar) && Character.isLetterOrDigit((char) previousChar)) || (!Character.isLetterOrDigit((char) currentChar) && !Character.isLetterOrDigit((char) previousChar)) || !Character.isWhitespace((char) currentChar)) {
+                lexeme.append((char) currentChar);
+
+            } else {
+                for (Map.Entry<Pattern, Tag> entry : this.keywords.entrySet()) {
+                    Pattern pattern = entry.getKey();
+                    Tag tag = entry.getValue();
+
+                    if (pattern.matcher(lexeme.toString()).matches()) {
+                        return new Token(tag, this.currentLine, lexeme.toString());
+                    }
+                }
+
+                for (Map.Entry<Pattern, Tag> entry : this.ruledTerminals.entrySet()) {
+                    Pattern pattern = entry.getKey();
+                    Tag tag = entry.getValue();
+
+                    if (pattern.matcher(lexeme.toString()).matches()) {
+                        return new Token(tag, this.currentLine, lexeme.toString());
+                    }
+                }
+
+                for (Map.Entry<Pattern, Tag> entry : this.operators.entrySet()) {
+                    Pattern pattern = entry.getKey();
+                    Tag tag = entry.getValue();
+
+                    if (pattern.matcher(lexeme.toString()).matches()) {
+                        return new Token(tag, this.currentLine, lexeme.toString());
+                    }
+                }
+
+                if (Character.isWhitespace(currentChar)) {
+                    if (currentChar == '\n') {
+                        this.currentLine++;
+                    }
+
+                    currentChar = this.reader.read();
+                    continue;
+                }
+
+                lexeme.append((char) currentChar);
+            }
+        }
+
+        return new Token(Tag.EOF, this.currentLine, lexeme.toString());
+
+    }
+
+
+    private int read() throws IOException {
+
+        while (Character.isWhitespace(currentChar)) {
+            if (currentChar == '\n') {
+                this.currentLine++;
+            }
+
+            currentChar = this.reader.read();
+        }
+
+        return currentChar;
     }
 
 }
