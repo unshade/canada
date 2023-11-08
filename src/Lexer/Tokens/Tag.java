@@ -55,5 +55,6 @@ public enum Tag {
     ASSIGN,
 
     // Special
-    EOF
+    EOF,
+    UNKNOWN
 }

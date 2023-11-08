@@ -1,5 +1,6 @@
 package Lexer;
 
+import Exceptions.Lexical.InvalidToken;
 import Lexer.Tokens.Tag;
 import Lexer.Tokens.Token;
 
@@ -10,20 +11,18 @@ import java.util.Map;
 import java.util.regex.Pattern;
 
 public class Lexer {
-    Reader reader;
-    private List<Token> tokens;
-    private int currentLine;
-    private Map<Pattern, Tag> keywords;
-    private Map<Pattern, Tag> ruledTerminals;
-    private Map<Pattern, Tag> operators;
+    private final PeekingReader reader;
+    private final Map<Pattern, Tag> keywords;
+    private final Map<Pattern, Tag> ruledTerminals;
+    private final Map<Pattern, Tag> operators;
 
+    private int currentLine;
     private int currentChar;
     private int previousChar;
 
     public Lexer(File file) throws IOException {
 
-        this.reader = new BufferedReader(new FileReader(file));
-        this.tokens = new ArrayList<>();
+        this.reader = new PeekingReader(new FileReader(file));
         this.currentLine = 1;
         this.currentChar = this.reader.read();
         this.previousChar = this.currentChar;
@@ -83,14 +82,23 @@ public class Lexer {
         );
     }
 
-    // TODO: manage the comments
-
-    public Token nextToken() throws IOException {
+    public Token nextToken() throws IOException, InvalidToken {
 
         StringBuilder lexeme = new StringBuilder();
 
         while (this.currentChar != -1) {
-
+            if (this.currentChar == '-' && this.reader.peek(1) == '-' && this.reader.peek(2) != '-') {
+                do {
+                    while (this.currentChar != '\n' && this.currentChar != -1) {
+                        this.currentChar = this.reader.read();
+                    }
+                    if (this.currentChar != -1) {
+                        this.currentChar = this.reader.read();
+                    }
+                    this.currentLine++;
+                } while (this.currentChar == '-' && this.reader.peek(1) == '-' && this.reader.peek(2) != '-');
+                lexeme.append((char) currentChar);
+            }
             // if the current char is the same "type" as the previous one, we add it to the lexeme
             // else that means the lexem is a potential token
             if ((Character.isLetterOrDigit((char) currentChar) && Character.isLetterOrDigit((char) previousChar)) || (!Character.isLetterOrDigit((char) currentChar) && !Character.isLetterOrDigit((char) previousChar) && !Character.isWhitespace((char) currentChar))) {
@@ -119,11 +127,13 @@ public class Lexer {
             }
         }
 
+        this.reader.close();
+
         return new Token(Tag.EOF, this.currentLine, lexeme.toString());
 
     }
 
-    Token matchToken(String lexeme) {
+    private Token matchToken(String lexeme) throws InvalidToken {
         for (Map.Entry<Pattern, Tag> entry : this.keywords.entrySet()) {
             Pattern pattern = entry.getKey();
             Tag tag = entry.getValue();
@@ -151,23 +161,16 @@ public class Lexer {
             }
         }
 
-        //TODO: throw an exception
-        System.out.println("Error: '" + lexeme + "' is not a valid token");
-        return null;
+        throw new InvalidToken(new Token(Tag.UNKNOWN, this.currentLine, lexeme));
     }
 
-
-    private int read() throws IOException {
-
-        while (Character.isWhitespace(currentChar)) {
-            if (currentChar == '\n') {
-                this.currentLine++;
-            }
-
-            currentChar = this.reader.read();
+    public void displayAllTokens() throws IOException, InvalidToken {
+        Token token;
+        List<Token> tokens = new ArrayList<>();
+        while ((token = this.nextToken()).tag() != Tag.EOF) {
+            tokens.add(token);
         }
-
-        return currentChar;
+        tokens.forEach(System.out::print);
     }
 
 }
