@@ -1,0 +1,104 @@
+fichier -> "with Ada.Text_IO; use Ada.Text_IO;" 
+fichier -> procedure ident is <decls>
+fichier -> begin <instrs> end <hasident> ; EOF
+
+decl -> type ident <hasischoose> ;
+decl -> <identsep> : <type> <typexpr> ;
+decl -> procedure ident <hasparams> is <decls> begin <instrs> end <hasident> ; 
+decl -> function ident <hasparams> return <type> is <decls> begin <instrs> end <hasident> ;
+
+hasischoose -> is <accorrec>
+hasischoose -> ''
+
+accorrec -> access ident
+accorrec -> record <champs> end record
+
+decls -> <decl> <decls>
+decls -> ''
+
+hasident -> ident
+hasident -> ''
+
+identsep -> ident <identsep2>
+
+identsep2 -> , <identsep>
+identsep2 -> ''
+
+champ -> <identsep> : <type> ;
+
+champs -> <champ> <champs2>
+
+champs2 -> <champs>
+champs2 -> ''
+
+type -> ident 
+type -> access ident
+
+params -> ( <paramsep> )
+
+hasparams -> <params>
+hasparams -> ''
+
+paramsep -> <param> <paramsep2>
+
+paramsep2 -> ; <paramsep>
+paramsep2 -> ''
+
+typexpr -> := <expr>
+typexpr -> ''
+
+param -> <identsep> : <mode> <type>
+
+mode -> in <modeout>
+mode -> ''
+
+modeout -> out
+modeout -> ''
+
+expr -> entier <expr'>
+expr -> caractère <expr'>
+expr -> true <expr'>
+expr -> false <expr'>
+expr -> null <expr'>
+expr -> ( <expr> ) <expr'>
+expr -> accès <expr'>
+expr -> not <expr> <expr'>
+expr -> - <expr> <expr'>
+expr -> new ident <expr'>
+expr -> ident ( <exprsep> ) <expr'>
+expr -> character ' val ( <expr> ) <expr'>
+
+expr' -> <opérateur> <expr> <expr'>
+expr' -> ''
+
+
+exprsep -> <expr> , <exprsep>
+exprsep -> <expr>
+
+hasexpr -> <expr>
+hasexpr -> ''
+
+instr -> <accès> := <expr> ; 
+instr -> ident ; 
+instr -> ident ( <exprsep> ) ; 
+instr -> return <hasexpr> ; 
+instr -> begin <instrs> end ;
+instr -> if <expr> then <instrs> <elsif> <else> end if ; 
+instr -> for ident in <hasreverse> <expr> .. <expr> loop <instrs> end loop ; 
+instr -> while <expr> loop <instrs> end loop ;
+
+elsif -> elsif <expr> then <instrs> <elsif>
+elsif -> ''
+
+else -> else <instrs>
+else -> ''
+
+hasreverse -> reverse
+hasreverse -> ''
+
+instrs -> <instr> <instrs>
+instrs -> <instr>
+
+opérateur -> = | /= | < | <= | > | >= | + | - | * | / | rem | and | and then | or | or else
+
+accès -> ident | <expr> . ident
