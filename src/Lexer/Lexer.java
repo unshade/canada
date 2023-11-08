@@ -26,6 +26,7 @@ public class Lexer {
         this.tokens = new ArrayList<>();
         this.currentLine = 1;
         this.currentChar = this.reader.read();
+        this.previousChar = this.currentChar;
 
         this.keywords = Map.ofEntries(
                 Map.entry(Pattern.compile("procedure"), Tag.PROCEDURE),
@@ -82,62 +83,77 @@ public class Lexer {
         );
     }
 
+    // TODO: manage the comments
+
     public Token nextToken() throws IOException {
 
         StringBuilder lexeme = new StringBuilder();
 
         while (this.currentChar != -1) {
 
-            this.previousChar = this.currentChar;
-
-            this.currentChar = this.reader.read();
-
-            if ((Character.isLetterOrDigit((char) currentChar) && Character.isLetterOrDigit((char) previousChar)) || (!Character.isLetterOrDigit((char) currentChar) && !Character.isLetterOrDigit((char) previousChar)) || !Character.isWhitespace((char) currentChar)) {
+            // if the current char is the same "type" as the previous one, we add it to the lexeme
+            // else that means the lexem is a potential token
+            if ((Character.isLetterOrDigit((char) currentChar) && Character.isLetterOrDigit((char) previousChar)) || (!Character.isLetterOrDigit((char) currentChar) && !Character.isLetterOrDigit((char) previousChar) && !Character.isWhitespace((char) currentChar))) {
                 lexeme.append((char) currentChar);
-
+                this.previousChar = this.currentChar;
+                this.currentChar = this.reader.read();
             } else {
-                for (Map.Entry<Pattern, Tag> entry : this.keywords.entrySet()) {
-                    Pattern pattern = entry.getKey();
-                    Tag tag = entry.getValue();
 
-                    if (pattern.matcher(lexeme.toString()).matches()) {
-                        return new Token(tag, this.currentLine, lexeme.toString());
-                    }
-                }
+                // TODO: manage the case where the function throws an exception
+                // TODO: if the program start with a space ?
+                Token token = matchToken(lexeme.toString());
 
-                for (Map.Entry<Pattern, Tag> entry : this.ruledTerminals.entrySet()) {
-                    Pattern pattern = entry.getKey();
-                    Tag tag = entry.getValue();
-
-                    if (pattern.matcher(lexeme.toString()).matches()) {
-                        return new Token(tag, this.currentLine, lexeme.toString());
-                    }
-                }
-
-                for (Map.Entry<Pattern, Tag> entry : this.operators.entrySet()) {
-                    Pattern pattern = entry.getKey();
-                    Tag tag = entry.getValue();
-
-                    if (pattern.matcher(lexeme.toString()).matches()) {
-                        return new Token(tag, this.currentLine, lexeme.toString());
-                    }
-                }
-
-                if (Character.isWhitespace(currentChar)) {
+                // get next char while it's a whitespace
+                while (Character.isWhitespace(currentChar)) {
                     if (currentChar == '\n') {
                         this.currentLine++;
                     }
 
                     currentChar = this.reader.read();
-                    continue;
                 }
 
+                previousChar = currentChar;
                 lexeme.append((char) currentChar);
+
+                return token;
             }
         }
 
         return new Token(Tag.EOF, this.currentLine, lexeme.toString());
 
+    }
+
+    Token matchToken(String lexeme) {
+        for (Map.Entry<Pattern, Tag> entry : this.keywords.entrySet()) {
+            Pattern pattern = entry.getKey();
+            Tag tag = entry.getValue();
+
+            if (pattern.matcher(lexeme).matches()) {
+                return new Token(tag, this.currentLine, lexeme);
+            }
+        }
+
+        for (Map.Entry<Pattern, Tag> entry : this.ruledTerminals.entrySet()) {
+            Pattern pattern = entry.getKey();
+            Tag tag = entry.getValue();
+
+            if (pattern.matcher(lexeme).matches()) {
+                return new Token(tag, this.currentLine, lexeme);
+            }
+        }
+
+        for (Map.Entry<Pattern, Tag> entry : this.operators.entrySet()) {
+            Pattern pattern = entry.getKey();
+            Tag tag = entry.getValue();
+
+            if (pattern.matcher(lexeme).matches()) {
+                return new Token(tag, this.currentLine, lexeme);
+            }
+        }
+
+        //TODO: throw an exception
+        System.out.println("Error: '" + lexeme + "' is not a valid token");
+        return null;
     }
 
 
