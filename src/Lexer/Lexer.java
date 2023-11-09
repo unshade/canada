@@ -25,9 +25,9 @@ public class Lexer {
      * Lexer attributes
      */
     private final PeekingReader reader;
-    private final Map<Pattern, Tag> keywords;
-    private final Map<Pattern, Tag> ruledTerminals;
-    private final Map<Pattern, Tag> operators;
+    private final Map<Tag, Pattern> keywords;
+    private final Map<Tag, Pattern> ruledTerminals;
+    private final Map<Tag, Pattern> operators;
     private int currentChar;
 
     /**
@@ -41,58 +41,59 @@ public class Lexer {
         this.reader = new PeekingReader(new FileReader(file));
         this.currentChar = this.reader.read();
         this.keywords = Map.ofEntries(
-                Map.entry(Pattern.compile("procedure"), Tag.PROCEDURE),
-                Map.entry(Pattern.compile("is"), Tag.IS),
-                Map.entry(Pattern.compile("begin"), Tag.BEGIN),
-                Map.entry(Pattern.compile("end"), Tag.END),
-                Map.entry(Pattern.compile(";"), Tag.SEMICOLON),
-                Map.entry(Pattern.compile("type"), Tag.TYPE),
-                Map.entry(Pattern.compile("access"), Tag.ACCESS),
-                Map.entry(Pattern.compile("record"), Tag.RECORD),
-                Map.entry(Pattern.compile(":"), Tag.COLON),
-                Map.entry(Pattern.compile("function"), Tag.FUNCTION),
-                Map.entry(Pattern.compile("return"), Tag.RETURN),
-                Map.entry(Pattern.compile("in"), Tag.IN),
-                Map.entry(Pattern.compile("out"), Tag.OUT),
-                Map.entry(Pattern.compile("if"), Tag.IF),
-                Map.entry(Pattern.compile("then"), Tag.THEN),
-                Map.entry(Pattern.compile("elsif"), Tag.ELSIF),
-                Map.entry(Pattern.compile("else"), Tag.ELSE),
-                Map.entry(Pattern.compile("loop"), Tag.LOOP),
-                Map.entry(Pattern.compile("for"), Tag.FOR),
-                Map.entry(Pattern.compile("reverse"), Tag.REVERSE),
-                Map.entry(Pattern.compile("while"), Tag.WHILE),
-                Map.entry(Pattern.compile("rem"), Tag.REM),
-                Map.entry(Pattern.compile("and"), Tag.AND),
-                Map.entry(Pattern.compile("or"), Tag.OR),
-                Map.entry(Pattern.compile("\\."), Tag.DOT),
-                Map.entry(Pattern.compile("val"), Tag.VAL),
-                Map.entry(Pattern.compile("\\("), Tag.OPEN_PAREN),
-                Map.entry(Pattern.compile("\\)"), Tag.CLOSE_PAREN),
-                Map.entry(Pattern.compile("true"), Tag.TRUE),
-                Map.entry(Pattern.compile("false"), Tag.FALSE),
-                Map.entry(Pattern.compile(","), Tag.COMMA)
+                Map.entry(Tag.PROCEDURE, Pattern.compile("procedure")),
+                Map.entry(Tag.IS, Pattern.compile("is")),
+                Map.entry(Tag.BEGIN, Pattern.compile("begin")),
+                Map.entry(Tag.END, Pattern.compile("end")),
+                Map.entry(Tag.SEMICOLON, Pattern.compile(";")),
+                Map.entry(Tag.TYPE, Pattern.compile("type")),
+                Map.entry(Tag.ACCESS, Pattern.compile("access")),
+                Map.entry(Tag.RECORD, Pattern.compile("record")),
+                Map.entry(Tag.COLON, Pattern.compile(":")),
+                Map.entry(Tag.FUNCTION, Pattern.compile("function")),
+                Map.entry(Tag.RETURN, Pattern.compile("return")),
+                Map.entry(Tag.IN, Pattern.compile("in")),
+                Map.entry(Tag.OUT, Pattern.compile("out")),
+                Map.entry(Tag.IF, Pattern.compile("if")),
+                Map.entry(Tag.THEN, Pattern.compile("then")),
+                Map.entry(Tag.ELSIF, Pattern.compile("elsif")),
+                Map.entry(Tag.ELSE, Pattern.compile("else")),
+                Map.entry(Tag.LOOP, Pattern.compile("loop")),
+                Map.entry(Tag.FOR, Pattern.compile("for")),
+                Map.entry(Tag.REVERSE, Pattern.compile("reverse")),
+                Map.entry(Tag.WHILE, Pattern.compile("while")),
+                Map.entry(Tag.REM, Pattern.compile("rem")),
+                Map.entry(Tag.AND, Pattern.compile("and")),
+                Map.entry(Tag.OR, Pattern.compile("or")),
+                Map.entry(Tag.DOT, Pattern.compile("\\.")),
+                Map.entry(Tag.VAL, Pattern.compile("val")),
+                Map.entry(Tag.OPEN_PAREN, Pattern.compile("\\(")),
+                Map.entry(Tag.CLOSE_PAREN, Pattern.compile("\\)")),
+                Map.entry(Tag.TRUE, Pattern.compile("true")),
+                Map.entry(Tag.FALSE, Pattern.compile("false")),
+                Map.entry(Tag.COMMA, Pattern.compile(","))
         );
 
         this.operators = Map.ofEntries(
-                Map.entry(Pattern.compile("\\+"), Tag.PLUS),
-                Map.entry(Pattern.compile("-"), Tag.MINUS),
-                Map.entry(Pattern.compile("\\*"), Tag.MULTI),
-                Map.entry(Pattern.compile("/"), Tag.DIV),
-                Map.entry(Pattern.compile("="), Tag.EQ),
-                Map.entry(Pattern.compile("/="), Tag.NE),
-                Map.entry(Pattern.compile("<"), Tag.LT),
-                Map.entry(Pattern.compile("<="), Tag.LE),
-                Map.entry(Pattern.compile(">"), Tag.GT),
-                Map.entry(Pattern.compile(">="), Tag.GE),
-                Map.entry(Pattern.compile(":="), Tag.ASSIGN)
+                Map.entry(Tag.PLUS, Pattern.compile("\\+")),
+                Map.entry(Tag.MINUS, Pattern.compile("-")),
+                Map.entry(Tag.MULTI, Pattern.compile("\\*")),
+                Map.entry(Tag.DIV, Pattern.compile("/")),
+                Map.entry(Tag.EQ, Pattern.compile("=")),
+                Map.entry(Tag.NE, Pattern.compile("/=")),
+                Map.entry(Tag.LT, Pattern.compile("<")),
+                Map.entry(Tag.LE, Pattern.compile("<=")),
+                Map.entry(Tag.GT, Pattern.compile(">")),
+                Map.entry(Tag.GE, Pattern.compile(">=")),
+                Map.entry(Tag.ASSIGN, Pattern.compile(":="))
         );
 
         this.ruledTerminals = Map.of(
-                Pattern.compile("[A-Za-z][A-Za-z0-9_]*"), Tag.IDENT,
-                Pattern.compile("[0-9]+"), Tag.ENTIER,
-                Pattern.compile("'[A-Za-z]'"), Tag.CARACTERE
+                Tag.IDENT, Pattern.compile("[A-Za-z][A-Za-z0-9_]*"),
+                Tag.ENTIER, Pattern.compile("[0-9]+"),
+                Tag.CARACTERE, Pattern.compile("'[A-Za-z]'")
         );
+
     }
 
     /**
@@ -188,12 +189,12 @@ public class Lexer {
      * @throws InvalidToken if the lexeme does not match any pattern
      */
     private Token matchToken(String lexeme) throws InvalidToken {
-        List<Map<Pattern, Tag>> patterns = List.of(this.keywords, this.ruledTerminals, this.operators);
+        List<Map<Tag, Pattern>> patterns = List.of(this.keywords, this.ruledTerminals, this.operators);
 
-        for (Map<Pattern, Tag> pattern : patterns) {
-            for (Map.Entry<Pattern, Tag> entry : pattern.entrySet()) {
-                Pattern p = entry.getKey();
-                Tag tag = entry.getValue();
+        for (Map<Tag, Pattern> pattern : patterns) {
+            for (Map.Entry<Tag, Pattern> entry : pattern.entrySet()) {
+                Pattern p = entry.getValue();
+                Tag tag = entry.getKey();
 
                 if (p.matcher(lexeme).matches()) {
                     return new Token(tag, this.reader.getCurrentLine(), lexeme);
