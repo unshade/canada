@@ -4,21 +4,39 @@ import Exceptions.Lexical.InvalidToken;
 import Lexer.Tokens.Tag;
 import Lexer.Tokens.Token;
 
-import java.io.*;
+import java.io.File;
+import java.io.FileReader;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.regex.Pattern;
 
+/**
+ * Lexer class to read a file and return tokens
+ *
+ * @author Noé Steiner
+ * @author Alexis Marcel
+ * @author Lucas Laurent
+ */
 public class Lexer {
+
+    /**
+     * Lexer attributes
+     */
     private final PeekingReader reader;
     private final Map<Pattern, Tag> keywords;
     private final Map<Pattern, Tag> ruledTerminals;
     private final Map<Pattern, Tag> operators;
-
     private int currentLine;
     private int currentChar;
 
+    /**
+     * Lexer constructor
+     *
+     * @param file the file to read
+     * @throws IOException if the file cannot be read
+     */
     public Lexer(File file) throws IOException {
 
         this.reader = new PeekingReader(new FileReader(file));
@@ -79,21 +97,28 @@ public class Lexer {
         );
     }
 
+    /**
+     * Get the next token from the file
+     *
+     * @return the next token
+     * @throws IOException  if the file cannot be read
+     * @throws InvalidToken if the lexer finds an invalid token
+     */
     public Token nextToken() throws IOException, InvalidToken {
         StringBuilder lexeme = new StringBuilder();
 
         while (this.currentChar != -1) {
 
-            if (isComment()) {
-                skipComment();
-            } else if(Character.isWhitespace((char) currentChar)) {
-                skipWhitespace();
+            if (this.isComment()) {
+                this.skipComment();
+            } else if (Character.isWhitespace((char) currentChar)) {
+                this.skipWhitespace();
             } else {
                 lexeme.append((char) currentChar);
 
-                if (isEndOfToken()) {
+                if (this.isEndOfToken()) {
                     currentChar = this.reader.read();
-                    return matchToken(lexeme.toString());
+                    return this.matchToken(lexeme.toString());
                 }
                 currentChar = this.reader.read();
             }
@@ -104,10 +129,21 @@ public class Lexer {
         return new Token(Tag.EOF, this.currentLine, lexeme.toString());
     }
 
+    /**
+     * Check if the current character is the beginning of a comment
+     *
+     * @return true if the current character is the beginning of a comment, false otherwise
+     * @throws IOException if the file cannot be read
+     */
     private boolean isComment() throws IOException {
         return this.currentChar == '-' && this.reader.peek(1) == '-' && this.reader.peek(2) != '-';
     }
 
+    /**
+     * Skip the current comment
+     *
+     * @throws IOException if the file cannot be read
+     */
     private void skipComment() throws IOException {
         while (this.currentChar != '\n' && this.currentChar != -1) {
             this.currentChar = this.reader.read();
@@ -118,6 +154,12 @@ public class Lexer {
         this.currentLine++;
     }
 
+    /**
+     * Check if the current character is the end of a token
+     *
+     * @return true if the current character is the end of a token, false otherwise
+     * @throws IOException if the file cannot be read
+     */
     private boolean isEndOfToken() throws IOException {
         char current = (char) currentChar;
         char next = (char) this.reader.peek(1);
@@ -129,6 +171,11 @@ public class Lexer {
         return (isCurrentLetterOrDigit && !isNextLetterOrDigit) || (!isCurrentLetterOrDigit && (isNextLetterOrDigit || isNextWhitespace));
     }
 
+    /**
+     * Skip all whitespaces
+     *
+     * @throws IOException if the file cannot be read
+     */
     private void skipWhitespace() throws IOException {
         while (Character.isWhitespace((char) this.currentChar)) {
             if (currentChar == '\n') {
@@ -138,6 +185,13 @@ public class Lexer {
         }
     }
 
+    /**
+     * Match the lexeme with a pattern and return the corresponding token
+     *
+     * @param lexeme the lexeme to match
+     * @return the corresponding token
+     * @throws InvalidToken if the lexeme does not match any pattern
+     */
     private Token matchToken(String lexeme) throws InvalidToken {
         List<Map<Pattern, Tag>> patterns = List.of(this.keywords, this.ruledTerminals, this.operators);
 
@@ -155,12 +209,19 @@ public class Lexer {
         throw new InvalidToken(new Token(Tag.UNKNOWN, this.currentLine, lexeme));
     }
 
+    /**
+     * Display all tokens from the file in the standard output
+     *
+     * @throws IOException  if the file cannot be read
+     * @throws InvalidToken if the lexer finds an invalid token
+     */
     public void displayAllTokens() throws IOException, InvalidToken {
         Token token;
         List<Token> tokens = new ArrayList<>();
         while ((token = this.nextToken()).tag() != Tag.EOF) {
             tokens.add(token);
         }
+        tokens.add(token);
         tokens.forEach(System.out::print);
     }
 
