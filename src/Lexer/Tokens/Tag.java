@@ -1,5 +1,8 @@
 package Lexer.Tokens;
 
+/**
+ * Token tags
+ */
 public enum Tag {
     // Ruled Terminals
     IDENT,
