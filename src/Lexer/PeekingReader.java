@@ -9,8 +9,11 @@ public class PeekingReader extends Reader {
     private final Reader reader;
     private final Queue<Integer> nextChars = new LinkedList<>();
 
+    private int currentLine;
+
     public PeekingReader(Reader reader) {
         this.reader = reader;
+        this.currentLine = 1;
     }
 
     @Override
@@ -36,10 +39,19 @@ public class PeekingReader extends Reader {
 
     @Override
     public int read() throws IOException {
+        int nextChar;
         if (!nextChars.isEmpty()) {
-            return nextChars.poll();
+            nextChar =  nextChars.poll();
         } else {
-            return reader.read();
+            nextChar = reader.read();
         }
+
+        currentLine = nextChar == '\n' ? currentLine + 1 : currentLine;
+
+        return nextChar;
+    }
+
+    public int getCurrentLine() {
+        return currentLine;
     }
 }

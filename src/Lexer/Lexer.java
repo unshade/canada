@@ -28,7 +28,6 @@ public class Lexer {
     private final Map<Pattern, Tag> keywords;
     private final Map<Pattern, Tag> ruledTerminals;
     private final Map<Pattern, Tag> operators;
-    private int currentLine;
     private int currentChar;
 
     /**
@@ -40,7 +39,6 @@ public class Lexer {
     public Lexer(File file) throws IOException {
 
         this.reader = new PeekingReader(new FileReader(file));
-        this.currentLine = 1;
         this.currentChar = this.reader.read();
         this.keywords = Map.ofEntries(
                 Map.entry(Pattern.compile("procedure"), Tag.PROCEDURE),
@@ -117,8 +115,9 @@ public class Lexer {
                 lexeme.append((char) currentChar);
 
                 if (this.isEndOfToken()) {
+                    Token token =  this.matchToken(lexeme.toString());
                     currentChar = this.reader.read();
-                    return this.matchToken(lexeme.toString());
+                    return token;
                 }
                 currentChar = this.reader.read();
             }
@@ -126,7 +125,7 @@ public class Lexer {
         }
 
         this.reader.close();
-        return new Token(Tag.EOF, this.currentLine, lexeme.toString());
+        return new Token(Tag.EOF, this.reader.getCurrentLine(), lexeme.toString());
     }
 
     /**
@@ -151,7 +150,6 @@ public class Lexer {
         if (this.currentChar != -1) {
             this.currentChar = this.reader.read();
         }
-        this.currentLine++;
     }
 
     /**
@@ -178,10 +176,7 @@ public class Lexer {
      */
     private void skipWhitespace() throws IOException {
         while (Character.isWhitespace((char) this.currentChar)) {
-            if (currentChar == '\n') {
-                this.currentLine++;
-            }
-            currentChar = this.reader.read();
+            this.currentChar = this.reader.read();
         }
     }
 
@@ -201,12 +196,11 @@ public class Lexer {
                 Tag tag = entry.getValue();
 
                 if (p.matcher(lexeme).matches()) {
-                    return new Token(tag, this.currentLine, lexeme);
+                    return new Token(tag, this.reader.getCurrentLine(), lexeme);
                 }
             }
         }
-
-        throw new InvalidToken(new Token(Tag.UNKNOWN, this.currentLine, lexeme));
+        throw new InvalidToken(new Token(Tag.UNKNOWN, this.reader.getCurrentLine(), lexeme));
     }
 
     /**
