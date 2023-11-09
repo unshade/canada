@@ -18,15 +18,12 @@ public class Lexer {
 
     private int currentLine;
     private int currentChar;
-    private int previousChar;
 
     public Lexer(File file) throws IOException {
 
         this.reader = new PeekingReader(new FileReader(file));
         this.currentLine = 1;
         this.currentChar = this.reader.read();
-        this.previousChar = this.currentChar;
-
         this.keywords = Map.ofEntries(
                 Map.entry(Pattern.compile("procedure"), Tag.PROCEDURE),
                 Map.entry(Pattern.compile("is"), Tag.IS),
@@ -86,22 +83,21 @@ public class Lexer {
         StringBuilder lexeme = new StringBuilder();
 
         while (this.currentChar != -1) {
+
             if (isComment()) {
                 skipComment();
+            } else if(Character.isWhitespace((char) currentChar)) {
+                skipWhitespace();
+            } else {
                 lexeme.append((char) currentChar);
+
+                if (isEndOfToken()) {
+                    currentChar = this.reader.read();
+                    return matchToken(lexeme.toString());
+                }
+                currentChar = this.reader.read();
             }
 
-            if (isSameTypeAsPrevious()) {
-                lexeme.append((char) currentChar);
-                this.previousChar = this.currentChar;
-                this.currentChar = this.reader.read();
-            } else {
-                Token token = matchToken(lexeme.toString());
-                skipWhitespace();
-                previousChar = currentChar;
-                lexeme.append((char) currentChar);
-                return token;
-            }
         }
 
         this.reader.close();
@@ -113,24 +109,28 @@ public class Lexer {
     }
 
     private void skipComment() throws IOException {
-        do {
-            while (this.currentChar != '\n' && this.currentChar != -1) {
-                this.currentChar = this.reader.read();
-            }
-            if (this.currentChar != -1) {
-                this.currentChar = this.reader.read();
-            }
-            this.currentLine++;
-        } while (isComment());
+        while (this.currentChar != '\n' && this.currentChar != -1) {
+            this.currentChar = this.reader.read();
+        }
+        if (this.currentChar != -1) {
+            this.currentChar = this.reader.read();
+        }
+        this.currentLine++;
     }
 
-    private boolean isSameTypeAsPrevious() {
-        return (Character.isLetterOrDigit((char) currentChar) && Character.isLetterOrDigit((char) previousChar))
-                || (!Character.isLetterOrDigit((char) currentChar) && !Character.isLetterOrDigit((char) previousChar) && !Character.isWhitespace((char) currentChar));
+    private boolean isEndOfToken() throws IOException {
+        char current = (char) currentChar;
+        char next = (char) this.reader.peek(1);
+
+        boolean isCurrentLetterOrDigit = Character.isLetterOrDigit(current);
+        boolean isNextLetterOrDigit = Character.isLetterOrDigit(next);
+        boolean isNextWhitespace = Character.isWhitespace(next);
+
+        return (isCurrentLetterOrDigit && !isNextLetterOrDigit) || (!isCurrentLetterOrDigit && (isNextLetterOrDigit || isNextWhitespace));
     }
 
     private void skipWhitespace() throws IOException {
-        while (Character.isWhitespace(currentChar)) {
+        while (Character.isWhitespace((char) this.currentChar)) {
             if (currentChar == '\n') {
                 this.currentLine++;
             }
