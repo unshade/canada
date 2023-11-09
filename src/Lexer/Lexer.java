@@ -29,6 +29,7 @@ public class Lexer {
     private final Map<Tag, Pattern> ruledTerminals;
     private final Map<Tag, Pattern> operators;
     private int currentChar;
+    StringBuilder lexeme;
 
     /**
      * Lexer constructor
@@ -39,7 +40,7 @@ public class Lexer {
     public Lexer(File file) throws IOException {
 
         this.reader = new PeekingReader(new FileReader(file));
-        this.currentChar = this.reader.read();
+        this.lexeme = new StringBuilder();
         this.keywords = Map.ofEntries(
                 Map.entry(Tag.PROCEDURE, Pattern.compile("procedure")),
                 Map.entry(Tag.IS, Pattern.compile("is")),
@@ -71,7 +72,8 @@ public class Lexer {
                 Map.entry(Tag.CLOSE_PAREN, Pattern.compile("\\)")),
                 Map.entry(Tag.TRUE, Pattern.compile("true")),
                 Map.entry(Tag.FALSE, Pattern.compile("false")),
-                Map.entry(Tag.COMMA, Pattern.compile(","))
+                Map.entry(Tag.COMMA, Pattern.compile(",")),
+                Map.entry(Tag.APOSTROPHE, Pattern.compile("'"))
         );
 
         this.operators = Map.ofEntries(
@@ -104,25 +106,23 @@ public class Lexer {
      * @throws InvalidToken if the lexer finds an invalid token
      */
     public Token nextToken() throws IOException, InvalidToken {
-        StringBuilder lexeme = new StringBuilder();
 
-        while (this.currentChar != -1) {
+        while ((this.currentChar = this.reader.read()) != -1) {
 
             if (this.isComment()) {
                 this.skipComment();
             } else if (Character.isWhitespace((char) currentChar)) {
                 this.skipWhitespace();
+            } else if (isCharacterLiteral()) {
+                return this.readCharacterLiteral();
             } else {
                 lexeme.append((char) currentChar);
-
                 if (this.isEndOfToken()) {
-                    Token token =  this.matchToken(lexeme.toString());
-                    currentChar = this.reader.read();
+                    Token token = this.matchToken(lexeme.toString());
+                    lexeme.setLength(0); // clear the StringBuilder
                     return token;
                 }
-                currentChar = this.reader.read();
             }
-
         }
 
         this.reader.close();
@@ -148,9 +148,21 @@ public class Lexer {
         while (this.currentChar != '\n' && this.currentChar != -1) {
             this.currentChar = this.reader.read();
         }
-        if (this.currentChar != -1) {
-            this.currentChar = this.reader.read();
-        }
+    }
+
+    private boolean isCharacterLiteral() throws IOException {
+        return this.currentChar == '\'' && Character.isLetter((char) this.reader.peek(1)) && this.reader.peek(2) == '\'';
+    }
+
+    private Token readCharacterLiteral() throws IOException {
+        // On a déjà lu l'apostrophe de début, on passe au caractère suivant
+        currentChar = this.reader.read();
+        char charValue = (char) currentChar;
+
+        // Lire le caractère suivant, qui devrait être une apostrophe fermante
+        currentChar = this.reader.read();
+
+        return new Token(Tag.CARACTERE, this.reader.getCurrentLine(), String.valueOf(charValue));
     }
 
     /**
@@ -163,8 +175,8 @@ public class Lexer {
         char current = (char) currentChar;
         char next = (char) this.reader.peek(1);
 
-        boolean isCurrentLetterOrDigit = Character.isLetterOrDigit(current);
-        boolean isNextLetterOrDigit = Character.isLetterOrDigit(next);
+        boolean isCurrentLetterOrDigit = Character.isLetterOrDigit(current) || current == '_';
+        boolean isNextLetterOrDigit = Character.isLetterOrDigit(next) || next == '_';
         boolean isNextWhitespace = Character.isWhitespace(next);
 
         return (isCurrentLetterOrDigit && !isNextLetterOrDigit) || (!isCurrentLetterOrDigit && (isNextLetterOrDigit || isNextWhitespace));
@@ -176,7 +188,7 @@ public class Lexer {
      * @throws IOException if the file cannot be read
      */
     private void skipWhitespace() throws IOException {
-        while (Character.isWhitespace((char) this.currentChar)) {
+        while (Character.isWhitespace((char) this.reader.peek(1))) {
             this.currentChar = this.reader.read();
         }
     }

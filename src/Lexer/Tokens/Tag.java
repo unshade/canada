@@ -11,7 +11,6 @@ public enum Tag {
 
     // Keywords
     SEMICOLON,
-    DOUBLEPOINT,
     PROCEDURE,
     IS,
     BEGIN,
@@ -42,6 +41,7 @@ public enum Tag {
     TRUE,
     FALSE,
     COMMA,
+    APOSTROPHE,
 
     // Operators
     PLUS,
