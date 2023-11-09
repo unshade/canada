@@ -83,54 +83,59 @@ public class Lexer {
     }
 
     public Token nextToken() throws IOException, InvalidToken {
-
         StringBuilder lexeme = new StringBuilder();
 
         while (this.currentChar != -1) {
-            if (this.currentChar == '-' && this.reader.peek(1) == '-' && this.reader.peek(2) != '-') {
-                do {
-                    while (this.currentChar != '\n' && this.currentChar != -1) {
-                        this.currentChar = this.reader.read();
-                    }
-                    if (this.currentChar != -1) {
-                        this.currentChar = this.reader.read();
-                    }
-                    this.currentLine++;
-                } while (this.currentChar == '-' && this.reader.peek(1) == '-' && this.reader.peek(2) != '-');
+            if (isComment()) {
+                skipComment();
                 lexeme.append((char) currentChar);
             }
-            // if the current char is the same "type" as the previous one, we add it to the lexeme
-            // else that means the lexem is a potential token
-            if ((Character.isLetterOrDigit((char) currentChar) && Character.isLetterOrDigit((char) previousChar)) || (!Character.isLetterOrDigit((char) currentChar) && !Character.isLetterOrDigit((char) previousChar) && !Character.isWhitespace((char) currentChar))) {
+
+            if (isSameTypeAsPrevious()) {
                 lexeme.append((char) currentChar);
                 this.previousChar = this.currentChar;
                 this.currentChar = this.reader.read();
             } else {
-
-                // TODO: manage the case where the function throws an exception
-                // TODO: if the program start with a space ?
                 Token token = matchToken(lexeme.toString());
-
-                // get next char while it's a whitespace
-                while (Character.isWhitespace(currentChar)) {
-                    if (currentChar == '\n') {
-                        this.currentLine++;
-                    }
-
-                    currentChar = this.reader.read();
-                }
-
+                skipWhitespace();
                 previousChar = currentChar;
                 lexeme.append((char) currentChar);
-
                 return token;
             }
         }
 
         this.reader.close();
-
         return new Token(Tag.EOF, this.currentLine, lexeme.toString());
+    }
 
+    private boolean isComment() throws IOException {
+        return this.currentChar == '-' && this.reader.peek(1) == '-' && this.reader.peek(2) != '-';
+    }
+
+    private void skipComment() throws IOException {
+        do {
+            while (this.currentChar != '\n' && this.currentChar != -1) {
+                this.currentChar = this.reader.read();
+            }
+            if (this.currentChar != -1) {
+                this.currentChar = this.reader.read();
+            }
+            this.currentLine++;
+        } while (isComment());
+    }
+
+    private boolean isSameTypeAsPrevious() {
+        return (Character.isLetterOrDigit((char) currentChar) && Character.isLetterOrDigit((char) previousChar))
+                || (!Character.isLetterOrDigit((char) currentChar) && !Character.isLetterOrDigit((char) previousChar) && !Character.isWhitespace((char) currentChar));
+    }
+
+    private void skipWhitespace() throws IOException {
+        while (Character.isWhitespace(currentChar)) {
+            if (currentChar == '\n') {
+                this.currentLine++;
+            }
+            currentChar = this.reader.read();
+        }
     }
 
     private Token matchToken(String lexeme) throws InvalidToken {

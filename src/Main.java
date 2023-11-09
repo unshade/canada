@@ -1,5 +1,6 @@
 import Exceptions.BadFileExtension;
 import Exceptions.Lexical.InvalidToken;
+import Helpers.FileHelper;
 import Lexer.Lexer;
 
 import java.io.IOException;
@@ -22,8 +23,8 @@ public class Main {
             throw new IOException("File does not exist or cannot be read");
         }
 
-        if (!getFileExtension(filePath).equalsIgnoreCase(REQUIRED_EXTENSION)) {
-            throw new BadFileExtension("File extension must be ." + REQUIRED_EXTENSION);
+        if (!FileHelper.getFileExtension(filePath).equalsIgnoreCase(REQUIRED_EXTENSION)) {
+            throw new BadFileExtension(REQUIRED_EXTENSION);
         }
 
         if (args.length > 1 && "-t".equals(args[1])) {
@@ -32,9 +33,4 @@ public class Main {
         }
     }
 
-    private static String getFileExtension(Path path) {
-        String fileName = path.toString();
-        int dotIndex = fileName.lastIndexOf(".");
-        return (dotIndex == -1) ? "" : fileName.substring(dotIndex + 1);
-    }
 }
