@@ -1,6 +1,5 @@
 package Lexer;
 
-import Exceptions.Lexical.InvalidToken;
 import Lexer.Tokens.Tag;
 import Lexer.Tokens.Token;
 
@@ -103,9 +102,8 @@ public class Lexer {
      *
      * @return the next token
      * @throws IOException  if the file cannot be read
-     * @throws InvalidToken if the lexer finds an invalid token
      */
-    public Token nextToken() throws IOException, InvalidToken {
+    public Token nextToken() throws IOException {
 
         while ((this.currentChar = this.reader.read()) != -1) {
 
@@ -198,9 +196,8 @@ public class Lexer {
      *
      * @param lexeme the lexeme to match
      * @return the corresponding token
-     * @throws InvalidToken if the lexeme does not match any pattern
      */
-    private Token matchToken(String lexeme) throws InvalidToken {
+    private Token matchToken(String lexeme) {
         List<Map<Tag, Pattern>> patterns = List.of(this.keywords, this.ruledTerminals, this.operators);
 
         for (Map<Tag, Pattern> pattern : patterns) {
@@ -213,16 +210,15 @@ public class Lexer {
                 }
             }
         }
-        throw new InvalidToken(new Token(Tag.UNKNOWN, this.reader.getCurrentLine(), lexeme));
+        return new Token(Tag.UNKNOWN, this.reader.getCurrentLine(), lexeme);
     }
 
     /**
      * Display all tokens from the file in the standard output
      *
      * @throws IOException  if the file cannot be read
-     * @throws InvalidToken if the lexer finds an invalid token
      */
-    public void displayAllTokens() throws IOException, InvalidToken {
+    public void displayAllTokens() throws IOException {
         Token token;
         List<Token> tokens = new ArrayList<>();
         while ((token = this.nextToken()).tag() != Tag.EOF) {

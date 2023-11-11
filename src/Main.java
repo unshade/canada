@@ -1,5 +1,4 @@
 import Exceptions.BadFileExtension;
-import Exceptions.Lexical.InvalidToken;
 import Helpers.FileHelper;
 import Lexer.Lexer;
 
@@ -10,7 +9,7 @@ import java.nio.file.Paths;
 
 public class Main {
 
-    public static void main(String[] args) throws BadFileExtension, IOException, InvalidToken {
+    public static void main(String[] args) throws BadFileExtension, IOException {
         if (args.length < 1) {
             System.err.println("Usage: java Main <file> [options]");
             return;
