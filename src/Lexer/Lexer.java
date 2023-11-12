@@ -134,7 +134,7 @@ public class Lexer {
      * @throws IOException if the file cannot be read
      */
     private boolean isComment() throws IOException {
-        return this.currentChar == '-' && this.reader.peek(1) == '-' && this.reader.peek(2) != '-';
+        return this.currentChar == '-' && this.reader.peek(1) == '-';
     }
 
     /**
@@ -170,6 +170,11 @@ public class Lexer {
      * @throws IOException if the file cannot be read
      */
     private boolean isEndOfToken() throws IOException {
+
+        if (this.reader.peek(1) == -1) {
+            return true;
+        }
+
         char current = (char) currentChar;
         char next = (char) this.reader.peek(1);
 
