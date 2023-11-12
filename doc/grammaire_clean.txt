@@ -2,16 +2,12 @@ fichier -> "with Ada.Text_IO; use Ada.Text_IO;"
 fichier -> procedure ident is <decls>
 fichier -> begin <instrs> end <hasident> ; EOF
 
-decl -> type ident <hasischoose> ;
+decl -> type ident ; 
+decl -> type ident is access ident ; 
+decl -> type ident is record <champs> end record ; 
 decl -> <identsep> : <type> <typexpr> ;
 decl -> procedure ident <hasparams> is <decls> begin <instrs> end <hasident> ; 
 decl -> function ident <hasparams> return <type> is <decls> begin <instrs> end <hasident> ;
-
-hasischoose -> is <accorrec>
-hasischoose -> ''
-
-accorrec -> access ident
-accorrec -> record <champs> end record
 
 decls -> <decl> <decls>
 decls -> ''
@@ -19,17 +15,13 @@ decls -> ''
 hasident -> ident
 hasident -> ''
 
-identsep -> ident <identsep2>
-
-identsep2 -> , <identsep>
-identsep2 -> ''
+identsep -> ident , <identsep>
+identsep -> ident
 
 champ -> <identsep> : <type> ;
 
-champs -> <champ> <champs2>
-
-champs2 -> <champs>
-champs2 -> ''
+champs -> <champ> <champs>
+champs -> <champ>
 
 type -> ident 
 type -> access ident
@@ -39,37 +31,31 @@ params -> ( <paramsep> )
 hasparams -> <params>
 hasparams -> ''
 
-paramsep -> <param> <paramsep2>
-
-paramsep2 -> ; <paramsep>
-paramsep2 -> ''
+paramsep -> <param> ; <paramsep>
+paramsep -> <param>
 
 typexpr -> := <expr>
 typexpr -> ''
 
 param -> <identsep> : <mode> <type>
 
-mode -> in <modeout>
+mode -> in 
+mode -> in out
 mode -> ''
 
-modeout -> out
-modeout -> ''
-
-expr -> entier <expr'>
-expr -> caractère <expr'>
-expr -> true <expr'>
-expr -> false <expr'>
-expr -> null <expr'>
-expr -> ( <expr> ) <expr'>
-expr -> accès <expr'>
-expr -> not <expr> <expr'>
-expr -> - <expr> <expr'>
-expr -> new ident <expr'>
-expr -> ident ( <exprsep> ) <expr'>
-expr -> character ' val ( <expr> ) <expr'>
-
-expr' -> <opérateur> <expr> <expr'>
-expr' -> ''
+expr -> entier
+expr -> caractère
+expr -> true
+expr -> false
+expr -> null
+expr -> ( <expr> )
+expr -> <accès>
+expr -> <expr> <opérateur> <expr> 
+expr -> not <expr>
+expr -> - <expr>
+expr -> new ident
+expr -> ident ( <exprsep> )
+expr -> character ' val ( <expr> )
 
 
 exprsep -> <expr> , <exprsep>
@@ -78,7 +64,7 @@ exprsep -> <expr>
 hasexpr -> <expr>
 hasexpr -> ''
 
-instr -> <accès> := <expr> ; 
+instr -> <accès> := <expr> ;
 instr -> ident ; 
 instr -> ident ( <exprsep> ) ; 
 instr -> return <hasexpr> ; 
@@ -102,3 +88,4 @@ instrs -> <instr>
 opérateur -> = | /= | < | <= | > | >= | + | - | * | / | rem | and | and then | or | or else
 
 accès -> ident | <expr> . ident
+
