@@ -20,6 +20,7 @@ import java.util.regex.Pattern;
  */
 public class Lexer {
 
+    private static Lexer instance;
     /**
      * Lexer attributes
      */
@@ -27,8 +28,8 @@ public class Lexer {
     private final Map<Tag, Pattern> keywords;
     private final Map<Tag, Pattern> ruledTerminals;
     private final Map<Tag, Pattern> operators;
-    private int currentChar;
     StringBuilder lexeme;
+    private int currentChar;
 
     /**
      * Lexer constructor
@@ -36,7 +37,7 @@ public class Lexer {
      * @param file the file to read
      * @throws IOException if the file cannot be read
      */
-    public Lexer(File file) throws IOException {
+    private Lexer(File file) throws IOException {
 
         this.reader = new PeekingReader(new FileReader(file));
         this.lexeme = new StringBuilder();
@@ -72,7 +73,10 @@ public class Lexer {
                 Map.entry(Tag.TRUE, Pattern.compile("true")),
                 Map.entry(Tag.FALSE, Pattern.compile("false")),
                 Map.entry(Tag.COMMA, Pattern.compile(",")),
-                Map.entry(Tag.APOSTROPHE, Pattern.compile("'"))
+                Map.entry(Tag.APOSTROPHE, Pattern.compile("'")),
+                Map.entry(Tag.ADA_TEXT_IO, Pattern.compile("Ada.Text_IO")),
+                Map.entry(Tag.USEADA_TEXT_IO, Pattern.compile("useAda.Text_IO"))
+
         );
 
         this.operators = Map.ofEntries(
@@ -97,11 +101,27 @@ public class Lexer {
 
     }
 
+    public static Lexer getInstance() {
+        if (!(instance == null)) {
+            return instance;
+        }
+        return null;
+    }
+
+    public static Lexer getInstance(File file) throws IOException {
+
+        if (instance == null) {
+            instance = new Lexer(file);
+        }
+
+        return instance;
+    }
+
     /**
      * Get the next token from the file
      *
      * @return the next token
-     * @throws IOException  if the file cannot be read
+     * @throws IOException if the file cannot be read
      */
     public Token nextToken() throws IOException {
 
@@ -221,7 +241,7 @@ public class Lexer {
     /**
      * Display all tokens from the file in the standard output
      *
-     * @throws IOException  if the file cannot be read
+     * @throws IOException if the file cannot be read
      */
     public void displayAllTokens() throws IOException {
         List<Token> tokens = this.getAllTokens();

@@ -26,7 +26,7 @@ public class Main {
         }
 
         if (args.length > 1 && "-t".equals(args[1])) {
-            Lexer lexer = new Lexer(filePath.toFile());
+            Lexer lexer = Lexer.getInstance(filePath.toFile());
             lexer.displayAllTokens();
         }
     }
