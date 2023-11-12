@@ -44,6 +44,7 @@ public enum Tag {
     APOSTROPHE,
     ADA_TEXT_IO,
     USEADA_TEXT_IO,
+    WITH,
 
     // Operators
     PLUS,
