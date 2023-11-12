@@ -224,13 +224,18 @@ public class Lexer {
      * @throws IOException  if the file cannot be read
      */
     public void displayAllTokens() throws IOException {
+        List<Token> tokens = this.getAllTokens();
+        tokens.forEach(System.out::print);
+    }
+
+    public List<Token> getAllTokens() throws IOException {
         Token token;
         List<Token> tokens = new ArrayList<>();
         while ((token = this.nextToken()).tag() != Tag.EOF) {
             tokens.add(token);
         }
         tokens.add(token);
-        tokens.forEach(System.out::print);
+        return tokens;
     }
 
 }
