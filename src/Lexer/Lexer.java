@@ -33,9 +33,9 @@ public class Lexer {
     private final Map<Tag, Pattern> keywords;
     private final Map<Tag, Pattern> ruledTerminals;
     private final Map<Tag, Pattern> operators;
+    private final ErrorService errorService;
     StringBuilder lexeme;
     private int currentChar;
-    private ErrorService errorService;
 
     /**
      * Lexer constructor

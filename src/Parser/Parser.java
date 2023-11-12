@@ -7,13 +7,22 @@ import Services.ErrorService;
 
 public class Parser {
 
-    Lexer lexer;
     private static Parser instance;
-    private ErrorService errorService;
+    private final ErrorService errorService;
+    Lexer lexer;
 
     private Parser() {
         this.lexer = Lexer.getInstance();
         this.errorService = ErrorService.getInstance();
+    }
+
+    public static Parser getInstance() {
+        if (!(instance == null)) {
+            return instance;
+        } else {
+            instance = new Parser();
+        }
+        return null;
     }
 
     public void fichier() {
@@ -27,15 +36,6 @@ public class Parser {
         analyseTerminal(Tag.IDENT);
         analyseTerminal(Tag.IS);
 
-    }
-
-    public static Parser getInstance() {
-        if (!(instance == null)) {
-            return instance;
-        } else {
-            instance = new Parser();
-        }
-        return null;
     }
 
     private void decls() {
