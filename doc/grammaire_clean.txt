@@ -1,6 +1,4 @@
-fichier -> "with Ada.Text_IO; use Ada.Text_IO;" 
-fichier -> procedure ident is <decls>
-fichier -> begin <instrs> end <hasident> ; EOF
+fichier -> with Ada.Text_IO ; use Ada.Text_IO ; procedure ident is <decls> begin <instrs> end <hasident> ; EOF
 
 decl -> type ident ; 
 decl -> type ident is access ident ; 
