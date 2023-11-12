@@ -6,7 +6,6 @@ import Lexer.Tokens.Token;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -129,7 +128,6 @@ public class Lexer {
      * Get the next token from the file
      *
      * @return the next token
-     * @throws IOException if the file cannot be read
      */
     public Token nextToken() {
 
@@ -166,7 +164,6 @@ public class Lexer {
 
     /**
      * Skip the current comment
-     *
      */
     private void skipComment() {
         while (this.currentChar != '\n' && this.currentChar != -1) {
@@ -212,7 +209,6 @@ public class Lexer {
 
     /**
      * Skip all whitespaces
-     *
      */
     private void skipWhitespace() {
         while (Character.isWhitespace((char) this.reader.peek(1))) {
@@ -244,7 +240,6 @@ public class Lexer {
 
     /**
      * Display all tokens from the file in the standard output
-     *
      */
     public void displayAllTokens() {
         List<Token> tokens = this.getAllTokens();

@@ -54,7 +54,7 @@ public class PeekingReader extends Reader {
     public int read() {
         int nextChar;
         if (!this.nextChars.isEmpty()) {
-            nextChar =  this.nextChars.poll();
+            nextChar = this.nextChars.poll();
         } else {
             try {
                 nextChar = this.reader.read();
