@@ -4,7 +4,10 @@ aire: integer; -- -commentaireblab launction
 --test
 $$$
 begin
-    'c'
+    'c' ;
     aire_1 := larg * long ;
 return aire
-end aireRectangle ;a
+end aireRectangle ;
+begin
+    aire_1 := aireRectangle(2,3) ;
+end unDebut ;
