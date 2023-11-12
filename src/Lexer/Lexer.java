@@ -1,5 +1,6 @@
 package Lexer;
 
+import Exceptions.Lexical.UnknownTokenException;
 import Lexer.Tokens.Tag;
 import Lexer.Tokens.Token;
 import Services.ErrorService;
@@ -239,7 +240,7 @@ public class Lexer {
             }
         }
         Token unknownToken = new Token(Tag.UNKNOWN, this.reader.getCurrentLine(), lexeme);
-        this.errorService.registerLexicalError(new Exception("Unknown token: " + unknownToken + " at line " + unknownToken.line()));
+        this.errorService.registerLexicalError(new UnknownTokenException(unknownToken));
         return unknownToken;
     }
 

@@ -1,5 +1,6 @@
 package Parser;
 
+import Exceptions.Syntax.UnexpectedTokenException;
 import Helpers.TagHelper;
 import Lexer.Lexer;
 import Lexer.Tokens.Tag;
@@ -179,7 +180,8 @@ public class Parser {
     private void analyseTerminal(Tag tag) {
         Token token = lexer.nextToken();
         if (!(token.tag() == tag)) {
-            errorService.registerSyntaxError(new Exception("Syntax error: expected " + TagHelper.getTagString(tag) + " but got " + TagHelper.getTagString(token.tag()) + " at line " + token.line()));
+            Token expectedToken = new Token(tag, token.line(), TagHelper.getTagString(tag));
+            errorService.registerSyntaxError(new UnexpectedTokenException(expectedToken, token));
         }
     }
 
