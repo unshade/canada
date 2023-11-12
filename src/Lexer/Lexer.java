@@ -2,6 +2,7 @@ package Lexer;
 
 import Lexer.Tokens.Tag;
 import Lexer.Tokens.Token;
+import Services.ErrorService;
 
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -34,6 +35,7 @@ public class Lexer {
     private final Map<Tag, Pattern> operators;
     StringBuilder lexeme;
     private int currentChar;
+    private ErrorService errorService;
 
     /**
      * Lexer constructor
@@ -106,6 +108,7 @@ public class Lexer {
                 Tag.CARACTERE, Pattern.compile("'[A-Za-z]'")
         );
 
+        this.errorService = ErrorService.getInstance();
     }
 
     public static Lexer getInstance() {
@@ -235,7 +238,9 @@ public class Lexer {
                 }
             }
         }
-        return new Token(Tag.UNKNOWN, this.reader.getCurrentLine(), lexeme);
+        Token unknownToken = new Token(Tag.UNKNOWN, this.reader.getCurrentLine(), lexeme);
+        this.errorService.registerLexicalError(new Exception("Unknown token: " + unknownToken + " at line " + unknownToken.line()));
+        return unknownToken;
     }
 
     /**

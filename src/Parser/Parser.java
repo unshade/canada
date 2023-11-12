@@ -2,14 +2,18 @@ package Parser;
 
 import Lexer.Lexer;
 import Lexer.Tokens.Tag;
+import Lexer.Tokens.Token;
+import Services.ErrorService;
 
 public class Parser {
 
     Lexer lexer;
     private static Parser instance;
+    private ErrorService errorService;
 
     private Parser() {
         this.lexer = Lexer.getInstance();
+        this.errorService = ErrorService.getInstance();
     }
 
     public void fichier() {
@@ -172,11 +176,10 @@ public class Parser {
 
 
     private void analyseTerminal(Tag tag) {
-        if (lexer.nextToken().tag() == tag) {
-        } else {
-            throw new Exception("Error");
+        Token token = lexer.nextToken();
+        if (!(token.tag() == tag)) {
+            errorService.registerSyntaxError(new Exception("Syntax error: expected " + tag + " but got " + token.tag() + " at line " + token.line()));
         }
-
     }
 
 }
