@@ -5,7 +5,12 @@ import Lexer.Tokens.Tag;
 
 public class Parser {
 
-    Lexer lexer = Lexer.getInstance();
+    Lexer lexer;
+    private static Parser instance;
+
+    private Parser() {
+        this.lexer = Lexer.getInstance();
+    }
 
     public void fichier() {
 
@@ -18,6 +23,15 @@ public class Parser {
         analyseTerminal(Tag.IDENT);
         analyseTerminal(Tag.IS);
 
+    }
+
+    public static Parser getInstance() {
+        if (!(instance == null)) {
+            return instance;
+        } else {
+            instance = new Parser();
+        }
+        return null;
     }
 
     private void decls() {

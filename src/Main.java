@@ -1,6 +1,7 @@
 import Exceptions.BadFileExtension;
 import Helpers.FileHelper;
 import Lexer.Lexer;
+import Parser.Parser;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -25,9 +26,11 @@ public class Main {
             throw new BadFileExtension(Constants.REQUIRED_EXTENSION);
         }
 
+        Lexer lexer = Lexer.getInstance(filePath.toFile());
         if (args.length > 1 && "-t".equals(args[1])) {
-            Lexer lexer = Lexer.getInstance(filePath.toFile());
             lexer.displayAllTokens();
+        } else {
+            Parser parser = Parser.getInstance();
         }
     }
 
