@@ -17,18 +17,31 @@ public class PeekingReader extends Reader {
     }
 
     @Override
-    public int read(char[] cbuf, int off, int len) throws IOException {
-        return this.reader.read(cbuf, off, len);
+    public int read(char[] cbuf, int off, int len) {
+        try {
+            return this.reader.read(cbuf, off, len);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     @Override
-    public void close() throws IOException {
-        this.reader.close();
+    public void close() {
+        try {
+            this.reader.close();
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
     }
 
-    public int peek(int n) throws IOException {
+    public int peek(int n) {
         while (this.nextChars.size() < n) {
-            int nextChar = this.reader.read();
+            int nextChar = 0;
+            try {
+                nextChar = this.reader.read();
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
             if (nextChar == -1) {
                 return -1;
             }
@@ -38,12 +51,16 @@ public class PeekingReader extends Reader {
     }
 
     @Override
-    public int read() throws IOException {
+    public int read() {
         int nextChar;
         if (!this.nextChars.isEmpty()) {
             nextChar =  this.nextChars.poll();
         } else {
-            nextChar = this.reader.read();
+            try {
+                nextChar = this.reader.read();
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
         }
 
         this.currentLine = nextChar == '\n' ? this.currentLine + 1 : this.currentLine;

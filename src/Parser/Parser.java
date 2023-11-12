@@ -2,13 +2,12 @@ package Parser;
 
 import Lexer.Lexer;
 import Lexer.Tokens.Tag;
-import Lexer.Tokens.Token;
 
 public class Parser {
 
     Lexer lexer = Lexer.getInstance();
 
-    public void fichier () {
+    public void fichier() {
 
         analyseTerminal(Tag.WITH);
         analyseTerminal(Tag.ADA_TEXT_IO);
@@ -21,7 +20,7 @@ public class Parser {
 
     }
 
-    private void decls () {
+    private void decls() {
 
         switch (lexer.nextToken().tag()) {
             case Tag.PROCEDURE, Tag.IDENT, Tag.TYPE, Tag.FUNCTION -> {
@@ -33,7 +32,7 @@ public class Parser {
         }
     }
 
-    private void decl () {
+    private void decl() {
 
         switch (lexer.nextToken().tag()) {
             case Tag.PROCEDURE -> {
@@ -76,7 +75,7 @@ public class Parser {
 
     }
 
-    private void hasischoose () {
+    private void hasischoose() {
 
         switch (lexer.nextToken().tag()) {
             case Tag.IS -> {
@@ -87,7 +86,7 @@ public class Parser {
         }
     }
 
-    private void hasparams () {
+    private void hasparams() {
 
         switch (lexer.nextToken().tag()) {
             case Tag.IS -> {
@@ -100,7 +99,7 @@ public class Parser {
         }
     }
 
-    private void params () {
+    private void params() {
 
         switch (lexer.nextToken().tag()) {
             case Tag.OPEN_PAREN -> {
@@ -110,7 +109,7 @@ public class Parser {
         }
     }
 
-    private void paramsep () {
+    private void paramsep() {
 
         switch (lexer.nextToken().tag()) {
             case Tag.IDENT -> {
@@ -120,7 +119,7 @@ public class Parser {
         }
     }
 
-    private void param () {
+    private void param() {
 
         switch (lexer.nextToken().tag()) {
             case Tag.IDENT -> {
@@ -129,7 +128,7 @@ public class Parser {
         }
     }
 
-    private void identsep () {
+    private void identsep() {
 
         switch (lexer.nextToken().tag()) {
             case Tag.IDENT -> {
@@ -138,7 +137,7 @@ public class Parser {
         }
     }
 
-    private void identsep2 () {
+    private void identsep2() {
 
         switch (lexer.nextToken().tag()) {
             case Tag.COLON -> {
@@ -146,7 +145,7 @@ public class Parser {
         }
     }
 
-    private void paramsep2 () {
+    private void paramsep2() {
 
         switch (lexer.nextToken().tag()) {
             case Tag.SEMICOLON -> {
@@ -158,10 +157,8 @@ public class Parser {
     }
 
 
-
-    private void analyseTerminal( Tag tag ) {
-        if ( lexer.nextToken().tag() == tag ) {
-            return;
+    private void analyseTerminal(Tag tag) {
+        if (lexer.nextToken().tag() == tag) {
         } else {
             throw new Exception("Error");
         }

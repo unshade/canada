@@ -4,6 +4,7 @@ import Lexer.Tokens.Tag;
 import Lexer.Tokens.Token;
 
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -20,6 +21,10 @@ import java.util.regex.Pattern;
  */
 public class Lexer {
 
+
+    /**
+     * Singleton instance
+     */
     private static Lexer instance;
     /**
      * Lexer attributes
@@ -35,11 +40,14 @@ public class Lexer {
      * Lexer constructor
      *
      * @param file the file to read
-     * @throws IOException if the file cannot be read
      */
-    private Lexer(File file) throws IOException {
+    private Lexer(File file) {
 
-        this.reader = new PeekingReader(new FileReader(file));
+        try {
+            this.reader = new PeekingReader(new FileReader(file));
+        } catch (FileNotFoundException e) {
+            throw new RuntimeException(e);
+        }
         this.lexeme = new StringBuilder();
         this.keywords = Map.ofEntries(
                 Map.entry(Tag.PROCEDURE, Pattern.compile("procedure")),
@@ -108,7 +116,7 @@ public class Lexer {
         return null;
     }
 
-    public static Lexer getInstance(File file) throws IOException {
+    public static Lexer getInstance(File file) {
 
         if (instance == null) {
             instance = new Lexer(file);
@@ -123,7 +131,7 @@ public class Lexer {
      * @return the next token
      * @throws IOException if the file cannot be read
      */
-    public Token nextToken() throws IOException {
+    public Token nextToken() {
 
         while ((this.currentChar = this.reader.read()) != -1) {
 
@@ -151,28 +159,26 @@ public class Lexer {
      * Check if the current character is the beginning of a comment
      *
      * @return true if the current character is the beginning of a comment, false otherwise
-     * @throws IOException if the file cannot be read
      */
-    private boolean isComment() throws IOException {
+    private boolean isComment() {
         return this.currentChar == '-' && this.reader.peek(1) == '-';
     }
 
     /**
      * Skip the current comment
      *
-     * @throws IOException if the file cannot be read
      */
-    private void skipComment() throws IOException {
+    private void skipComment() {
         while (this.currentChar != '\n' && this.currentChar != -1) {
             this.currentChar = this.reader.read();
         }
     }
 
-    private boolean isCharacterLiteral() throws IOException {
+    private boolean isCharacterLiteral() {
         return this.currentChar == '\'' && Character.isLetter((char) this.reader.peek(1)) && this.reader.peek(2) == '\'';
     }
 
-    private Token readCharacterLiteral() throws IOException {
+    private Token readCharacterLiteral() {
         // On a déjà lu l'apostrophe de début, on passe au caractère suivant
         currentChar = this.reader.read();
         char charValue = (char) currentChar;
@@ -187,9 +193,8 @@ public class Lexer {
      * Check if the current character is the end of a token
      *
      * @return true if the current character is the end of a token, false otherwise
-     * @throws IOException if the file cannot be read
      */
-    private boolean isEndOfToken() throws IOException {
+    private boolean isEndOfToken() {
 
         if (this.reader.peek(1) == -1) {
             return true;
@@ -208,9 +213,8 @@ public class Lexer {
     /**
      * Skip all whitespaces
      *
-     * @throws IOException if the file cannot be read
      */
-    private void skipWhitespace() throws IOException {
+    private void skipWhitespace() {
         while (Character.isWhitespace((char) this.reader.peek(1))) {
             this.currentChar = this.reader.read();
         }
@@ -241,14 +245,13 @@ public class Lexer {
     /**
      * Display all tokens from the file in the standard output
      *
-     * @throws IOException if the file cannot be read
      */
-    public void displayAllTokens() throws IOException {
+    public void displayAllTokens() {
         List<Token> tokens = this.getAllTokens();
         tokens.forEach(System.out::print);
     }
 
-    public List<Token> getAllTokens() throws IOException {
+    public List<Token> getAllTokens() {
         Token token;
         List<Token> tokens = new ArrayList<>();
         while ((token = this.nextToken()).tag() != Tag.EOF) {
