@@ -116,8 +116,8 @@ primary -> ident primary2
 primary -> new ident
 primary -> character ' val ( expr )
 
-primary2 -> ( exprsep ) accès2
-primary2 -> accès2
+primary2 -> ( exprsep ) acces
+primary2 -> acces
 
 exprsep -> expr exprsep2
 
@@ -155,5 +155,5 @@ instrs -> instr instrs2
 instrs2 -> instr instrs2
 instrs2 -> ''
 
-accès2 -> . ident accès2
-accès2 -> ''
+acces -> . ident acces
+acces -> ''
