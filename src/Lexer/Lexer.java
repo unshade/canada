@@ -86,7 +86,9 @@ public class Lexer {
                 Map.entry(Tag.APOSTROPHE, Pattern.compile("'")),
                 Map.entry(Tag.ADA_TEXT_IO, Pattern.compile("Ada.Text_IO")),
                 Map.entry(Tag.USEADA_TEXT_IO, Pattern.compile("useAda.Text_IO")),
-                Map.entry(Tag.WITH, Pattern.compile("with"))
+                Map.entry(Tag.WITH, Pattern.compile("with")),
+                Map.entry(Tag.NULL, Pattern.compile("null")),
+                Map.entry(Tag.NEW, Pattern.compile("new"))
         );
 
         this.operators = Map.ofEntries(

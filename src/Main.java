@@ -33,6 +33,7 @@ public class Main {
             lexer.displayAllTokens();
         } else {
             Parser parser = Parser.getInstance();
+            parser.parse();
         }
 
         if (errorService.hasErrors()) {

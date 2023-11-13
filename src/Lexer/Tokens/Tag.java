@@ -45,6 +45,8 @@ public enum Tag {
     ADA_TEXT_IO,
     USEADA_TEXT_IO,
     WITH,
+    NULL,
+    NEW,
 
     // Operators
     PLUS,

@@ -57,6 +57,8 @@ public class TagHelper {
             case ASSIGN -> ":=";
             case EOF -> "EOF";
             case UNKNOWN -> "UNKNOWN";
+            case NULL -> "NULL";
+            case NEW -> "NEW";
         };
     }
 

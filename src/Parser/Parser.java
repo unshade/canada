@@ -18,19 +18,21 @@ public class Parser {
         this.lexer = Lexer.getInstance();
         this.errorService = ErrorService.getInstance();
         this.currentToken = lexer.nextToken();
-        fichier();
     }
 
     public static Parser getInstance() {
         if (!(instance == null)) {
             return instance;
-        } else {
-            instance = new Parser();
         }
-        return null;
+        instance = new Parser();
+        return instance;
     }
 
-    public void fichier() {
+    public void parse() {
+        fichier();
+    }
+
+    private void fichier() {
 
         analyseTerminal(Tag.WITH);
         analyseTerminal(Tag.ADA_TEXT_IO);
@@ -52,7 +54,7 @@ public class Parser {
 
     private void decl() {
 
-        switch (currentToken.tag()) {
+        switch (this.currentToken.tag()) {
             case PROCEDURE -> {
                 analyseTerminal(Tag.PROCEDURE);
                 analyseTerminal(Tag.IDENT);
@@ -98,7 +100,7 @@ public class Parser {
 
     private void hasischoose() {
 
-        switch (currentToken.tag()) {
+        switch (this.currentToken.tag()) {
             case IS -> {
                 analyseTerminal(Tag.IS);
                 accorrec();
@@ -110,7 +112,7 @@ public class Parser {
 
     private void accorrec() {
 
-        switch (currentToken.tag()) {
+        switch (this.currentToken.tag()) {
             case ACCESS -> {
                 analyseTerminal(Tag.ACCESS);
                 analyseTerminal(Tag.IDENT);
@@ -126,7 +128,7 @@ public class Parser {
 
     private void decls() {
 
-        switch (currentToken.tag()) {
+        switch (this.currentToken.tag()) {
             case PROCEDURE, IDENT, TYPE, FUNCTION -> {
                 decl();
                 decls();
@@ -138,7 +140,7 @@ public class Parser {
 
     private void hasident() {
 
-        switch (currentToken.tag()) {
+        switch (this.currentToken.tag()) {
             case SEMICOLON -> {
             }
             case IDENT -> analyseTerminal(Tag.IDENT);
@@ -147,7 +149,7 @@ public class Parser {
 
     private void identsep() {
 
-        if (currentToken.tag() == Tag.IDENT) {
+        if (this.currentToken.tag() == Tag.IDENT) {
             analyseTerminal(Tag.IDENT);
             identsep2();
         }
@@ -155,7 +157,7 @@ public class Parser {
 
     private void identsep2() {
 
-        switch (currentToken.tag()) {
+        switch (this.currentToken.tag()) {
             case COLON -> {
             }
             case COMMA -> {
@@ -167,7 +169,7 @@ public class Parser {
 
     private void champ() {
 
-        if (currentToken.tag() == Tag.IDENT) {
+        if (this.currentToken.tag() == Tag.IDENT) {
             identsep();
             analyseTerminal(Tag.COLON);
             type_n();
@@ -177,7 +179,7 @@ public class Parser {
 
     private void champs() {
 
-        if (currentToken.tag() == Tag.IDENT) {
+        if (this.currentToken.tag() == Tag.IDENT) {
             champ();
             champs2();
         }
@@ -185,7 +187,7 @@ public class Parser {
 
     private void champs2() {
 
-        switch (currentToken.tag()) {
+        switch (this.currentToken.tag()) {
             case IDENT -> champs();
             case END -> {
             }
@@ -194,7 +196,7 @@ public class Parser {
 
     private void type_n() {
 
-        switch (currentToken.tag()) {
+        switch (this.currentToken.tag()) {
             case ACCESS -> {
                 analyseTerminal(Tag.ACCESS);
                 analyseTerminal(Tag.IDENT);
@@ -205,7 +207,7 @@ public class Parser {
 
     private void params() {
 
-        if (currentToken.tag() == Tag.OPEN_PAREN) {
+        if (this.currentToken.tag() == Tag.OPEN_PAREN) {
             analyseTerminal(Tag.OPEN_PAREN);
             paramsep();
             analyseTerminal(Tag.CLOSE_PAREN);
@@ -214,7 +216,7 @@ public class Parser {
 
     private void hasparams() {
 
-        switch (currentToken.tag()) {
+        switch (this.currentToken.tag()) {
             case IS, RETURN -> {
             }
             case OPEN_PAREN -> params();
@@ -223,7 +225,7 @@ public class Parser {
 
     private void paramsep() {
 
-        if (currentToken.tag() == Tag.IDENT) {
+        if (this.currentToken.tag() == Tag.IDENT) {
             param();
             paramsep2();
         }
@@ -231,7 +233,7 @@ public class Parser {
 
     private void paramsep2() {
 
-        switch (currentToken.tag()) {
+        switch (this.currentToken.tag()) {
             case SEMICOLON -> {
                 analyseTerminal(Tag.SEMICOLON);
                 paramsep();
@@ -243,7 +245,7 @@ public class Parser {
 
     private void typexpr() {
 
-        switch (currentToken.tag()) {
+        switch (this.currentToken.tag()) {
             case ASSIGN -> {
                 analyseTerminal(Tag.ASSIGN);
                 expr();
@@ -255,7 +257,7 @@ public class Parser {
 
     private void param() {
 
-        if (currentToken.tag() == Tag.IDENT) {
+        if (this.currentToken.tag() == Tag.IDENT) {
             identsep();
             analyseTerminal(Tag.COLON);
             mode();
@@ -264,15 +266,44 @@ public class Parser {
     }
 
     private void mode() {
+        switch (this.currentToken.tag()) {
+            case IDENT, ACCESS -> {
+            }
+            case IN -> {
+                analyseTerminal(Tag.IN);
+                modeout();
+            }
+
+        }
     }
 
     private void modeout() {
+        switch (this.currentToken.tag()) {
+            case IDENT, ACCESS -> {
+            }
+            case OUT -> {
+                analyseTerminal(Tag.OUT);
+            }
+        }
     }
 
+    // TODO check TYPES
     private void expr() {
+        switch (this.currentToken.tag()) {
+            case IDENT, OPEN_PAREN, DOT, ENTIER, CARACTERE, TRUE, FALSE, NULL, NEW -> {
+                or_expr();
+            }
+
+        }
     }
 
     private void or_expr() {
+        switch (this.currentToken.tag()) {
+            case IDENT, OPEN_PAREN, DOT, ENTIER, CARACTERE, TRUE, FALSE, NULL, NEW -> {
+                and_expr();
+                or_expr2();
+            }
+        }
     }
 
     private void or_expr2() {
@@ -366,12 +397,12 @@ public class Parser {
     }
 
     private void analyseTerminal(Tag tag) {
-        if (!(currentToken.tag() == tag)) {
-            Token expectedToken = new Token(tag, currentToken.line(), TagHelper.getTagString(tag));
-            errorService.registerSyntaxError(new UnexpectedTokenException(expectedToken, currentToken));
+        if (!(this.currentToken.tag() == tag)) {
+            Token expectedToken = new Token(tag, this.currentToken.line(), TagHelper.getTagString(tag));
+            this.errorService.registerSyntaxError(new UnexpectedTokenException(expectedToken, this.currentToken));
         }
-        // Contient le prochain token ou <EOF,currentLine,""> si fin de fichier
-        currentToken = lexer.nextToken();
+        // Contient le prochain token ou <EOF, currentLine,""> si fin de fichier
+        this.currentToken = lexer.nextToken();
     }
 
 }
