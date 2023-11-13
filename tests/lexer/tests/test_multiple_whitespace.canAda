@@ -1,0 +1,4 @@
+begin
+aire    := larg *     long ;
+return    aire
+   end aireRectangle    ;
