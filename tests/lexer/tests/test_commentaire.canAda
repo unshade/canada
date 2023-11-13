@@ -1,0 +1,9 @@
+procedure --wow unDebut is
+function aireRectangle(larg : integer; long : integer) --return integer is
+aire: integer; ----commentaireblab
+--    test
+begin
+    'c'
+    aire_1 -- test := larg * long ;
+--return aire
+end aireRectangle ;

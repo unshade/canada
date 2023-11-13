@@ -1,0 +1,1 @@
+<BEGIN, 1, begin> <IDENT, 2, aire> <ASSIGN, 2, :=> <IDENT, 2, larg> <MULTI, 2, *> <IDENT, 2, long> <SEMICOLON, 2, ;> <RETURN, 3, return> <IDENT, 3, aire> <END, 4, end> <IDENT, 4, aireRectangle> <SEMICOLON, 4, ;> <EOF, 4, >
