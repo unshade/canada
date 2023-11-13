@@ -47,6 +47,7 @@ public enum Tag {
     WITH,
     NULL,
     NEW,
+    CHARACTER,
 
     // Operators
     PLUS,
