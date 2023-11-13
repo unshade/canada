@@ -59,6 +59,7 @@ public class TagHelper {
             case UNKNOWN -> "UNKNOWN";
             case NULL -> "NULL";
             case NEW -> "NEW";
+            case CHARACTER -> "CHARACTER";
         };
     }
 
