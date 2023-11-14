@@ -33,11 +33,15 @@ public class Parser {
     }
 
     private void fichier() {
-
+        System.out.println("fichier");
         analyseTerminal(Tag.WITH);
-        analyseTerminal(Tag.ADA_TEXT_IO);
+        analyseTerminal(Tag.IDENT);
+        analyseTerminal(Tag.DOT);
+        analyseTerminal(Tag.IDENT);
         analyseTerminal(Tag.SEMICOLON);
-        analyseTerminal(Tag.USEADA_TEXT_IO);
+        analyseTerminal(Tag.IDENT);
+        analyseTerminal(Tag.DOT);
+        analyseTerminal(Tag.IDENT);
         analyseTerminal(Tag.SEMICOLON);
         analyseTerminal(Tag.PROCEDURE);
         analyseTerminal(Tag.IDENT);
@@ -53,7 +57,7 @@ public class Parser {
     }
 
     private void decl() {
-
+        System.out.println("decl");
         switch (this.currentToken.tag()) {
             case PROCEDURE -> {
                 analyseTerminal(Tag.PROCEDURE);
@@ -99,7 +103,7 @@ public class Parser {
     }
 
     private void hasischoose() {
-
+        System.out.println("hasischoose");
         switch (this.currentToken.tag()) {
             case IS -> {
                 analyseTerminal(Tag.IS);
@@ -111,7 +115,7 @@ public class Parser {
     }
 
     private void accorrec() {
-
+        System.out.println("accorrec");
         switch (this.currentToken.tag()) {
             case ACCESS -> {
                 analyseTerminal(Tag.ACCESS);
@@ -127,7 +131,7 @@ public class Parser {
     }
 
     private void decls() {
-
+        System.out.println("decls");
         switch (this.currentToken.tag()) {
             case PROCEDURE, IDENT, TYPE, FUNCTION -> {
                 decl();
@@ -139,7 +143,7 @@ public class Parser {
     }
 
     private void hasident() {
-
+        System.out.println("hasident");
         switch (this.currentToken.tag()) {
             case SEMICOLON -> {
             }
@@ -148,7 +152,7 @@ public class Parser {
     }
 
     private void identsep() {
-
+        System.out.println("identsep");
         if (this.currentToken.tag() == Tag.IDENT) {
             analyseTerminal(Tag.IDENT);
             identsep2();
@@ -156,7 +160,7 @@ public class Parser {
     }
 
     private void identsep2() {
-
+        System.out.println("identsep2");
         switch (this.currentToken.tag()) {
             case COLON -> {
             }
@@ -168,7 +172,7 @@ public class Parser {
     }
 
     private void champ() {
-
+        System.out.println("champ");
         if (this.currentToken.tag() == Tag.IDENT) {
             identsep();
             analyseTerminal(Tag.COLON);
@@ -178,7 +182,7 @@ public class Parser {
     }
 
     private void champs() {
-
+        System.out.println("champs");
         if (this.currentToken.tag() == Tag.IDENT) {
             champ();
             champs2();
@@ -186,7 +190,7 @@ public class Parser {
     }
 
     private void champs2() {
-
+        System.out.println("champs2");
         switch (this.currentToken.tag()) {
             case IDENT -> champs();
             case END -> {
@@ -195,7 +199,7 @@ public class Parser {
     }
 
     private void type_n() {
-
+        System.out.println("type_n");
         switch (this.currentToken.tag()) {
             case ACCESS -> {
                 analyseTerminal(Tag.ACCESS);
@@ -206,7 +210,7 @@ public class Parser {
     }
 
     private void params() {
-
+        System.out.println("params");
         if (this.currentToken.tag() == Tag.OPEN_PAREN) {
             analyseTerminal(Tag.OPEN_PAREN);
             paramsep();
@@ -215,7 +219,7 @@ public class Parser {
     }
 
     private void hasparams() {
-
+        System.out.println("hasparams");
         switch (this.currentToken.tag()) {
             case IS, RETURN -> {
             }
@@ -224,7 +228,7 @@ public class Parser {
     }
 
     private void paramsep() {
-
+        System.out.println("paramsep");
         if (this.currentToken.tag() == Tag.IDENT) {
             param();
             paramsep2();
@@ -232,7 +236,7 @@ public class Parser {
     }
 
     private void paramsep2() {
-
+        System.out.println("paramsep2");
         switch (this.currentToken.tag()) {
             case SEMICOLON -> {
                 analyseTerminal(Tag.SEMICOLON);
@@ -244,7 +248,7 @@ public class Parser {
     }
 
     private void typexpr() {
-
+        System.out.println("typexpr");
         switch (this.currentToken.tag()) {
             case ASSIGN -> {
                 analyseTerminal(Tag.ASSIGN);
@@ -256,7 +260,7 @@ public class Parser {
     }
 
     private void param() {
-
+        System.out.println("param");
         if (this.currentToken.tag() == Tag.IDENT) {
             identsep();
             analyseTerminal(Tag.COLON);
@@ -266,6 +270,7 @@ public class Parser {
     }
 
     private void mode() {
+        System.out.println("mode");
         switch (this.currentToken.tag()) {
             case IDENT, ACCESS -> {
             }
@@ -278,6 +283,7 @@ public class Parser {
     }
 
     private void modeout() {
+        System.out.println("modeout");
         switch (this.currentToken.tag()) {
             case IDENT, ACCESS -> {
             }
@@ -288,6 +294,7 @@ public class Parser {
     }
 
     private void expr() {
+        System.out.println("expr");
         switch (this.currentToken.tag()) {
             case IDENT, OPEN_PAREN, DOT, ENTIER, CARACTERE, TRUE, FALSE, NULL, NEW, CHARACTER -> {
                 or_expr();
@@ -297,6 +304,7 @@ public class Parser {
     }
 
     private void or_expr() {
+        System.out.println("or_expr");
         switch (this.currentToken.tag()) {
             case IDENT, OPEN_PAREN, DOT, ENTIER, CARACTERE, TRUE, FALSE, NULL, NEW, CHARACTER -> {
                 and_expr();
@@ -306,6 +314,7 @@ public class Parser {
     }
 
     private void or_expr2() {
+        System.out.println("or_expr2");
         switch (this.currentToken.tag()) {
             case SEMICOLON, COMMA, CLOSE_PAREN, THEN, DOTDOT, LOOP -> {
             }
@@ -317,6 +326,7 @@ public class Parser {
     }
 
     private void or_expr3() {
+        System.out.println("or_expr3");
         switch (this.currentToken.tag()) {
             case IDENT, OPEN_PAREN, ELSE, DOT, MINUS, ENTIER, CARACTERE, TRUE, FALSE, NULL, NEW, CHARACTER-> {
                 and_expr();
@@ -326,6 +336,7 @@ public class Parser {
     }
 
     private void and_expr() {
+        System.out.println("and_expr");
         switch (this.currentToken.tag()) {
             case IDENT, OPEN_PAREN, MINUS, ENTIER, CARACTERE, TRUE, FALSE, NULL, NEW, CHARACTER -> {
                 not_expr();
@@ -336,6 +347,7 @@ public class Parser {
     }
 
     private void and_expr2() {
+        System.out.println("and_expr2");
         switch (this.currentToken.tag()) {
             case SEMICOLON, COMMA, CLOSE_PAREN, OR, THEN, DOTDOT, LOOP -> {
             }
@@ -347,6 +359,7 @@ public class Parser {
     }
 
     private void and_expr3() {
+        System.out.println("and_expr3");
         switch (this.currentToken.tag()) {
             case IDENT, OPEN_PAREN, MINUS, ENTIER, CARACTERE, TRUE, FALSE, NULL, NEW, CHARACTER -> {
                 not_expr();
@@ -361,6 +374,7 @@ public class Parser {
     }
 
     private void not_expr() {
+        System.out.println("not_expr");
         switch (this.currentToken.tag()) {
             case IDENT, OPEN_PAREN, MINUS, ENTIER, CARACTERE, TRUE, FALSE, NULL, NEW, CHARACTER -> {
                 equality_expr();
@@ -370,6 +384,7 @@ public class Parser {
     }
 
     private void not_expr2() {
+        System.out.println("not_expr2");
         switch (this.currentToken.tag()) {
             case SEMICOLON, COMMA, CLOSE_PAREN, OR, AND, THEN, DOTDOT, LOOP -> {
             }
@@ -382,6 +397,7 @@ public class Parser {
     }
 
     private void equality_expr() {
+        System.out.println("equality_expr");
         switch (this.currentToken.tag()) {
             case IDENT, OPEN_PAREN, MINUS, ENTIER, CARACTERE, TRUE, FALSE, NULL, NEW, CHARACTER -> {
                 relational_expr();
@@ -391,6 +407,7 @@ public class Parser {
     }
 
     private void equality_expr2() {
+        System.out.println("equality_expr2");
         switch (this.currentToken.tag()) {
             case SEMICOLON, COMMA, CLOSE_PAREN, OR, AND, THEN, NOT, DOTDOT, LOOP  -> {
             }
@@ -408,6 +425,7 @@ public class Parser {
     }
 
     private void relational_expr() {
+        System.out.println("relational_expr");
         switch (this.currentToken.tag()) {
             case IDENT, OPEN_PAREN, MINUS, ENTIER, CARACTERE, TRUE, FALSE, NULL, NEW, CHARACTER -> {
                 additive_expr();
@@ -417,6 +435,7 @@ public class Parser {
     }
 
     private void relational_expr2() {
+        System.out.println("relational_expr2");
         switch (this.currentToken.tag()) {
             case SEMICOLON, COMMA, CLOSE_PAREN, OR, AND, THEN, NOT, EQ, NE, DOTDOT, LOOP -> {
             }
@@ -444,6 +463,7 @@ public class Parser {
     }
 
     private void additive_expr() {
+        System.out.println("additive_expr");
         switch (this.currentToken.tag()) {
             case IDENT, OPEN_PAREN, MINUS, ENTIER, CARACTERE, TRUE, FALSE, NULL, NEW, CHARACTER -> {
                 multiplicative_expr();
@@ -453,6 +473,7 @@ public class Parser {
     }
 
     private void additive_expr2() {
+        System.out.println("additive_expr2");
         switch (this.currentToken.tag()) {
             case SEMICOLON, COMMA, CLOSE_PAREN, OR, AND, THEN, NOT, EQ, NE, LT, LE, GT, GE, DOTDOT, LOOP -> {
             }
@@ -470,6 +491,7 @@ public class Parser {
     }
 
     private void multiplicative_expr() {
+        System.out.println("multiplicative_expr");
         switch (this.currentToken.tag()) {
             case IDENT, OPEN_PAREN, MINUS, ENTIER, CARACTERE, TRUE, FALSE, NULL, NEW, CHARACTER -> {
                 unary_expr();
@@ -479,6 +501,7 @@ public class Parser {
     }
 
     private void multiplicative_expr2() {
+        System.out.println("multiplicative_expr2");
         switch (this.currentToken.tag()) {
             case SEMICOLON, COMMA, CLOSE_PAREN, OR, AND, THEN, NOT, EQ, NE, LT, LE, GT, GE, PLUS, MINUS, DOTDOT, LOOP -> {
             }
@@ -501,6 +524,7 @@ public class Parser {
     }
 
     private void unary_expr() {
+        System.out.println("unary_expr");
         switch (this.currentToken.tag()) {
             case MINUS -> {
                 analyseTerminal(Tag.MINUS);
@@ -513,6 +537,7 @@ public class Parser {
     }
 
     private void primary() {
+        System.out.println("primary");
         switch (this.currentToken.tag()) {
             case IDENT -> {
                 analyseTerminal(Tag.IDENT);
@@ -555,6 +580,7 @@ public class Parser {
     }
 
     private void primary2() {
+        System.out.println("primary2");
         switch (this.currentToken.tag()) {
             case SEMICOLON, COMMA, CLOSE_PAREN, OR, AND, THEN, NOT, EQ, NE, LT, LE, GT, GE, PLUS, MINUS, MULTI, DIV, REM, DOTDOT, LOOP, DOT-> {
                 acces();
@@ -569,6 +595,7 @@ public class Parser {
     }
 
     private void exprsep() {
+        System.out.println("exprsep");
         switch (this.currentToken.tag()) {
             case IDENT, OPEN_PAREN, MINUS, ENTIER, CARACTERE, TRUE, FALSE, NULL, NEW, CHARACTER -> {
                 expr();
@@ -578,9 +605,10 @@ public class Parser {
     }
 
     private void exprsep2() {
+        System.out.println("exprsep2");
         switch (this.currentToken.tag()) {
-            case SEMICOLON -> {
-                analyseTerminal(Tag.SEMICOLON);
+            case COMMA -> {
+                analyseTerminal(Tag.COMMA);
                 exprsep();
             }
             case CLOSE_PAREN -> {
@@ -589,6 +617,7 @@ public class Parser {
     }
 
     private void hasexpr() {
+        System.out.println("hasexpr");
         switch (this.currentToken.tag()) {
             case SEMICOLON -> {
             }
@@ -602,6 +631,7 @@ public class Parser {
     }
 
     private void instr() {
+        System.out.println("instr");
         switch (this.currentToken.tag()) {
             case IDENT -> {
                 analyseTerminal(Tag.IDENT);
@@ -656,6 +686,7 @@ public class Parser {
     }
 
     private void instr2() {
+        System.out.println("instr2");
         switch (this.currentToken.tag()) {
             case SEMICOLON -> {
                 analyseTerminal(Tag.SEMICOLON);
@@ -665,8 +696,7 @@ public class Parser {
                 exprsep();
                 analyseTerminal(Tag.CLOSE_PAREN);
                 instr3();
-                analyseTerminal(Tag.ASSIGN);
-                expr();
+                hasassign();
                 analyseTerminal(Tag.SEMICOLON);
             }
             case ASSIGN, DOT -> {
@@ -679,6 +709,7 @@ public class Parser {
     }
 
     private void instr3() {
+        System.out.println("instr3");
         switch (this.currentToken.tag()) {
             case ASSIGN -> {
             }
@@ -690,7 +721,20 @@ public class Parser {
         }
     }
 
+    private void hasassign() {
+        System.out.println("hasassign");
+        switch (this.currentToken.tag()) {
+            case SEMICOLON -> {
+            }
+            case ASSIGN -> {
+                analyseTerminal(Tag.ASSIGN);
+                expr();
+            }
+        }
+    }
+
     private void elifn() {
+        System.out.println("elifn");
         switch (this.currentToken.tag()) {
             case END, ELSE -> {
             }
@@ -705,17 +749,19 @@ public class Parser {
     }
 
     private void elsen() {
+        System.out.println("elsen");
         switch (this.currentToken.tag()) {
             case END -> {
             }
             case ELSE -> {
                 analyseTerminal(Tag.ELSE);
-                instr();
+                instrs();
             }
         }
     }
 
     private void hasreverse() {
+        System.out.println("hasreverse");
         switch (this.currentToken.tag()) {
             case IDENT,OPEN_PAREN, MINUS, ENTIER, CARACTERE, TRUE, FALSE, NULL, NEW, CHARACTER -> {
             }
@@ -726,6 +772,7 @@ public class Parser {
     }
 
     private void instrs() {
+        System.out.println("instrs");
         switch (this.currentToken.tag()){
             case IDENT, BEGIN, RETURN, IF, FOR, WHILE -> {
                 instr();
@@ -736,6 +783,7 @@ public class Parser {
     }
 
     private void instrs2() {
+        System.out.println("instrs2");
         switch (this.currentToken.tag()){
             case IDENT, BEGIN, RETURN, IF, FOR, WHILE -> {
                 instr();
@@ -747,6 +795,7 @@ public class Parser {
     }
 
     private void acces() {
+        System.out.println("acces");
         switch (this.currentToken.tag()) {
             case SEMICOLON, COMMA, CLOSE_PAREN, OR, END, THEN, NOT, EQ, NE, LT, LE, GT, GE, PLUS, MINUS, MULTI, DIV, REM, DOTDOT, LOOP -> {
             }
@@ -760,11 +809,15 @@ public class Parser {
     }
 
     private void analyseTerminal(Tag tag) {
+        System.out.println(this.currentToken);
         if (!(this.currentToken.tag() == tag)) {
             Token expectedToken = new Token(tag, this.currentToken.line(), TagHelper.getTagString(tag));
             this.errorService.registerSyntaxError(new UnexpectedTokenException(expectedToken, this.currentToken));
         }
         // Contient le prochain token ou <EOF, currentLine,""> si fin de fichier
+        if (this.currentToken.tag() == Tag.EOF) {
+            return;
+        }
         this.currentToken = lexer.nextToken();
     }
 
