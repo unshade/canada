@@ -60,6 +60,7 @@ public class TagHelper {
             case NULL -> "NULL";
             case NEW -> "NEW";
             case CHARACTER -> "CHARACTER";
+            case DOTDOT -> "..";
         };
     }
 

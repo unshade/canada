@@ -287,10 +287,9 @@ public class Parser {
         }
     }
 
-    // TODO check TYPES
     private void expr() {
         switch (this.currentToken.tag()) {
-            case IDENT, OPEN_PAREN, DOT, ENTIER, CARACTERE, TRUE, FALSE, NULL, NEW -> {
+            case IDENT, OPEN_PAREN, DOT, ENTIER, CARACTERE, TRUE, FALSE, NULL, NEW, CHARACTER -> {
                 or_expr();
             }
 
@@ -299,7 +298,7 @@ public class Parser {
 
     private void or_expr() {
         switch (this.currentToken.tag()) {
-            case IDENT, OPEN_PAREN, DOT, ENTIER, CARACTERE, TRUE, FALSE, NULL, NEW -> {
+            case IDENT, OPEN_PAREN, DOT, ENTIER, CARACTERE, TRUE, FALSE, NULL, NEW, CHARACTER -> {
                 and_expr();
                 or_expr2();
             }
@@ -307,51 +306,210 @@ public class Parser {
     }
 
     private void or_expr2() {
+        switch (this.currentToken.tag()) {
+            case SEMICOLON, COMMA, CLOSE_PAREN, THEN, DOTDOT, LOOP -> {
+            }
+            case OR -> {
+                analyseTerminal(Tag.OR);
+                or_expr3();
+            }
+        }
     }
 
     private void or_expr3() {
+        switch (this.currentToken.tag()) {
+            case IDENT, OPEN_PAREN, ELSE, DOT, MINUS, ENTIER, CARACTERE, TRUE, FALSE, NULL, NEW, CHARACTER-> {
+                and_expr();
+                or_expr2();
+            }
+        }
     }
 
     private void and_expr() {
+        switch (this.currentToken.tag()) {
+            case IDENT, OPEN_PAREN, MINUS, ENTIER, CARACTERE, TRUE, FALSE, NULL, NEW, CHARACTER -> {
+                not_expr();
+                and_expr2();
+            }
+
+        }
     }
 
     private void and_expr2() {
+        switch (this.currentToken.tag()) {
+            case SEMICOLON, COMMA, CLOSE_PAREN, OR, THEN, DOTDOT, LOOP -> {
+            }
+            case AND -> {
+                analyseTerminal(Tag.AND);
+                and_expr3();
+            }
+        }
     }
 
     private void and_expr3() {
+        switch (this.currentToken.tag()) {
+            case IDENT, OPEN_PAREN, MINUS, ENTIER, CARACTERE, TRUE, FALSE, NULL, NEW, CHARACTER -> {
+                not_expr();
+                and_expr2();
+            }
+            case THEN -> {
+                analyseTerminal(Tag.THEN);
+                not_expr();
+                and_expr2();
+            }
+        }
     }
 
     private void not_expr() {
+        switch (this.currentToken.tag()) {
+            case IDENT, OPEN_PAREN, MINUS, ENTIER, CARACTERE, TRUE, FALSE, NULL, NEW, CHARACTER -> {
+                equality_expr();
+                not_expr2();
+            }
+        }
     }
 
     private void not_expr2() {
+        switch (this.currentToken.tag()) {
+            case SEMICOLON, COMMA, CLOSE_PAREN, OR, AND, THEN, DOTDOT, LOOP -> {
+            }
+            case NOT -> {
+                analyseTerminal(Tag.NOT);
+                equality_expr();
+                not_expr2();
+            }
+        }
     }
 
     private void equality_expr() {
+        switch (this.currentToken.tag()) {
+            case IDENT, OPEN_PAREN, MINUS, ENTIER, CARACTERE, TRUE, FALSE, NULL, NEW, CHARACTER -> {
+                relational_expr();
+                equality_expr2();
+            }
+        }
     }
 
     private void equality_expr2() {
+        switch (this.currentToken.tag()) {
+            case SEMICOLON, COMMA, CLOSE_PAREN, OR, AND, THEN, NOT, DOTDOT, LOOP  -> {
+            }
+            case EQ -> {
+                analyseTerminal(Tag.EQ);
+                relational_expr();
+                equality_expr2();
+            }
+            case NE -> {
+                analyseTerminal(Tag.NE);
+                relational_expr();
+                equality_expr2();
+            }
+        }
     }
 
     private void relational_expr() {
+        switch (this.currentToken.tag()) {
+            case IDENT, OPEN_PAREN, MINUS, ENTIER, CARACTERE, TRUE, FALSE, NULL, NEW, CHARACTER -> {
+                additive_expr();
+                relational_expr2();
+            }
+        }
     }
 
     private void relational_expr2() {
+        switch (this.currentToken.tag()) {
+            case SEMICOLON, COMMA, CLOSE_PAREN, OR, AND, THEN, NOT, EQ, NE, DOTDOT, LOOP -> {
+            }
+            case LT -> {
+                analyseTerminal(Tag.LT);
+                additive_expr();
+                relational_expr2();
+            }
+            case LE -> {
+                analyseTerminal(Tag.LE);
+                additive_expr();
+                relational_expr2();
+            }
+            case GT -> {
+                analyseTerminal(Tag.GT);
+                additive_expr();
+                relational_expr2();
+            }
+            case GE -> {
+                analyseTerminal(Tag.GE);
+                additive_expr();
+                relational_expr2();
+            }
+        }
     }
 
     private void additive_expr() {
+        switch (this.currentToken.tag()) {
+            case IDENT, OPEN_PAREN, MINUS, ENTIER, CARACTERE, TRUE, FALSE, NULL, NEW, CHARACTER -> {
+                multiplicative_expr();
+                additive_expr2();
+            }
+        }
     }
 
     private void additive_expr2() {
+        switch (this.currentToken.tag()) {
+            case SEMICOLON, COMMA, CLOSE_PAREN, OR, AND, THEN, NOT, EQ, NE, LT, LE, GT, GE, DOTDOT, LOOP -> {
+            }
+            case PLUS -> {
+                analyseTerminal(Tag.PLUS);
+                multiplicative_expr();
+                additive_expr2();
+            }
+            case MINUS -> {
+                analyseTerminal(Tag.MINUS);
+                multiplicative_expr();
+                additive_expr2();
+            }
+        }
     }
 
     private void multiplicative_expr() {
+        switch (this.currentToken.tag()) {
+            case IDENT, OPEN_PAREN, MINUS, ENTIER, CARACTERE, TRUE, FALSE, NULL, NEW, CHARACTER -> {
+                unary_expr();
+                multiplicative_expr2();
+            }
+        }
     }
 
     private void multiplicative_expr2() {
+        switch (this.currentToken.tag()) {
+            case SEMICOLON, COMMA, CLOSE_PAREN, OR, AND, THEN, NOT, EQ, NE, LT, LE, GT, GE, PLUS, MINUS, DOTDOT, LOOP -> {
+            }
+            case MULTI -> {
+                analyseTerminal(Tag.MULTI);
+                unary_expr();
+                multiplicative_expr2();
+            }
+            case DIV -> {
+                analyseTerminal(Tag.DIV);
+                unary_expr();
+                multiplicative_expr2();
+            }
+            case REM -> {
+                analyseTerminal(Tag.REM);
+                unary_expr();
+                multiplicative_expr2();
+            }
+        }
     }
 
     private void unary_expr() {
+        switch (this.currentToken.tag()) {
+            case MINUS -> {
+                analyseTerminal(Tag.MINUS);
+                primary();
+            }
+            case IDENT, OPEN_PAREN, ENTIER, CARACTERE, TRUE, FALSE, NULL, NEW, CHARACTER -> {
+                primary();
+            }
+        }
     }
 
     private void primary() {

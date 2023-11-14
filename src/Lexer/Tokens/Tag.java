@@ -62,6 +62,7 @@ public enum Tag {
     GT,
     GE,
     ASSIGN,
+    DOTDOT,
 
     // Special
     EOF,

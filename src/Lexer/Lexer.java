@@ -103,13 +103,14 @@ public class Lexer {
                 Map.entry(Tag.LE, Pattern.compile("<=")),
                 Map.entry(Tag.GT, Pattern.compile(">")),
                 Map.entry(Tag.GE, Pattern.compile(">=")),
-                Map.entry(Tag.ASSIGN, Pattern.compile(":="))
+                Map.entry(Tag.ASSIGN, Pattern.compile(":=")),
+                Map.entry(Tag.DOTDOT, Pattern.compile(".."))
         );
 
         this.ruledTerminals = Map.of(
                 Tag.IDENT, Pattern.compile("[A-Za-z][A-Za-z0-9_]*"),
                 Tag.ENTIER, Pattern.compile("[0-9]+"),
-                Tag.CARACTERE, Pattern.compile("'[A-Za-z]'")
+                Tag.CARACTERE, Pattern.compile("'[\\x00-\\x26\\x28-\\x7F]'")
         );
 
         this.errorService = ErrorService.getInstance();
@@ -185,7 +186,7 @@ public class Lexer {
     }
 
     private boolean isCharacterLiteral() {
-        return this.currentChar == '\'' && Character.isLetter((char) this.reader.peek(1)) && this.reader.peek(2) == '\'';
+        return this.currentChar == '\'' && this.reader.peek(2) == '\'';
     }
 
     private Token readCharacterLiteral() {
