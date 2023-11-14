@@ -47,15 +47,15 @@ public class ErrorService {
             for (Exception e : this.lexicalErrors) {
                 System.err.println(e.getMessage());
             }
+            System.out.println();
         }
-        System.out.println();
         if (!this.syntaxErrors.isEmpty()) {
             System.err.println("Syntax errors:");
             for (Exception e : this.syntaxErrors) {
                 System.err.println(e.getMessage());
             }
+            System.out.println();
         }
-        System.out.println();
         if (!this.semanticErrors.isEmpty()) {
             System.err.println("Semantic errors:");
             for (Exception e : this.semanticErrors) {
