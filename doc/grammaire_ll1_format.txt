@@ -135,11 +135,14 @@ instr -> for ident in hasreverse expr .. expr loop instrs end loop ;
 instr -> while expr loop instrs end loop ;
 
 instr2 -> instr3 := expr ;
-instr2 -> ( exprsep ) instr3 := expr ;
+instr2 -> ( exprsep ) instr3 hasassign ;
 instr2 -> ;
 
 instr3 -> . ident instr3
 instr3 -> ''
+
+hasassign -> := expr
+hasassign -> ''
 
 elifn -> elif expr then instrs elifn
 elifn -> ''
