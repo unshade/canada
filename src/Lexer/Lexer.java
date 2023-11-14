@@ -104,7 +104,7 @@ public class Lexer {
                 Map.entry(Tag.GT, Pattern.compile(">")),
                 Map.entry(Tag.GE, Pattern.compile(">=")),
                 Map.entry(Tag.ASSIGN, Pattern.compile(":=")),
-                Map.entry(Tag.DOTDOT, Pattern.compile(".."))
+                Map.entry(Tag.DOTDOT, Pattern.compile("\\.\\."))
         );
 
         this.ruledTerminals = Map.of(
