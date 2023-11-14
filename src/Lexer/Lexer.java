@@ -131,6 +131,12 @@ public class Lexer {
         return instance;
     }
 
+    public static Lexer newInstance(File file) {
+
+        instance = null;
+        return getInstance(file);
+    }
+
     /**
      * Get the next token from the file
      *

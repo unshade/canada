@@ -26,7 +26,7 @@ public class LexerTest {
 
     private void performLexerTest(File testFile, File solutionFile) {
         try {
-            Lexer lexer = Lexer.getInstance(testFile);
+            Lexer lexer = Lexer.newInstance(testFile);
             List<Token> tokens = lexer.getAllTokens();
             String actualResult = tokens.stream()
                     .map(Token::toString)
