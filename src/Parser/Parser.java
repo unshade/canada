@@ -513,45 +513,250 @@ public class Parser {
     }
 
     private void primary() {
+        switch (this.currentToken.tag()) {
+            case IDENT -> {
+                analyseTerminal(Tag.IDENT);
+                primary2();
+            }
+            case OPEN_PAREN -> {
+                analyseTerminal(Tag.OPEN_PAREN);
+                expr();
+                analyseTerminal(Tag.CLOSE_PAREN);
+            }
+            case ENTIER -> {
+                analyseTerminal(Tag.ENTIER);
+            }
+            case CARACTERE -> {
+                analyseTerminal(Tag.CARACTERE);
+            }
+            case TRUE -> {
+                analyseTerminal(Tag.TRUE);
+            }
+            case FALSE -> {
+                analyseTerminal(Tag.FALSE);
+            }
+            case NULL -> {
+                analyseTerminal(Tag.NULL);
+            }
+            case NEW -> {
+                analyseTerminal(Tag.NEW);
+                analyseTerminal(Tag.IDENT);
+            }
+            case CHARACTER -> {
+                analyseTerminal(Tag.CHARACTER);
+                analyseTerminal(Tag.APOSTROPHE);
+                analyseTerminal(Tag.VAL);
+                analyseTerminal(Tag.OPEN_PAREN);
+                expr();
+                analyseTerminal(Tag.CLOSE_PAREN);
+            }
+
+        }
     }
 
     private void primary2() {
+        switch (this.currentToken.tag()) {
+            case SEMICOLON, COMMA, CLOSE_PAREN, OR, AND, THEN, NOT, EQ, NE, LT, LE, GT, GE, PLUS, MINUS, MULTI, DIV, REM, DOTDOT, LOOP, DOT-> {
+                acces();
+            }
+            case OPEN_PAREN -> {
+                analyseTerminal(Tag.OPEN_PAREN);
+                exprsep();
+                analyseTerminal(Tag.CLOSE_PAREN);
+                acces();
+            }
+            }
     }
 
     private void exprsep() {
+        switch (this.currentToken.tag()) {
+            case IDENT, OPEN_PAREN, MINUS, ENTIER, CARACTERE, TRUE, FALSE, NULL, NEW, CHARACTER -> {
+                expr();
+                exprsep2();
+            }
+        }
     }
 
     private void exprsep2() {
+        switch (this.currentToken.tag()) {
+            case SEMICOLON -> {
+                analyseTerminal(Tag.SEMICOLON);
+                exprsep();
+            }
+            case CLOSE_PAREN -> {
+            }
+        }
     }
 
     private void hasexpr() {
+        switch (this.currentToken.tag()) {
+            case SEMICOLON -> {
+            }
+            case IDENT, OPEN_PAREN, MINUS, ENTIER, CARACTERE, TRUE, FALSE, NULL, NEW, CHARACTER -> {
+                expr();
+            }
+            case ASSIGN, DOT -> {
+                exprsep();
+            }
+        }
     }
 
     private void instr() {
+        switch (this.currentToken.tag()) {
+            case IDENT -> {
+                analyseTerminal(Tag.IDENT);
+                instr2();
+            }
+            case BEGIN -> {
+                analyseTerminal(Tag.BEGIN);
+                instrs();
+                analyseTerminal(Tag.END);
+                analyseTerminal(Tag.SEMICOLON);
+            }
+            case RETURN -> {
+                analyseTerminal(Tag.RETURN);
+                hasexpr();
+                analyseTerminal(Tag.SEMICOLON);
+            }
+            case IF -> {
+                analyseTerminal(Tag.IF);
+                expr();
+                analyseTerminal(Tag.THEN);
+                instrs();
+                elifn();
+                elsen();
+                analyseTerminal(Tag.END);
+                analyseTerminal(Tag.IF);
+                analyseTerminal(Tag.SEMICOLON);
+            }
+            case FOR -> {
+                analyseTerminal(Tag.FOR);
+                analyseTerminal(Tag.IDENT);
+                analyseTerminal(Tag.IN);
+                hasreverse();
+                expr();
+                analyseTerminal(Tag.DOTDOT);
+                expr();
+                analyseTerminal(Tag.LOOP);
+                instrs();
+                analyseTerminal(Tag.END);
+                analyseTerminal(Tag.LOOP);
+                analyseTerminal(Tag.SEMICOLON);
+            }
+            case WHILE -> {
+                analyseTerminal(Tag.WHILE);
+                expr();
+                analyseTerminal(Tag.LOOP);
+                instrs();
+                analyseTerminal(Tag.END);
+                analyseTerminal(Tag.LOOP);
+                analyseTerminal(Tag.SEMICOLON);
+            }
+        }
     }
 
     private void instr2() {
+        switch (this.currentToken.tag()) {
+            case SEMICOLON -> {
+                analyseTerminal(Tag.SEMICOLON);
+            }
+            case OPEN_PAREN-> {
+                analyseTerminal(Tag.OPEN_PAREN);
+                exprsep();
+                analyseTerminal(Tag.CLOSE_PAREN);
+                instr3();
+                analyseTerminal(Tag.ASSIGN);
+                expr();
+                analyseTerminal(Tag.SEMICOLON);
+            }
+            case ASSIGN, DOT -> {
+                instr3();
+                analyseTerminal(Tag.ASSIGN);
+                expr();
+                analyseTerminal(Tag.SEMICOLON);
+            }
+        }
     }
 
     private void instr3() {
+        switch (this.currentToken.tag()) {
+            case ASSIGN -> {
+            }
+            case DOT -> {
+                analyseTerminal(Tag.DOT);
+                analyseTerminal(Tag.IDENT);
+                instr3();
+            }
+        }
     }
 
     private void elifn() {
+        switch (this.currentToken.tag()) {
+            case END, ELSE -> {
+            }
+            case ELSIF -> {
+                analyseTerminal(Tag.ELSIF);
+                expr();
+                analyseTerminal(Tag.THEN);
+                instr();
+                elifn();
+            }
+        }
     }
 
     private void elsen() {
+        switch (this.currentToken.tag()) {
+            case END -> {
+            }
+            case ELSE -> {
+                analyseTerminal(Tag.ELSE);
+                instr();
+            }
+        }
     }
 
     private void hasreverse() {
+        switch (this.currentToken.tag()) {
+            case IDENT,OPEN_PAREN, MINUS, ENTIER, CARACTERE, TRUE, FALSE, NULL, NEW, CHARACTER -> {
+            }
+            case REVERSE -> {
+                analyseTerminal(Tag.REVERSE);
+            }
+        }
     }
 
     private void instrs() {
+        switch (this.currentToken.tag()){
+            case IDENT, BEGIN, RETURN, IF, FOR, WHILE -> {
+                instr();
+                instrs2();
+            }
+        }
+
     }
 
     private void instrs2() {
+        switch (this.currentToken.tag()){
+            case IDENT, BEGIN, RETURN, IF, FOR, WHILE -> {
+                instr();
+                instrs2();
+            }
+            case END, ELSE, ELSIF-> {
+            }
+        }
     }
 
     private void acces() {
+        switch (this.currentToken.tag()) {
+            case SEMICOLON, COMMA, CLOSE_PAREN, OR, END, THEN, NOT, EQ, NE, LT, LE, GT, GE, PLUS, MINUS, MULTI, DIV, REM, DOTDOT, LOOP -> {
+            }
+            case DOT -> {
+                analyseTerminal(Tag.DOT);
+                analyseTerminal(Tag.IDENT);
+                acces();
+            }
+        }
+
     }
 
     private void analyseTerminal(Tag tag) {
