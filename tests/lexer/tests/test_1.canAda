@@ -7,3 +7,4 @@ begin
     aire_1 := larg * long ;
 return aire
 end aireRectangle ;
+$$$

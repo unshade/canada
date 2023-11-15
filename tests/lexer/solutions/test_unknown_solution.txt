@@ -1,0 +1,22 @@
+<UNKNOWN, 1, $> <UNKNOWN, 2, $$$> <UNKNOWN, 3, $$> <UNKNOWN, 3, $$> <UNKNOWN, 4, {> <UNKNOWN, 4, }> <UNKNOWN, 4, °> <UNKNOWN, 4, %> <UNKNOWN, 4, ù> <UNKNOWN, 4, `> <UNKNOWN, 4, £> <UNKNOWN, 4, €> <UNKNOWN, 4, &> <UNKNOWN, 4, @> <UNKNOWN, 4, #> <UNKNOWN, 4, |> <UNKNOWN, 4, §> <UNKNOWN, 5, _idf> <UNKNOWN, 6, 5idf> <IDENT, 7, idf> <UNKNOWN, 7, $> <EOF, 7, >
+
+Unknown token: <UNKNOWN, 1, $>  at line 1
+Unknown token: <UNKNOWN, 2, $$$>  at line 2
+Unknown token: <UNKNOWN, 3, $$>  at line 3
+Unknown token: <UNKNOWN, 3, $$>  at line 3
+Unknown token: <UNKNOWN, 4, {>  at line 4
+Unknown token: <UNKNOWN, 4, }>  at line 4
+Unknown token: <UNKNOWN, 4, °>  at line 4
+Unknown token: <UNKNOWN, 4, %>  at line 4
+Unknown token: <UNKNOWN, 4, ù>  at line 4
+Unknown token: <UNKNOWN, 4, `>  at line 4
+Unknown token: <UNKNOWN, 4, £>  at line 4
+Unknown token: <UNKNOWN, 4, €>  at line 4
+Unknown token: <UNKNOWN, 4, &>  at line 4
+Unknown token: <UNKNOWN, 4, @>  at line 4
+Unknown token: <UNKNOWN, 4, #>  at line 4
+Unknown token: <UNKNOWN, 4, |>  at line 4
+Unknown token: <UNKNOWN, 4, §>  at line 4
+Unknown token: <UNKNOWN, 5, _idf>  at line 5
+Unknown token: <UNKNOWN, 6, 5idf>  at line 6
+Unknown token: <UNKNOWN, 7, $>  at line 7

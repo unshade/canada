@@ -133,9 +133,7 @@ public class Lexer {
     }
 
     public static Lexer newInstance(File file) {
-
-        instance = null;
-        return getInstance(file);
+        return new Lexer(file);
     }
 
     /**

@@ -25,6 +25,10 @@ public class ErrorService {
         return instance;
     }
 
+    public static void resetInstance() {
+        instance = null;
+    }
+
     public void registerLexicalError(Exception e) {
         this.lexicalErrors.add(e);
     }
@@ -62,5 +66,9 @@ public class ErrorService {
                 System.err.println(e.getMessage());
             }
         }
+    }
+
+    public List<Exception> getLexicalErrors() {
+        return lexicalErrors;
     }
 }

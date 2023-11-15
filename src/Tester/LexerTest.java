@@ -2,6 +2,7 @@ package Tester;
 
 import Lexer.Lexer;
 import Lexer.Tokens.Token;
+import Services.ErrorService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.function.Executable;
@@ -26,15 +27,29 @@ public class LexerTest {
 
     private void performLexerTest(File testFile, File solutionFile) {
         try {
+            ErrorService.resetInstance();
+
             Lexer lexer = Lexer.newInstance(testFile);
             List<Token> tokens = lexer.getAllTokens();
             String actualResult = tokens.stream()
                     .map(Token::toString)
                     .collect(Collectors.joining()).trim();
 
-            String expectedResult = new String(Files.readAllBytes(solutionFile.toPath())).trim();
+            String actualErrors = ErrorService.getInstance().getLexicalErrors().stream()
+                    .map(Exception::getMessage)
+                    .collect(Collectors.joining("\n"));
+
+            String[] solution = Files.readString(solutionFile.toPath()).split("\n\n");
+            String expectedResult = solution[0].trim();
+            String expectedErrors;
+            if (solution.length > 1) {
+                expectedErrors = solution[1].trim();
+            } else {
+                expectedErrors = "";
+            }
 
             assertEquals(expectedResult, actualResult);
+            assertEquals(expectedErrors, actualErrors);
 
         } catch (IOException e) {
             e.printStackTrace();
