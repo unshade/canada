@@ -158,6 +158,9 @@ public class Lexer {
                 if (this.isEndOfToken()) {
                     Token token = this.matchToken(lexeme.toString());
                     lexeme.setLength(0); // clear the StringBuilder
+                    if (token.tag() == Tag.UNKNOWN) {
+                        this.errorService.registerLexicalError(new UnknownTokenException(token));
+                    }
                     return token;
                 }
             }
@@ -206,19 +209,32 @@ public class Lexer {
      * @return true if the current character is the end of a token, false otherwise
      */
     private boolean isEndOfToken() {
-
-        if (this.reader.peek(1) == -1 || this.reader.peek(1) == '\n' || this.reader.peek(1) == '\'' || this.reader.peek(1) == '(' || this.reader.peek(1) == ')' || this.currentChar == '(' || this.currentChar == ')') {
-            return true;
-        }
-
         char current = (char) currentChar;
-        char next = (char) this.reader.peek(1);
+        int nextInt = this.reader.peek(1);
+        char next = (char) nextInt;
 
         boolean isCurrentLetterOrDigit = Character.isLetterOrDigit(current) || current == '_';
         boolean isNextLetterOrDigit = Character.isLetterOrDigit(next) || next == '_';
         boolean isNextWhitespace = Character.isWhitespace(next);
 
-        return (isCurrentLetterOrDigit && !isNextLetterOrDigit) || (!isCurrentLetterOrDigit && (isNextLetterOrDigit || isNextWhitespace));
+        // If the current character is a whitespace or the end of the file, the current character is the end of the token
+        if (nextInt == -1 || isNextWhitespace) {
+            return true;
+        }
+        // If the current character is an identifier or an integer, the next character must not be a letter or a digit
+        if (isCurrentLetterOrDigit) {
+            return !isNextLetterOrDigit;
+        }
+
+        Token token = this.matchToken(lexeme.toString());
+
+        // If the current character is a token and the next character is not a token, the current character is the end of the token
+        if (token.tag() != Tag.UNKNOWN) {
+            Token nextToken = this.matchToken(lexeme.toString() + next);
+            return nextToken.tag() == Tag.UNKNOWN;
+        }
+
+        return false;
     }
 
     /**
@@ -250,7 +266,7 @@ public class Lexer {
             }
         }
         Token unknownToken = new Token(Tag.UNKNOWN, this.reader.getCurrentLine(), lexeme);
-        this.errorService.registerLexicalError(new UnknownTokenException(unknownToken));
+        //this.errorService.registerLexicalError(new UnknownTokenException(unknownToken));
         return unknownToken;
     }
 
