@@ -207,7 +207,7 @@ public class Lexer {
      */
     private boolean isEndOfToken() {
 
-        if (this.reader.peek(1) == -1 || this.reader.peek(1) == '\n' || this.reader.peek(1) == '\'') {
+        if (this.reader.peek(1) == -1 || this.reader.peek(1) == '\n' || this.reader.peek(1) == '\'' || this.reader.peek(1) == '(' || this.reader.peek(1) == ')' || this.currentChar == '(' || this.currentChar == ')') {
             return true;
         }
 
