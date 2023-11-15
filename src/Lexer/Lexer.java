@@ -186,7 +186,7 @@ public class Lexer {
     }
 
     private boolean isCharacterLiteral() {
-        return this.currentChar == '\'' && this.reader.peek(2) == '\'';
+        return this.currentChar == '\'' && this.reader.peek(1) != '\n' && this.reader.peek(2) == '\'';
     }
 
     private Token readCharacterLiteral() {
@@ -207,7 +207,7 @@ public class Lexer {
      */
     private boolean isEndOfToken() {
 
-        if (this.reader.peek(1) == -1) {
+        if (this.reader.peek(1) == -1 || this.reader.peek(1) == '\n' || this.reader.peek(1) == '\'') {
             return true;
         }
 
