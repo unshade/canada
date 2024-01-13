@@ -30,4 +30,10 @@ public class BlockNode extends StatementNode {
         }
     }
 
+    public void addStatements(List<StatementNode> statements) {
+        for (StatementNode statement : statements) {
+            addStatement(statement);
+        }
+    }
+
 }

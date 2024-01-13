@@ -12,8 +12,7 @@ import ast.declaration.DeclarationNode;
 import ast.declaration.FunctionDeclarationNode;
 import ast.declaration.ProcedureDeclarationNode;
 import ast.declaration.TypeDeclarationNode;
-import ast.statement.BlockNode;
-import ast.statement.StatementNode;
+import ast.statement.*;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -63,7 +62,7 @@ public class Parser {
         rootProcedureBody.setParent(rootProcedure);
         rootProcedureBody.addDeclarations(decls());
         analyseTerminal(Tag.BEGIN);
-        rootProcedureBody.addStatement(instrs());
+        rootProcedureBody.addStatements(instrs());
         rootProcedure.setBody(rootProcedureBody);
         abstractSyntaxTreeRoot.setRootProcedure(rootProcedure);
         analyseTerminal(Tag.END);
@@ -658,25 +657,31 @@ public class Parser {
         }
     }
 
-    private void instr() {
+    private StatementNode instr() {
         System.out.println("instr");
+        StatementNode statement;
         switch (this.currentToken.tag()) {
             case IDENT -> {
+                // TODO ??
+                statement = new BlockNode();
                 analyseTerminal(Tag.IDENT);
                 instr2();
             }
             case BEGIN -> {
+                statement = new BlockNode();
                 analyseTerminal(Tag.BEGIN);
                 instrs();
                 analyseTerminal(Tag.END);
                 analyseTerminal(Tag.SEMICOLON);
             }
             case RETURN -> {
+                statement = new ReturnStatementNode();
                 analyseTerminal(Tag.RETURN);
                 hasexpr();
                 analyseTerminal(Tag.SEMICOLON);
             }
             case IF -> {
+                statement = new IfStatementNode();
                 analyseTerminal(Tag.IF);
                 expr();
                 analyseTerminal(Tag.THEN);
@@ -688,6 +693,7 @@ public class Parser {
                 analyseTerminal(Tag.SEMICOLON);
             }
             case FOR -> {
+                statement = new LoopStatementNode();
                 analyseTerminal(Tag.FOR);
                 analyseTerminal(Tag.IDENT);
                 analyseTerminal(Tag.IN);
@@ -702,6 +708,7 @@ public class Parser {
                 analyseTerminal(Tag.SEMICOLON);
             }
             case WHILE -> {
+                statement = new LoopStatementNode();
                 analyseTerminal(Tag.WHILE);
                 expr();
                 analyseTerminal(Tag.LOOP);
@@ -710,7 +717,11 @@ public class Parser {
                 analyseTerminal(Tag.LOOP);
                 analyseTerminal(Tag.SEMICOLON);
             }
+            default -> {
+                statement = new StatementNode();
+            }
         }
+        return statement;
     }
 
     private void instr2() {
@@ -799,29 +810,32 @@ public class Parser {
         }
     }
 
-    private StatementNode instrs() {
+    private List<StatementNode> instrs() {
         System.out.println("instrs");
+        List<StatementNode> statements = new ArrayList<>();
         switch (this.currentToken.tag()){
             case IDENT, BEGIN, RETURN, IF, FOR, WHILE -> {
-                instr();
-                instrs2();
+                statements.add(instr());
+                statements.addAll(instrs2());
             }
         }
 
         //TODO
-        return new StatementNode();
+        return statements;
     }
 
-    private void instrs2() {
+    private List<StatementNode> instrs2() {
         System.out.println("instrs2");
+        List<StatementNode> statements = new ArrayList<>();
         switch (this.currentToken.tag()){
             case IDENT, BEGIN, RETURN, IF, FOR, WHILE -> {
-                instr();
-                instrs2();
+                statements.add(instr());
+                statements.addAll(instrs2());
             }
             case END, ELSE, ELSIF-> {
             }
         }
+        return statements;
     }
 
     private void acces() {
