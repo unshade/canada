@@ -6,11 +6,12 @@ import Lexer.Lexer;
 import Lexer.Tokens.Tag;
 import Lexer.Tokens.Token;
 import Services.ErrorService;
-import ast2.ASTNode;
-import ast2.ProgramNode;
-import ast2.declaration.DeclarationNode;
-import ast2.declaration.ProcedureDeclarationNode;
-import ast2.statement.StatementNode;
+import ast.ASTNode;
+import ast.ProgramNode;
+import ast.declaration.DeclarationNode;
+import ast.declaration.ProcedureDeclarationNode;
+import ast.statement.BlockNode;
+import ast.statement.StatementNode;
 
 public class Parser {
 
@@ -33,10 +34,10 @@ public class Parser {
         return instance;
     }
 
-    public ASTNode parse() {
+    public ProgramNode parse() {
         return fichier();
     }
-    private ASTNode fichier() {
+    private ProgramNode fichier() {
         ProgramNode abstractSyntaxTreeRoot = new ProgramNode();
 
         analyseTerminal(Tag.WITH);
@@ -53,12 +54,13 @@ public class Parser {
         analyseTerminal(Tag.IDENT);
         analyseTerminal(Tag.IS);
         ProcedureDeclarationNode rootProcedure = new ProcedureDeclarationNode(rootProcedureName);
-        DeclarationNode rootProcedureDeclaration = decls();
-        rootProcedure.addDeclaration(rootProcedureDeclaration);
-        abstractSyntaxTreeRoot.addDeclaration(rootProcedure);
+        BlockNode rootProcedureBody = new BlockNode();
+        rootProcedureBody.setParent(rootProcedure);
+        rootProcedureBody.addDeclaration(decls());
         analyseTerminal(Tag.BEGIN);
-        StatementNode rootProcedureBody = instrs();
-        abstractSyntaxTreeRoot.addStatement(rootProcedureBody);
+        rootProcedureBody.addStatement(instrs());
+        rootProcedure.setBody(rootProcedureBody);
+        abstractSyntaxTreeRoot.setRootProcedure(rootProcedure);
         analyseTerminal(Tag.END);
         hasident();
         analyseTerminal(Tag.SEMICOLON);
@@ -150,7 +152,8 @@ public class Parser {
             case BEGIN -> {
             }
         }
-        return null;
+        //TODO
+        return new DeclarationNode("decls");
     }
 
     private void hasident() {
@@ -791,7 +794,8 @@ public class Parser {
             }
         }
 
-        return null;
+        //TODO
+        return new StatementNode();
     }
 
     private void instrs2() {

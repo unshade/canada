@@ -3,7 +3,8 @@ import Helpers.FileHelper;
 import Lexer.Lexer;
 import Parser.Parser;
 import Services.ErrorService;
-import ast2.ASTNode;
+import ast.ASTNode;
+import ast.ProgramNode;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -34,7 +35,7 @@ public class Main {
             lexer.displayAllTokens();
         } else {
             Parser parser = Parser.getInstance();
-            ASTNode AST = parser.parse();
+            ProgramNode AST = parser.parse();
             System.out.println(AST);
         }
 
