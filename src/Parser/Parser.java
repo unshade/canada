@@ -31,7 +31,6 @@ public class Parser {
     public void parse() {
         fichier();
     }
-
     private void fichier() {
         System.out.println("fichier");
         analyseTerminal(Tag.WITH);
