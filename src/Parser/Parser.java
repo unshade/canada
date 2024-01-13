@@ -6,6 +6,11 @@ import Lexer.Lexer;
 import Lexer.Tokens.Tag;
 import Lexer.Tokens.Token;
 import Services.ErrorService;
+import ast2.ASTNode;
+import ast2.ProgramNode;
+import ast2.declaration.DeclarationNode;
+import ast2.declaration.ProcedureDeclarationNode;
+import ast2.statement.StatementNode;
 
 public class Parser {
 
@@ -28,11 +33,12 @@ public class Parser {
         return instance;
     }
 
-    public void parse() {
-        fichier();
+    public ASTNode parse() {
+        return fichier();
     }
-    private void fichier() {
-        System.out.println("fichier");
+    private ASTNode fichier() {
+        ProgramNode abstractSyntaxTreeRoot = new ProgramNode();
+
         analyseTerminal(Tag.WITH);
         analyseTerminal(Tag.IDENT);
         analyseTerminal(Tag.DOT);
@@ -43,16 +49,22 @@ public class Parser {
         analyseTerminal(Tag.IDENT);
         analyseTerminal(Tag.SEMICOLON);
         analyseTerminal(Tag.PROCEDURE);
+        String rootProcedureName = currentToken.getValue();
         analyseTerminal(Tag.IDENT);
         analyseTerminal(Tag.IS);
-        decls();
+        ProcedureDeclarationNode rootProcedure = new ProcedureDeclarationNode(rootProcedureName);
+        DeclarationNode rootProcedureDeclaration = decls();
+        rootProcedure.addDeclaration(rootProcedureDeclaration);
+        abstractSyntaxTreeRoot.addDeclaration(rootProcedure);
         analyseTerminal(Tag.BEGIN);
-        instrs();
+        StatementNode rootProcedureBody = instrs();
+        abstractSyntaxTreeRoot.addStatement(rootProcedureBody);
         analyseTerminal(Tag.END);
         hasident();
         analyseTerminal(Tag.SEMICOLON);
         analyseTerminal(Tag.EOF);
 
+        return abstractSyntaxTreeRoot;
     }
 
     private void decl() {
@@ -98,7 +110,6 @@ public class Parser {
                 analyseTerminal(Tag.SEMICOLON);
             }
         }
-
     }
 
     private void hasischoose() {
@@ -129,7 +140,7 @@ public class Parser {
         }
     }
 
-    private void decls() {
+    private DeclarationNode decls() {
         System.out.println("decls");
         switch (this.currentToken.tag()) {
             case PROCEDURE, IDENT, TYPE, FUNCTION -> {
@@ -139,6 +150,7 @@ public class Parser {
             case BEGIN -> {
             }
         }
+        return null;
     }
 
     private void hasident() {
@@ -770,7 +782,7 @@ public class Parser {
         }
     }
 
-    private void instrs() {
+    private StatementNode instrs() {
         System.out.println("instrs");
         switch (this.currentToken.tag()){
             case IDENT, BEGIN, RETURN, IF, FOR, WHILE -> {
@@ -779,6 +791,7 @@ public class Parser {
             }
         }
 
+        return null;
     }
 
     private void instrs2() {

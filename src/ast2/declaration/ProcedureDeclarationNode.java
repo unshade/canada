@@ -13,4 +13,8 @@ public class ProcedureDeclarationNode extends DeclarationNode {
         super(name);
     }
 
+    public void addDeclaration(DeclarationNode declaration) {
+        body.addDeclaration(declaration);
+    }
+
 }

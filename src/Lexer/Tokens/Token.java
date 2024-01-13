@@ -15,4 +15,8 @@ public record Token(Tag tag, int line, String lexeme) {
     public String toString() {
         return "<" + this.tag + ", " + this.line + ", " + this.lexeme + ">" + " ";
     }
+
+    public String getValue() {
+        return this.lexeme;
+    }
 }
