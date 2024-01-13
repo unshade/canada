@@ -4,6 +4,7 @@ import ast.ParameterNode;
 import ast.statement.BlockNode;
 import ast.type.TypeNode;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class FunctionDeclarationNode extends DeclarationNode {
@@ -13,6 +14,18 @@ public class FunctionDeclarationNode extends DeclarationNode {
 
     public FunctionDeclarationNode(String name) {
         super(name);
+        this.parameters = new ArrayList<>();
+    }
+
+    public void addParameter(ParameterNode parameter) {
+        parameters.add(parameter);
+        parameter.setParent(this);
+    }
+
+    public void addParameters(List<ParameterNode> parameters) {
+        for (ParameterNode parameter : parameters) {
+            addParameter(parameter);
+        }
     }
 
 }

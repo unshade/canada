@@ -17,4 +17,15 @@ public class ProcedureDeclarationNode extends DeclarationNode {
         this.body = body;
     }
 
+    public void addParameter(ParameterNode parameter) {
+        parameters.add(parameter);
+        parameter.setParent(this);
+    }
+
+    public void addParameters(List<ParameterNode> parameters) {
+        for (ParameterNode parameter : parameters) {
+            addParameter(parameter);
+        }
+    }
+
 }

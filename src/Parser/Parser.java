@@ -6,13 +6,15 @@ import Lexer.Lexer;
 import Lexer.Tokens.Tag;
 import Lexer.Tokens.Token;
 import Services.ErrorService;
-import ast.ASTNode;
+import ast.ParameterNode;
 import ast.ProgramNode;
 import ast.declaration.DeclarationNode;
 import ast.declaration.FunctionDeclarationNode;
 import ast.declaration.ProcedureDeclarationNode;
 import ast.declaration.TypeDeclarationNode;
 import ast.statement.*;
+import ast.type.SimpleTypeNode;
+import ast.type.TypeNode;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -41,6 +43,7 @@ public class Parser {
     public ProgramNode parse() {
         return fichier();
     }
+
     private ProgramNode fichier() {
         ProgramNode abstractSyntaxTreeRoot = new ProgramNode();
 
@@ -60,7 +63,7 @@ public class Parser {
         ProcedureDeclarationNode rootProcedure = new ProcedureDeclarationNode(rootProcedureName);
         BlockNode rootProcedureBody = new BlockNode();
         rootProcedureBody.setParent(rootProcedure);
-        rootProcedureBody.addDeclarations(decls());
+        rootProcedureBody.addDeclarations(declarations());
         analyseTerminal(Tag.BEGIN);
         rootProcedureBody.addStatements(instrs());
         rootProcedure.setBody(rootProcedureBody);
@@ -73,7 +76,7 @@ public class Parser {
         return abstractSyntaxTreeRoot;
     }
 
-    private DeclarationNode decl() {
+    private DeclarationNode declaration() {
         System.out.println("decl");
         DeclarationNode declaration;
         switch (this.currentToken.tag()) {
@@ -81,9 +84,9 @@ public class Parser {
                 declaration = new ProcedureDeclarationNode(currentToken.getValue());
                 analyseTerminal(Tag.PROCEDURE);
                 analyseTerminal(Tag.IDENT);
-                hasparams();
+                ((ProcedureDeclarationNode) declaration).addParameters(hasparams());
                 analyseTerminal(Tag.IS);
-                decls();
+                declarations();
                 analyseTerminal(Tag.BEGIN);
                 instrs();
                 analyseTerminal(Tag.END);
@@ -109,19 +112,18 @@ public class Parser {
                 declaration = new FunctionDeclarationNode(currentToken.getValue());
                 analyseTerminal(Tag.FUNCTION);
                 analyseTerminal(Tag.IDENT);
-                hasparams();
+                ((FunctionDeclarationNode) declaration).addParameters(hasparams());
                 analyseTerminal(Tag.RETURN);
                 type_n();
                 analyseTerminal(Tag.IS);
-                decls();
+                declarations();
                 analyseTerminal(Tag.BEGIN);
                 instrs();
                 analyseTerminal(Tag.END);
                 hasident();
-                analyseTerminal(Tag.SEMICOLON);
             }
             default -> {
-                declaration = new DeclarationNode(currentToken.getValue());
+                declaration = null;
             }
         }
         return declaration;
@@ -155,13 +157,13 @@ public class Parser {
         }
     }
 
-    private List<DeclarationNode> decls() {
+    private List<DeclarationNode> declarations() {
         System.out.println("decls");
         List<DeclarationNode> declarations = new ArrayList<>();
         switch (this.currentToken.tag()) {
             case PROCEDURE, IDENT, TYPE, FUNCTION -> {
-                declarations.add(decl());
-                declarations.addAll(decls());
+                declarations.add(declaration());
+                declarations.addAll(declarations());
             }
             case BEGIN -> {
             }
@@ -225,53 +227,69 @@ public class Parser {
         }
     }
 
-    private void type_n() {
+    private TypeNode type_n() {
         System.out.println("type_n");
+        TypeNode type = null;
         switch (this.currentToken.tag()) {
             case ACCESS -> {
                 analyseTerminal(Tag.ACCESS);
                 analyseTerminal(Tag.IDENT);
             }
-            case IDENT -> analyseTerminal(Tag.IDENT);
+            case IDENT -> {
+                type = new SimpleTypeNode();
+                ((SimpleTypeNode) type).setTypeName(currentToken.getValue());
+                analyseTerminal(Tag.IDENT);
+            }
         }
+        return type;
     }
 
-    private void params() {
+    private List<ParameterNode> params() {
         System.out.println("params");
+        List<ParameterNode> parameters = new ArrayList<>();
         if (this.currentToken.tag() == Tag.OPEN_PAREN) {
             analyseTerminal(Tag.OPEN_PAREN);
-            paramsep();
+            parameters.addAll(paramsep());
             analyseTerminal(Tag.CLOSE_PAREN);
         }
+        return parameters;
     }
 
-    private void hasparams() {
+    private List<ParameterNode> hasparams() {
         System.out.println("hasparams");
+        List<ParameterNode> parameters = new ArrayList<>();
         switch (this.currentToken.tag()) {
             case IS, RETURN -> {
             }
-            case OPEN_PAREN -> params();
+            case OPEN_PAREN -> {
+                parameters.addAll(params());
+            }
         }
+        return parameters;
     }
 
-    private void paramsep() {
+    private List<ParameterNode> paramsep() {
         System.out.println("paramsep");
+        List<ParameterNode> parameters = new ArrayList<>();
         if (this.currentToken.tag() == Tag.IDENT) {
-            param();
-            paramsep2();
+            parameters.add(param());
+            parameters.addAll(paramsep2());
         }
+        return parameters;
     }
 
-    private void paramsep2() {
+    private List<ParameterNode> paramsep2() {
         System.out.println("paramsep2");
+        List<ParameterNode> parameters = new ArrayList<>();
         switch (this.currentToken.tag()) {
             case SEMICOLON -> {
                 analyseTerminal(Tag.SEMICOLON);
-                paramsep();
+                parameters.addAll(paramsep());
             }
             case CLOSE_PAREN -> {
             }
         }
+        return parameters;
     }
 
     private void typexpr() {
@@ -286,14 +304,18 @@ public class Parser {
         }
     }
 
-    private void param() {
+    private ParameterNode param() {
         System.out.println("param");
+        ParameterNode parameter = null;
         if (this.currentToken.tag() == Tag.IDENT) {
+            parameter = new ParameterNode();
+            parameter.setName(currentToken.getValue());
             identsep();
             analyseTerminal(Tag.COLON);
             mode();
-            type_n();
+            parameter.setType(type_n());
         }
+        return parameter;
     }
 
     private void mode() {
@@ -355,7 +377,7 @@ public class Parser {
     private void or_expr3() {
         System.out.println("or_expr3");
         switch (this.currentToken.tag()) {
-            case IDENT, OPEN_PAREN, ELSE, DOT, MINUS, ENTIER, CARACTERE, TRUE, FALSE, NULL, NEW, CHARACTER-> {
+            case IDENT, OPEN_PAREN, ELSE, DOT, MINUS, ENTIER, CARACTERE, TRUE, FALSE, NULL, NEW, CHARACTER -> {
                 and_expr();
                 or_expr2();
             }
@@ -436,7 +458,7 @@ public class Parser {
     private void equality_expr2() {
         System.out.println("equality_expr2");
         switch (this.currentToken.tag()) {
-            case SEMICOLON, COMMA, CLOSE_PAREN, OR, AND, THEN, NOT, DOTDOT, LOOP  -> {
+            case SEMICOLON, COMMA, CLOSE_PAREN, OR, AND, THEN, NOT, DOTDOT, LOOP -> {
             }
             case EQ -> {
                 analyseTerminal(Tag.EQ);
@@ -609,7 +631,7 @@ public class Parser {
     private void primary2() {
         System.out.println("primary2");
         switch (this.currentToken.tag()) {
-            case SEMICOLON, COMMA, CLOSE_PAREN, OR, AND, THEN, NOT, EQ, NE, LT, LE, GT, GE, PLUS, MINUS, MULTI, DIV, REM, DOTDOT, LOOP, DOT-> {
+            case SEMICOLON, COMMA, CLOSE_PAREN, OR, AND, THEN, NOT, EQ, NE, LT, LE, GT, GE, PLUS, MINUS, MULTI, DIV, REM, DOTDOT, LOOP, DOT -> {
                 acces();
             }
             case OPEN_PAREN -> {
@@ -618,7 +640,7 @@ public class Parser {
                 analyseTerminal(Tag.CLOSE_PAREN);
                 acces();
             }
-            }
+        }
     }
 
     private void exprsep() {
@@ -718,7 +740,7 @@ public class Parser {
                 analyseTerminal(Tag.SEMICOLON);
             }
             default -> {
-                statement = new StatementNode();
+                statement = null;
             }
         }
         return statement;
@@ -730,7 +752,7 @@ public class Parser {
             case SEMICOLON -> {
                 analyseTerminal(Tag.SEMICOLON);
             }
-            case OPEN_PAREN-> {
+            case OPEN_PAREN -> {
                 analyseTerminal(Tag.OPEN_PAREN);
                 exprsep();
                 analyseTerminal(Tag.CLOSE_PAREN);
@@ -802,7 +824,7 @@ public class Parser {
     private void hasreverse() {
         System.out.println("hasreverse");
         switch (this.currentToken.tag()) {
-            case IDENT,OPEN_PAREN, MINUS, ENTIER, CARACTERE, TRUE, FALSE, NULL, NEW, CHARACTER -> {
+            case IDENT, OPEN_PAREN, MINUS, ENTIER, CARACTERE, TRUE, FALSE, NULL, NEW, CHARACTER -> {
             }
             case REVERSE -> {
                 analyseTerminal(Tag.REVERSE);
@@ -813,7 +835,7 @@ public class Parser {
     private List<StatementNode> instrs() {
         System.out.println("instrs");
         List<StatementNode> statements = new ArrayList<>();
-        switch (this.currentToken.tag()){
+        switch (this.currentToken.tag()) {
             case IDENT, BEGIN, RETURN, IF, FOR, WHILE -> {
                 statements.add(instr());
                 statements.addAll(instrs2());
@@ -827,12 +849,12 @@ public class Parser {
     private List<StatementNode> instrs2() {
         System.out.println("instrs2");
         List<StatementNode> statements = new ArrayList<>();
-        switch (this.currentToken.tag()){
+        switch (this.currentToken.tag()) {
             case IDENT, BEGIN, RETURN, IF, FOR, WHILE -> {
                 statements.add(instr());
                 statements.addAll(instrs2());
             }
-            case END, ELSE, ELSIF-> {
+            case END, ELSE, ELSIF -> {
             }
         }
         return statements;
