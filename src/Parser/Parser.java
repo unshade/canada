@@ -63,7 +63,7 @@ public class Parser {
         ProcedureDeclarationNode rootProcedure = new ProcedureDeclarationNode(rootProcedureName);
         BlockNode rootProcedureBody = new BlockNode();
         rootProcedureBody.setParent(rootProcedure);
-        rootProcedureBody.addDeclarations(declarations());
+        rootProcedureBody.addDeclarations(decls());
         analyseTerminal(Tag.BEGIN);
         rootProcedureBody.addStatements(instrs());
         rootProcedure.setBody(rootProcedureBody);
@@ -76,7 +76,7 @@ public class Parser {
         return abstractSyntaxTreeRoot;
     }
 
-    private DeclarationNode declaration() {
+    private DeclarationNode decl() {
         System.out.println("decl");
         DeclarationNode declaration;
         switch (this.currentToken.tag()) {
@@ -86,7 +86,7 @@ public class Parser {
                 analyseTerminal(Tag.IDENT);
                 ((ProcedureDeclarationNode) declaration).addParameters(hasparams());
                 analyseTerminal(Tag.IS);
-                declarations();
+                decls();
                 analyseTerminal(Tag.BEGIN);
                 instrs();
                 analyseTerminal(Tag.END);
@@ -116,11 +116,12 @@ public class Parser {
                 analyseTerminal(Tag.RETURN);
                 type_n();
                 analyseTerminal(Tag.IS);
-                declarations();
+                decls();
                 analyseTerminal(Tag.BEGIN);
                 instrs();
                 analyseTerminal(Tag.END);
                 hasident();
+                analyseTerminal(Tag.SEMICOLON);
             }
             default -> {
                 declaration = null;
@@ -157,13 +158,13 @@ public class Parser {
         }
     }
 
-    private List<DeclarationNode> declarations() {
+    private List<DeclarationNode> decls() {
         System.out.println("decls");
         List<DeclarationNode> declarations = new ArrayList<>();
         switch (this.currentToken.tag()) {
             case PROCEDURE, IDENT, TYPE, FUNCTION -> {
-                declarations.add(declaration());
-                declarations.addAll(declarations());
+                declarations.add(decl());
+                declarations.addAll(decls());
             }
             case BEGIN -> {
             }

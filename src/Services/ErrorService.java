@@ -34,6 +34,8 @@ public class ErrorService {
     }
 
     public void registerSyntaxError(Exception e) {
+        System.err.println(e.getMessage());
+        System.exit(1);
         this.syntaxErrors.add(e);
     }
 
