@@ -11,10 +11,4 @@ public class ProgramNode extends ASTNode {
         rootProcedure.setParent(this);
     }
 
-    @Override
-    public String toString() {
-        return "ProgramNode { \n" +
-                "\t rootProcedure = " + rootProcedure + "\n" +
-                '}';
-    }
 }

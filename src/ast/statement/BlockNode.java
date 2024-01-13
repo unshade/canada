@@ -24,13 +24,4 @@ public class BlockNode extends StatementNode {
         declaration.setParent(this);
     }
 
-    @Override
-    public String toString() {
-        System.out.println(this.getDepth());
-        String res = "BlockNode { \n" +
-                "\t statements = " + statements + ", \n" +
-                "\t declarations = " + declarations + "\n" +
-                "}";
-        return this.format(res);
-    }
 }

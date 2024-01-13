@@ -17,12 +17,4 @@ public class ProcedureDeclarationNode extends DeclarationNode {
         this.body = body;
     }
 
-    @Override
-    public String toString() {
-        String res = "ProcedureDeclarationNode { \n" +
-                "\t parameters = " + parameters + ", \n" +
-                "\t body = " + body + "\n" +
-                "}";
-        return this.format(res);
-    }
 }
