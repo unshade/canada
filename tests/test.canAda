@@ -18,7 +18,6 @@ end perimetreRectangle;
 choix : integer ;
     -- PROCEDURE PRINCIPALE
 begin
-begin
     choix := 2;
     if choix = 1
         then valeur := perimetreRectangle(2, 3) ;
