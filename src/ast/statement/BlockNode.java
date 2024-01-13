@@ -24,4 +24,10 @@ public class BlockNode extends StatementNode {
         declaration.setParent(this);
     }
 
+    public void addDeclarations(List<DeclarationNode> declarations) {
+        for (DeclarationNode declaration : declarations) {
+            addDeclaration(declaration);
+        }
+    }
+
 }

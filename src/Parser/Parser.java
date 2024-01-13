@@ -9,9 +9,14 @@ import Services.ErrorService;
 import ast.ASTNode;
 import ast.ProgramNode;
 import ast.declaration.DeclarationNode;
+import ast.declaration.FunctionDeclarationNode;
 import ast.declaration.ProcedureDeclarationNode;
+import ast.declaration.TypeDeclarationNode;
 import ast.statement.BlockNode;
 import ast.statement.StatementNode;
+
+import java.util.ArrayList;
+import java.util.List;
 
 public class Parser {
 
@@ -56,7 +61,7 @@ public class Parser {
         ProcedureDeclarationNode rootProcedure = new ProcedureDeclarationNode(rootProcedureName);
         BlockNode rootProcedureBody = new BlockNode();
         rootProcedureBody.setParent(rootProcedure);
-        rootProcedureBody.addDeclaration(decls());
+        rootProcedureBody.addDeclarations(decls());
         analyseTerminal(Tag.BEGIN);
         rootProcedureBody.addStatement(instrs());
         rootProcedure.setBody(rootProcedureBody);
@@ -69,10 +74,12 @@ public class Parser {
         return abstractSyntaxTreeRoot;
     }
 
-    private void decl() {
+    private DeclarationNode decl() {
         System.out.println("decl");
+        DeclarationNode declaration;
         switch (this.currentToken.tag()) {
             case PROCEDURE -> {
+                declaration = new ProcedureDeclarationNode(currentToken.getValue());
                 analyseTerminal(Tag.PROCEDURE);
                 analyseTerminal(Tag.IDENT);
                 hasparams();
@@ -85,6 +92,7 @@ public class Parser {
                 analyseTerminal(Tag.SEMICOLON);
             }
             case IDENT -> {
+                declaration = new TypeDeclarationNode(currentToken.getValue());
                 identsep();
                 analyseTerminal(Tag.COLON);
                 type_n();
@@ -92,12 +100,14 @@ public class Parser {
                 analyseTerminal(Tag.SEMICOLON);
             }
             case TYPE -> {
+                declaration = new TypeDeclarationNode(currentToken.getValue());
                 analyseTerminal(Tag.TYPE);
                 analyseTerminal(Tag.IDENT);
                 hasischoose();
                 analyseTerminal(Tag.SEMICOLON);
             }
             case FUNCTION -> {
+                declaration = new FunctionDeclarationNode(currentToken.getValue());
                 analyseTerminal(Tag.FUNCTION);
                 analyseTerminal(Tag.IDENT);
                 hasparams();
@@ -111,7 +121,11 @@ public class Parser {
                 hasident();
                 analyseTerminal(Tag.SEMICOLON);
             }
+            default -> {
+                declaration = new DeclarationNode(currentToken.getValue());
+            }
         }
+        return declaration;
     }
 
     private void hasischoose() {
@@ -142,18 +156,18 @@ public class Parser {
         }
     }
 
-    private DeclarationNode decls() {
+    private List<DeclarationNode> decls() {
         System.out.println("decls");
+        List<DeclarationNode> declarations = new ArrayList<>();
         switch (this.currentToken.tag()) {
             case PROCEDURE, IDENT, TYPE, FUNCTION -> {
-                decl();
-                decls();
+                declarations.add(decl());
+                declarations.addAll(decls());
             }
             case BEGIN -> {
             }
         }
-        //TODO
-        return new DeclarationNode("decls");
+        return declarations;
     }
 
     private void hasident() {
