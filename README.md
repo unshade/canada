@@ -45,11 +45,11 @@ pip install -r requirements.txt
 ## Build
 
 ```bash
-./gradlew build
+gradle build
 ```
 
 ## Run
 
 ```bash
-./gradlew run
+gradle run --args="test.canAda -g"
 ```

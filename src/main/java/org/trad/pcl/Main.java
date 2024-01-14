@@ -49,9 +49,11 @@ public class Main {
                 AnsiFormat fWarning = new AnsiFormat(Attribute.WHITE_TEXT(), Attribute.GREEN_BACK(), Attribute.BOLD());
                 System.out.println("\n✅ "+colorize("PARSING PHASE COMPLETED, GENERATING AST", fWarning));
                 System.out.println(AST);
-                AST.setJson(true);
-                String json = AST.toString();
-                PythonRunner.exec(json);
+                if (args.length > 1 && "-g".equals(args[1])) {
+                    AST.setJson(true);
+                    String json = AST.toString();
+                    PythonRunner.exec(json);
+                }
             } else {
                 AnsiFormat fWarning = new AnsiFormat(Attribute.WHITE_TEXT(), Attribute.RED_BACK(), Attribute.BOLD());
                 System.out.println("\n❌ "+colorize("PARSING PHASE FAILED, STOPPING", fWarning));
