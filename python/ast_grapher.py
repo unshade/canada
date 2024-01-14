@@ -4,17 +4,19 @@ import json
 import networkx as nx
 import pygraphviz
 
-def build_graph(node, graph, path):
+def build_graph(node, graph, path, labels):
     if isinstance(node, dict):
         for key, value in node.items():
             child_path = f"{path}.{key}"
             graph.add_edge(path, child_path)
-            build_graph(value, graph, child_path)
+            labels[child_path] = key
+            build_graph(value, graph, child_path, labels)
     elif isinstance(node, list):
         for i, item in enumerate(node):
             child_path = f"{path}[{i}]"
             graph.add_edge(path, child_path)
-            build_graph(item, graph, child_path)
+            labels[child_path] = str(i)
+            build_graph(item, graph, child_path, labels)
 
 def main():
     if len(sys.argv) > 1:
@@ -22,12 +24,14 @@ def main():
         try:
             data = json.loads(json_str)
             G = nx.DiGraph()
-            build_graph(data, G, 'root')
+            labels = {}
+            build_graph(data, G, 'root', labels)
 
-            # Utiliser graphviz_layout avec le paramètre 'dot' pour une disposition de haut en bas
             pos = nx.drawing.nx_agraph.graphviz_layout(G, prog='dot')
 
-            nx.draw(G, pos, with_labels=True, arrows=True)
+            plt.figure(figsize=(1920/100, 1080/100))
+
+            nx.draw(G, pos, labels=labels, with_labels=True, arrows=True)
             plt.show()
         except json.JSONDecodeError:
             print("Invalid JSON")
