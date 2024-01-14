@@ -11,21 +11,21 @@
 \contentsline {subsection}{\numberline {3.4}Grammaire Transformée en LL(1)}{6}{subsection.3.4}%
 \contentsline {subsection}{\numberline {3.5}Table LL(1)}{9}{subsection.3.5}%
 \contentsline {section}{\numberline {4}Analyse Lexicale pour canAda}{9}{section.4}%
-\contentsline {subsection}{\numberline {4.1}Structure et Fonctionnement du Lexer}{9}{subsection.4.1}%
+\contentsline {subsection}{\numberline {4.1}Structure et Fonctionnement du Lexer}{10}{subsection.4.1}%
 \contentsline {subsection}{\numberline {4.2}Gestion des Tokens}{10}{subsection.4.2}%
-\contentsline {subsection}{\numberline {4.3}Optimisation et Fiabilité}{10}{subsection.4.3}%
-\contentsline {section}{\numberline {5}Analyse Syntaxique}{10}{section.5}%
-\contentsline {subsection}{\numberline {5.1}Structure et Fonctionnement}{10}{subsection.5.1}%
-\contentsline {subsection}{\numberline {5.2}Interaction avec l'Analyseur Lexical}{10}{subsection.5.2}%
-\contentsline {subsection}{\numberline {5.3}Gestion des Erreurs Syntaxiques}{10}{subsection.5.3}%
-\contentsline {section}{\numberline {6}Construction de l'Arbre Abstrait Syntaxique pour canAda}{10}{section.6}%
-\contentsline {subsection}{\numberline {6.1}Structure et Fonctionnement de l'AST}{10}{subsection.6.1}%
-\contentsline {subsection}{\numberline {6.2}Représentation des Structures Syntaxiques}{11}{subsection.6.2}%
-\contentsline {subsection}{\numberline {6.3}Rôle dans le Processus de Compilation}{11}{subsection.6.3}%
-\contentsline {section}{\numberline {7}Tests et Validation}{11}{section.7}%
-\contentsline {section}{\numberline {8}Gestion de projet}{11}{section.8}%
-\contentsline {subsection}{\numberline {8.1}Équipe de projet}{11}{subsection.8.1}%
-\contentsline {subsection}{\numberline {8.2}Organisation au sein de l’équipe projet}{11}{subsection.8.2}%
-\contentsline {subsection}{\numberline {8.3}Matrice RACI}{11}{subsection.8.3}%
-\contentsline {subsection}{\numberline {8.4}Répartition du Temps de Travail sur le Projet}{12}{subsection.8.4}%
-\contentsline {section}{\numberline {9}Conclusion}{12}{section.9}%
+\contentsline {subsection}{\numberline {4.3}Optimisation et Fiabilité}{11}{subsection.4.3}%
+\contentsline {section}{\numberline {5}Analyse Syntaxique}{11}{section.5}%
+\contentsline {subsection}{\numberline {5.1}Structure et Fonctionnement}{11}{subsection.5.1}%
+\contentsline {subsection}{\numberline {5.2}Interaction avec l'Analyseur Lexical}{12}{subsection.5.2}%
+\contentsline {subsection}{\numberline {5.3}Gestion des Erreurs Syntaxiques}{12}{subsection.5.3}%
+\contentsline {section}{\numberline {6}Construction de l'Arbre Abstrait Syntaxique pour canAda}{12}{section.6}%
+\contentsline {subsection}{\numberline {6.1}Structure et Fonctionnement de l'AST}{12}{subsection.6.1}%
+\contentsline {subsection}{\numberline {6.2}Représentation des Structures Syntaxiques}{14}{subsection.6.2}%
+\contentsline {subsection}{\numberline {6.3}Rôle dans le Processus de Compilation}{14}{subsection.6.3}%
+\contentsline {section}{\numberline {7}Tests et Validation}{14}{section.7}%
+\contentsline {section}{\numberline {8}Gestion de projet}{15}{section.8}%
+\contentsline {subsection}{\numberline {8.1}Équipe de projet}{15}{subsection.8.1}%
+\contentsline {subsection}{\numberline {8.2}Organisation au sein de l’équipe projet}{15}{subsection.8.2}%
+\contentsline {subsection}{\numberline {8.3}Matrice RACI}{16}{subsection.8.3}%
+\contentsline {subsection}{\numberline {8.4}Répartition du Temps de Travail sur le Projet}{16}{subsection.8.4}%
+\contentsline {section}{\numberline {9}Conclusion}{17}{section.9}%

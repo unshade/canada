@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.141592653-2.6-1.40.24 (MiKTeX 22.10) (preloaded format=pdflatex 2022.10.19)  14 JAN 2024 19:19
+This is pdfTeX, Version 3.141592653-2.6-1.40.24 (MiKTeX 22.10) (preloaded format=pdflatex 2022.10.19)  14 JAN 2024 23:46
 entering extended mode
  restricted \write18 enabled.
  file:line:error style messages enabled.
@@ -1805,24 +1805,24 @@ File: l3backend-pdftex.def 2022-09-28 L3 backend support: PDF output (pdfTeX)
 ) (rapport.aux)
 \openout1 = `rapport.aux'.
 
-LaTeX Font Info:    Checking defaults for OML/cmm/m/it on input line 52.
-LaTeX Font Info:    ... okay on input line 52.
-LaTeX Font Info:    Checking defaults for OMS/cmsy/m/n on input line 52.
-LaTeX Font Info:    ... okay on input line 52.
-LaTeX Font Info:    Checking defaults for OT1/cmr/m/n on input line 52.
-LaTeX Font Info:    ... okay on input line 52.
-LaTeX Font Info:    Checking defaults for T1/cmr/m/n on input line 52.
-LaTeX Font Info:    ... okay on input line 52.
-LaTeX Font Info:    Checking defaults for TS1/cmr/m/n on input line 52.
-LaTeX Font Info:    ... okay on input line 52.
-LaTeX Font Info:    Checking defaults for OMX/cmex/m/n on input line 52.
-LaTeX Font Info:    ... okay on input line 52.
-LaTeX Font Info:    Checking defaults for U/cmr/m/n on input line 52.
-LaTeX Font Info:    ... okay on input line 52.
-LaTeX Font Info:    Checking defaults for PD1/pdf/m/n on input line 52.
-LaTeX Font Info:    ... okay on input line 52.
-LaTeX Font Info:    Checking defaults for PU/pdf/m/n on input line 52.
-LaTeX Font Info:    ... okay on input line 52.
+LaTeX Font Info:    Checking defaults for OML/cmm/m/it on input line 54.
+LaTeX Font Info:    ... okay on input line 54.
+LaTeX Font Info:    Checking defaults for OMS/cmsy/m/n on input line 54.
+LaTeX Font Info:    ... okay on input line 54.
+LaTeX Font Info:    Checking defaults for OT1/cmr/m/n on input line 54.
+LaTeX Font Info:    ... okay on input line 54.
+LaTeX Font Info:    Checking defaults for T1/cmr/m/n on input line 54.
+LaTeX Font Info:    ... okay on input line 54.
+LaTeX Font Info:    Checking defaults for TS1/cmr/m/n on input line 54.
+LaTeX Font Info:    ... okay on input line 54.
+LaTeX Font Info:    Checking defaults for OMX/cmex/m/n on input line 54.
+LaTeX Font Info:    ... okay on input line 54.
+LaTeX Font Info:    Checking defaults for U/cmr/m/n on input line 54.
+LaTeX Font Info:    ... okay on input line 54.
+LaTeX Font Info:    Checking defaults for PD1/pdf/m/n on input line 54.
+LaTeX Font Info:    ... okay on input line 54.
+LaTeX Font Info:    Checking defaults for PU/pdf/m/n on input line 54.
+LaTeX Font Info:    ... okay on input line 54.
 
 (C:\Users\Kuro\AppData\Local\Programs\MiKTeX\tex/context/base/mkii\supp-pdf.mki
 i
@@ -1849,7 +1849,7 @@ Package epstopdf-base Info: Redefining graphics rule for `.eps' on input line 4
 g
 File: epstopdf-sys.cfg 2021/03/18 v2.0 Configuration of epstopdf for MiKTeX
 ))
-Package hyperref Info: Link coloring OFF on input line 52.
+Package hyperref Info: Link coloring OFF on input line 54.
  (rapport.out) (rapport.out)
 \@outlinefile=\write4
 \openout4 = `rapport.out'.
@@ -1863,8 +1863,8 @@ Package: lscape 2020/05/28 v3.02 Landscape Pages (DPC)
 )
 Package pdflscape Info: Auto-detected driver: pdftex on input line 81.
 )
-LaTeX Info: Redefining \degres on input line 52.
-LaTeX Info: Redefining \up on input line 52.
+LaTeX Info: Redefining \degres on input line 54.
+LaTeX Info: Redefining \up on input line 54.
 \c@lstlisting=\count354
 
 *geometry* driver: auto-detecting
@@ -1901,16 +1901,16 @@ LaTeX Info: Redefining \up on input line 52.
 * \@reversemarginfalse
 * (1in=72.27pt=25.4mm, 1cm=28.453pt)
 
-LaTeX Info: Command `\dddot' is already robust on input line 52.
-LaTeX Info: Command `\ddddot' is already robust on input line 52.
-LaTeX Info: Command `\overleftrightarrow' is already robust on input line 52.
-LaTeX Info: Command `\underrightarrow' is already robust on input line 52.
-LaTeX Info: Command `\underleftarrow' is already robust on input line 52.
-LaTeX Info: Command `\underleftrightarrow' is already robust on input line 52.
+LaTeX Info: Command `\dddot' is already robust on input line 54.
+LaTeX Info: Command `\ddddot' is already robust on input line 54.
+LaTeX Info: Command `\overleftrightarrow' is already robust on input line 54.
+LaTeX Info: Command `\underrightarrow' is already robust on input line 54.
+LaTeX Info: Command `\underleftarrow' is already robust on input line 54.
+LaTeX Info: Command `\underleftrightarrow' is already robust on input line 54.
 <img//tele_univ.png, id=126, 532.23843pt x 265.74281pt>
 File: img//tele_univ.png Graphic file (type png)
 <use img//tele_univ.png>
-Package pdftex.def Info: img//tele_univ.png  used on input line 59.
+Package pdftex.def Info: img//tele_univ.png  used on input line 61.
 (pdftex.def)             Requested size: 227.62206pt x 113.64677pt.
 [1
 
@@ -1924,575 +1924,234 @@ pdfTeX warning (ext4): destination with the same identifier (name{page.1}) has
 been already used, duplicate ignored
 <to be read again> 
                    \relax 
-l.91     \newpage
+l.93     \newpage
                   [1]
 <img//grammaire_init.png, id=175, 504.38437pt x 759.58781pt>
 File: img//grammaire_init.png Graphic file (type png)
 <use img//grammaire_init.png>
-Package pdftex.def Info: img//grammaire_init.png  used on input line 106.
+Package pdftex.def Info: img//grammaire_init.png  used on input line 115.
 (pdftex.def)             Requested size: 364.19667pt x 548.4675pt.
  [2]
 LaTeX Font Info:    Trying to load font information for T1+cmtt on input line 1
-16.
+25.
 
 (C:\Users\Kuro\AppData\Local\Programs\MiKTeX\tex/latex/base\t1cmtt.fd
 File: t1cmtt.fd 2019/12/16 v2.5j Standard LaTeX font definitions
 ) [3 <./img//grammaire_init.png>]
-Overfull \hbox (1.39438pt too wide) in paragraph at lines 207--207
-[]               \T1/cmtt/m/n/10 | procedure ident <hasparams> is <decls> begin
- <instrs> end <hasident> ;[] 
- []
 
+LaTeX Warning: Command \` invalid in math mode on input line 170.
 
-Overfull \hbox (69.62772pt too wide) in paragraph at lines 207--207
-[]               \T1/cmtt/m/n/10 | function ident <hasparams> return <type> is 
-<decls> begin <instrs> end <hasident> ;[] 
- []
+Missing character: There is no � in font cmr10!
 
-
-rapport.tex:207: LaTeX Error: Unicode character ε (U+03B5)
-               not set up for use with LaTeX.
+rapport.tex:176: LaTeX Error: Invalid UTF-8 byte sequence (�\expandafter).
 
 See the LaTeX manual or LaTeX Companion for explanation.
 Type  H <return>  for immediate help.
  ...                                              
                                                   
-l.207     \end{verbatim}
-                        
-You may provide a definition with
-\DeclareUnicodeCharacter 
+l.176                | <expr> <opérateur>
+                                           <expr>
+The document does not appear to be in UTF-8 encoding.
+Try adding \UseRawInputEncoding as the first line of the file
+or specify an encoding such as \usepackage [latin1]{inputenc}
+in the document preamble.
+Alternatively, save the file in UTF-8 using your editor or another tool
 
 
-rapport.tex:207: LaTeX Error: Unicode character ε (U+03B5)
-               not set up for use with LaTeX.
-
-See the LaTeX manual or LaTeX Companion for explanation.
-Type  H <return>  for immediate help.
- ...                                              
-                                                  
-l.207     \end{verbatim}
-                        
-You may provide a definition with
-\DeclareUnicodeCharacter 
-
-
-rapport.tex:207: LaTeX Error: Unicode character ε (U+03B5)
-               not set up for use with LaTeX.
+rapport.tex:176: LaTeX Error: Invalid UTF-8 byte "A9.
 
 See the LaTeX manual or LaTeX Companion for explanation.
 Type  H <return>  for immediate help.
  ...                                              
                                                   
-l.207     \end{verbatim}
-                        
-You may provide a definition with
-\DeclareUnicodeCharacter 
-
-
-rapport.tex:207: LaTeX Error: Unicode character ε (U+03B5)
-               not set up for use with LaTeX.
-
-See the LaTeX manual or LaTeX Companion for explanation.
-Type  H <return>  for immediate help.
- ...                                              
-                                                  
-l.207     \end{verbatim}
-                        
-You may provide a definition with
-\DeclareUnicodeCharacter 
-
-
-rapport.tex:207: LaTeX Error: Unicode character ε (U+03B5)
-               not set up for use with LaTeX.
-
-See the LaTeX manual or LaTeX Companion for explanation.
-Type  H <return>  for immediate help.
- ...                                              
-                                                  
-l.207     \end{verbatim}
-                        
-You may provide a definition with
-\DeclareUnicodeCharacter 
+l.176                | <expr> <opérateur>
+                                           <expr>
+The document does not appear to be in UTF-8 encoding.
+Try adding \UseRawInputEncoding as the first line of the file
+or specify an encoding such as \usepackage [latin1]{inputenc}
+in the document preamble.
+Alternatively, save the file in UTF-8 using your editor or another tool
 
 [4]
 
-rapport.tex:207: LaTeX Error: Unicode character ε (U+03B5)
-               not set up for use with LaTeX.
+rapport.tex:210: LaTeX Error: Invalid UTF-8 byte sequence (�\expandafter).
 
 See the LaTeX manual or LaTeX Companion for explanation.
 Type  H <return>  for immediate help.
  ...                                              
                                                   
-l.207     \end{verbatim}
-                        
-You may provide a definition with
-\DeclareUnicodeCharacter 
+l.210         opérateur 
+                         -> $=$ | $/=$ | $<$ | $<=$ | $>$ | $>=$ | $+$ | $-$...
+
+The document does not appear to be in UTF-8 encoding.
+Try adding \UseRawInputEncoding as the first line of the file
+or specify an encoding such as \usepackage [latin1]{inputenc}
+in the document preamble.
+Alternatively, save the file in UTF-8 using your editor or another tool
 
 
-rapport.tex:207: LaTeX Error: Unicode character ε (U+03B5)
-               not set up for use with LaTeX.
-
-See the LaTeX manual or LaTeX Companion for explanation.
-Type  H <return>  for immediate help.
- ...                                              
-                                                  
-l.207     \end{verbatim}
-                        
-You may provide a definition with
-\DeclareUnicodeCharacter 
-
-
-rapport.tex:207: LaTeX Error: Unicode character ε (U+03B5)
-               not set up for use with LaTeX.
+rapport.tex:210: LaTeX Error: Invalid UTF-8 byte "A9.
 
 See the LaTeX manual or LaTeX Companion for explanation.
 Type  H <return>  for immediate help.
  ...                                              
                                                   
-l.207     \end{verbatim}
-                        
-You may provide a definition with
-\DeclareUnicodeCharacter 
+l.210         opérateur 
+                         -> $=$ | $/=$ | $<$ | $<=$ | $>$ | $>=$ | $+$ | $-$...
+
+The document does not appear to be in UTF-8 encoding.
+Try adding \UseRawInputEncoding as the first line of the file
+or specify an encoding such as \usepackage [latin1]{inputenc}
+in the document preamble.
+Alternatively, save the file in UTF-8 using your editor or another tool
 
 
-rapport.tex:207: LaTeX Error: Unicode character ε (U+03B5)
-               not set up for use with LaTeX.
-
-See the LaTeX manual or LaTeX Companion for explanation.
-Type  H <return>  for immediate help.
- ...                                              
-                                                  
-l.207     \end{verbatim}
-                        
-You may provide a definition with
-\DeclareUnicodeCharacter 
-
-
-Overfull \hbox (64.379pt too wide) in paragraph at lines 207--207
-[]        \T1/cmtt/m/n/10 op�rateur -> = | /= | < | <= | > | >= | + | - | * | /
- | rem | and | and then | or | or else[] 
- []
-
-
-rapport.tex:220: LaTeX Error: Unicode character ε (U+03B5)
-               not set up for use with LaTeX.
+rapport.tex:221: LaTeX Error: Invalid UTF-8 byte sequence (�\expandafter).
 
 See the LaTeX manual or LaTeX Companion for explanation.
 Type  H <return>  for immediate help.
  ...                                              
                                                   
-l.220     \end{verbatim}
-                        
-You may provide a definition with
-\DeclareUnicodeCharacter 
+l.221         expr -> <accès>
+                              
+The document does not appear to be in UTF-8 encoding.
+Try adding \UseRawInputEncoding as the first line of the file
+or specify an encoding such as \usepackage [latin1]{inputenc}
+in the document preamble.
+Alternatively, save the file in UTF-8 using your editor or another tool
 
 
-rapport.tex:234: LaTeX Error: Unicode character ε (U+03B5)
-               not set up for use with LaTeX.
+rapport.tex:221: LaTeX Error: Invalid UTF-8 byte "A8.
 
 See the LaTeX manual or LaTeX Companion for explanation.
 Type  H <return>  for immediate help.
  ...                                              
                                                   
-l.234     \end{verbatim}
-                        
-You may provide a definition with
-\DeclareUnicodeCharacter 
+l.221         expr -> <accès>
+                              
+The document does not appear to be in UTF-8 encoding.
+Try adding \UseRawInputEncoding as the first line of the file
+or specify an encoding such as \usepackage [latin1]{inputenc}
+in the document preamble.
+Alternatively, save the file in UTF-8 using your editor or another tool
 
 [5]
 
-rapport.tex:250: LaTeX Error: Unicode character ε (U+03B5)
-               not set up for use with LaTeX.
+LaTeX Warning: Command \` invalid in math mode on input line 267.
 
-See the LaTeX manual or LaTeX Companion for explanation.
-Type  H <return>  for immediate help.
- ...                                              
-                                                  
-l.250         \end{verbatim}
-                            
-You may provide a definition with
-\DeclareUnicodeCharacter 
+Missing character: There is no � in font cmr10!
+[6] [7]
 
+LaTeX Warning: Command \` invalid in math mode on input line 391.
 
-Overfull \hbox (106.36874pt too wide) in paragraph at lines 433--433
-[]        \T1/cmtt/m/n/10 fichier -> withAda.Text_IO;useAda.Text_IO; procedure 
-ident is decls begin instrs end hasident ; EOF[] 
- []
-
-
-Overfull \hbox (22.38925pt too wide) in paragraph at lines 433--433
-[]        \T1/cmtt/m/n/10 decl -> function ident hasparams return type_n is dec
-ls begin instrs end hasident ;[] 
- []
-
-
-rapport.tex:433: LaTeX Error: Unicode character ε (U+03B5)
-               not set up for use with LaTeX.
-
-See the LaTeX manual or LaTeX Companion for explanation.
-Type  H <return>  for immediate help.
- ...                                              
-                                                  
-l.433     \end{verbatim}
-                        
-You may provide a definition with
-\DeclareUnicodeCharacter 
-
-
-rapport.tex:433: LaTeX Error: Unicode character ε (U+03B5)
-               not set up for use with LaTeX.
-
-See the LaTeX manual or LaTeX Companion for explanation.
-Type  H <return>  for immediate help.
- ...                                              
-                                                  
-l.433     \end{verbatim}
-                        
-You may provide a definition with
-\DeclareUnicodeCharacter 
-
-
-rapport.tex:433: LaTeX Error: Unicode character ε (U+03B5)
-               not set up for use with LaTeX.
-
-See the LaTeX manual or LaTeX Companion for explanation.
-Type  H <return>  for immediate help.
- ...                                              
-                                                  
-l.433     \end{verbatim}
-                        
-You may provide a definition with
-\DeclareUnicodeCharacter 
-
-[6]
-
-rapport.tex:433: LaTeX Error: Unicode character ε (U+03B5)
-               not set up for use with LaTeX.
-
-See the LaTeX manual or LaTeX Companion for explanation.
-Type  H <return>  for immediate help.
- ...                                              
-                                                  
-l.433     \end{verbatim}
-                        
-You may provide a definition with
-\DeclareUnicodeCharacter 
-
-
-rapport.tex:433: LaTeX Error: Unicode character ε (U+03B5)
-               not set up for use with LaTeX.
-
-See the LaTeX manual or LaTeX Companion for explanation.
-Type  H <return>  for immediate help.
- ...                                              
-                                                  
-l.433     \end{verbatim}
-                        
-You may provide a definition with
-\DeclareUnicodeCharacter 
-
-
-rapport.tex:433: LaTeX Error: Unicode character ε (U+03B5)
-               not set up for use with LaTeX.
-
-See the LaTeX manual or LaTeX Companion for explanation.
-Type  H <return>  for immediate help.
- ...                                              
-                                                  
-l.433     \end{verbatim}
-                        
-You may provide a definition with
-\DeclareUnicodeCharacter 
-
-
-rapport.tex:433: LaTeX Error: Unicode character ε (U+03B5)
-               not set up for use with LaTeX.
-
-See the LaTeX manual or LaTeX Companion for explanation.
-Type  H <return>  for immediate help.
- ...                                              
-                                                  
-l.433     \end{verbatim}
-                        
-You may provide a definition with
-\DeclareUnicodeCharacter 
-
-
-rapport.tex:433: LaTeX Error: Unicode character ε (U+03B5)
-               not set up for use with LaTeX.
-
-See the LaTeX manual or LaTeX Companion for explanation.
-Type  H <return>  for immediate help.
- ...                                              
-                                                  
-l.433     \end{verbatim}
-                        
-You may provide a definition with
-\DeclareUnicodeCharacter 
-
-
-rapport.tex:433: LaTeX Error: Unicode character ε (U+03B5)
-               not set up for use with LaTeX.
-
-See the LaTeX manual or LaTeX Companion for explanation.
-Type  H <return>  for immediate help.
- ...                                              
-                                                  
-l.433     \end{verbatim}
-                        
-You may provide a definition with
-\DeclareUnicodeCharacter 
-
-
-rapport.tex:433: LaTeX Error: Unicode character ε (U+03B5)
-               not set up for use with LaTeX.
-
-See the LaTeX manual or LaTeX Companion for explanation.
-Type  H <return>  for immediate help.
- ...                                              
-                                                  
-l.433     \end{verbatim}
-                        
-You may provide a definition with
-\DeclareUnicodeCharacter 
-
-
-rapport.tex:433: LaTeX Error: Unicode character ε (U+03B5)
-               not set up for use with LaTeX.
-
-See the LaTeX manual or LaTeX Companion for explanation.
-Type  H <return>  for immediate help.
- ...                                              
-                                                  
-l.433     \end{verbatim}
-                        
-You may provide a definition with
-\DeclareUnicodeCharacter 
-
-
-rapport.tex:433: LaTeX Error: Unicode character ε (U+03B5)
-               not set up for use with LaTeX.
-
-See the LaTeX manual or LaTeX Companion for explanation.
-Type  H <return>  for immediate help.
- ...                                              
-                                                  
-l.433     \end{verbatim}
-                        
-You may provide a definition with
-\DeclareUnicodeCharacter 
-
-
-rapport.tex:433: LaTeX Error: Unicode character ε (U+03B5)
-               not set up for use with LaTeX.
-
-See the LaTeX manual or LaTeX Companion for explanation.
-Type  H <return>  for immediate help.
- ...                                              
-                                                  
-l.433     \end{verbatim}
-                        
-You may provide a definition with
-\DeclareUnicodeCharacter 
-
-[7]
-
-rapport.tex:433: LaTeX Error: Unicode character ε (U+03B5)
-               not set up for use with LaTeX.
-
-See the LaTeX manual or LaTeX Companion for explanation.
-Type  H <return>  for immediate help.
- ...                                              
-                                                  
-l.433     \end{verbatim}
-                        
-You may provide a definition with
-\DeclareUnicodeCharacter 
-
-
-rapport.tex:433: LaTeX Error: Unicode character ε (U+03B5)
-               not set up for use with LaTeX.
-
-See the LaTeX manual or LaTeX Companion for explanation.
-Type  H <return>  for immediate help.
- ...                                              
-                                                  
-l.433     \end{verbatim}
-                        
-You may provide a definition with
-\DeclareUnicodeCharacter 
-
-
-rapport.tex:433: LaTeX Error: Unicode character ε (U+03B5)
-               not set up for use with LaTeX.
-
-See the LaTeX manual or LaTeX Companion for explanation.
-Type  H <return>  for immediate help.
- ...                                              
-                                                  
-l.433     \end{verbatim}
-                        
-You may provide a definition with
-\DeclareUnicodeCharacter 
-
-
-rapport.tex:433: LaTeX Error: Unicode character ε (U+03B5)
-               not set up for use with LaTeX.
-
-See the LaTeX manual or LaTeX Companion for explanation.
-Type  H <return>  for immediate help.
- ...                                              
-                                                  
-l.433     \end{verbatim}
-                        
-You may provide a definition with
-\DeclareUnicodeCharacter 
-
-
-rapport.tex:433: LaTeX Error: Unicode character ε (U+03B5)
-               not set up for use with LaTeX.
-
-See the LaTeX manual or LaTeX Companion for explanation.
-Type  H <return>  for immediate help.
- ...                                              
-                                                  
-l.433     \end{verbatim}
-                        
-You may provide a definition with
-\DeclareUnicodeCharacter 
-
-
-rapport.tex:433: LaTeX Error: Unicode character ε (U+03B5)
-               not set up for use with LaTeX.
-
-See the LaTeX manual or LaTeX Companion for explanation.
-Type  H <return>  for immediate help.
- ...                                              
-                                                  
-l.433     \end{verbatim}
-                        
-You may provide a definition with
-\DeclareUnicodeCharacter 
-
+Missing character: There is no � in font cmr10!
 [8]
-
-rapport.tex:433: LaTeX Error: Unicode character ε (U+03B5)
-               not set up for use with LaTeX.
-
-See the LaTeX manual or LaTeX Companion for explanation.
-Type  H <return>  for immediate help.
- ...                                              
-                                                  
-l.433     \end{verbatim}
-                        
-You may provide a definition with
-\DeclareUnicodeCharacter 
-
-
-rapport.tex:433: LaTeX Error: Unicode character ε (U+03B5)
-               not set up for use with LaTeX.
-
-See the LaTeX manual or LaTeX Companion for explanation.
-Type  H <return>  for immediate help.
- ...                                              
-                                                  
-l.433     \end{verbatim}
-                        
-You may provide a definition with
-\DeclareUnicodeCharacter 
-
-
-rapport.tex:433: LaTeX Error: Unicode character ε (U+03B5)
-               not set up for use with LaTeX.
-
-See the LaTeX manual or LaTeX Companion for explanation.
-Type  H <return>  for immediate help.
- ...                                              
-                                                  
-l.433     \end{verbatim}
-                        
-You may provide a definition with
-\DeclareUnicodeCharacter 
-
-
-rapport.tex:433: LaTeX Error: Unicode character ε (U+03B5)
-               not set up for use with LaTeX.
-
-See the LaTeX manual or LaTeX Companion for explanation.
-Type  H <return>  for immediate help.
- ...                                              
-                                                  
-l.433     \end{verbatim}
-                        
-You may provide a definition with
-\DeclareUnicodeCharacter 
-
-
-rapport.tex:433: LaTeX Error: Unicode character ε (U+03B5)
-               not set up for use with LaTeX.
-
-See the LaTeX manual or LaTeX Companion for explanation.
-Type  H <return>  for immediate help.
- ...                                              
-                                                  
-l.433     \end{verbatim}
-                        
-You may provide a definition with
-\DeclareUnicodeCharacter 
-
-
-rapport.tex:433: LaTeX Error: Unicode character ε (U+03B5)
-               not set up for use with LaTeX.
-
-See the LaTeX manual or LaTeX Companion for explanation.
-Type  H <return>  for immediate help.
- ...                                              
-                                                  
-l.433     \end{verbatim}
-                        
-You may provide a definition with
-\DeclareUnicodeCharacter 
-
-
-rapport.tex:433: LaTeX Error: Unicode character ε (U+03B5)
-               not set up for use with LaTeX.
-
-See the LaTeX manual or LaTeX Companion for explanation.
-Type  H <return>  for immediate help.
- ...                                              
-                                                  
-l.433     \end{verbatim}
-                        
-You may provide a definition with
-\DeclareUnicodeCharacter 
-
-<img//partial_table.png, id=210, 1939.245pt x 809.27344pt>
+<img//partial_table.png, id=469, 1939.245pt x 809.27344pt>
 File: img//partial_table.png Graphic file (type png)
 <use img//partial_table.png>
-Package pdftex.def Info: img//partial_table.png  used on input line 439.
-(pdftex.def)             Requested size: 364.19667pt x 151.98537pt.
-[9 <./img//partial_table.png>] [10]
-<img//RACI.png, id=221, 798.73407pt x 679.78969pt>
+Package pdftex.def Info: img//partial_table.png  used on input line 453.
+(pdftex.def)             Requested size: 455.24411pt x 189.96936pt.
+ [9 <./img//partial_table.png>] [10] [11]
+
+rapport.tex:578: LaTeX Error: Invalid UTF-8 byte sequence (�\expandafter\lst@Fi
+llFixed@).
+
+See the LaTeX manual or LaTeX Companion for explanation.
+Type  H <return>  for immediate help.
+ ...                                              
+                                                  
+l.578             System.out.println("\t\t↪️ 
+                                                 " + this.currentToken);
+The document does not appear to be in UTF-8 encoding.
+Try adding \UseRawInputEncoding as the first line of the file
+or specify an encoding such as \usepackage [latin1]{inputenc}
+in the document preamble.
+Alternatively, save the file in UTF-8 using your editor or another tool
+
+
+rapport.tex:578: LaTeX Error: Invalid UTF-8 byte "86.
+
+See the LaTeX manual or LaTeX Companion for explanation.
+Type  H <return>  for immediate help.
+ ...                                              
+                                                  
+l.578             System.out.println("\t\t↪️ 
+                                                 " + this.currentToken);
+The document does not appear to be in UTF-8 encoding.
+Try adding \UseRawInputEncoding as the first line of the file
+or specify an encoding such as \usepackage [latin1]{inputenc}
+in the document preamble.
+Alternatively, save the file in UTF-8 using your editor or another tool
+
+
+rapport.tex:578: LaTeX Error: Invalid UTF-8 byte "AA.
+
+See the LaTeX manual or LaTeX Companion for explanation.
+Type  H <return>  for immediate help.
+ ...                                              
+                                                  
+l.578             System.out.println("\t\t↪️ 
+                                                 " + this.currentToken);
+The document does not appear to be in UTF-8 encoding.
+Try adding \UseRawInputEncoding as the first line of the file
+or specify an encoding such as \usepackage [latin1]{inputenc}
+in the document preamble.
+Alternatively, save the file in UTF-8 using your editor or another tool
+
+
+rapport.tex:578: LaTeX Error: Invalid UTF-8 byte sequence (�\lst@EC�\lst@EC�).
+
+See the LaTeX manual or LaTeX Companion for explanation.
+Type  H <return>  for immediate help.
+ ...                                              
+                                                  
+l.578             System.out.println("\t\t↪️ 
+                                                 " + this.currentToken);
+The document does not appear to be in UTF-8 encoding.
+Try adding \UseRawInputEncoding as the first line of the file
+or specify an encoding such as \usepackage [latin1]{inputenc}
+in the document preamble.
+Alternatively, save the file in UTF-8 using your editor or another tool
+
+[12] [13]
+<img//sortie1.png, id=653, 259.7203pt x 893.58844pt>
+File: img//sortie1.png Graphic file (type png)
+<use img//sortie1.png>
+Package pdftex.def Info: img//sortie1.png  used on input line 706.
+(pdftex.def)             Requested size: 136.57462pt x 469.89088pt.
+<img//sortie2.png, id=654, 263.48438pt x 894.34125pt>
+File: img//sortie2.png Graphic file (type png)
+<use img//sortie2.png>
+Package pdftex.def Info: img//sortie2.png  used on input line 708.
+(pdftex.def)             Requested size: 136.57462pt x 463.5863pt.
+<img//sortie3.png, id=655, 261.97874pt x 923.70094pt>
+File: img//sortie3.png Graphic file (type png)
+<use img//sortie3.png>
+Package pdftex.def Info: img//sortie3.png  used on input line 710.
+(pdftex.def)             Requested size: 136.57462pt x 481.55348pt.
+ [14] [15 <./img//sortie1.png> <./img//sortie2.png> <./img//sortie3.png>]
+<img//RACI.png, id=685, 798.73407pt x 679.78969pt>
 File: img//RACI.png Graphic file (type png)
 <use img//RACI.png>
-Package pdftex.def Info: img//RACI.png  used on input line 518.
+Package pdftex.def Info: img//RACI.png  used on input line 739.
 (pdftex.def)             Requested size: 455.24411pt x 387.45303pt.
- [11] [12 <./img//RACI.png>] [13]
-(rapport.aux)
 
-LaTeX Warning: Label(s) may have changed. Rerun to get cross-references right.
+Underfull \hbox (badness 10000) in paragraph at lines 745--747
 
+ []
+
+[16 <./img//RACI.png>] [17] (rapport.aux)
 Package rerunfilecheck Info: File `rapport.out' has not changed.
 (rerunfilecheck)             Checksum: 3A85D4D725953BBF621DEEDC81554362;5921.
  ) 
 Here is how much of TeX's memory you used:
- 26271 strings out of 475385
- 510558 string characters out of 2777378
- 1038005 words of memory out of 3000000
- 47157 multiletter control sequences out of 15000+600000
+ 27440 strings out of 475385
+ 525469 string characters out of 2777378
+ 1316065 words of memory out of 3000000
+ 47889 multiletter control sequences out of 15000+600000
  478231 words of font info for 42 fonts, out of 8000000 for 9000
  1141 hyphenation exceptions out of 8191
- 84i,6n,80p,1025b,601s stack positions out of 10000i,1000n,20000p,200000b,80000s
+ 84i,6n,80p,411b,2028s stack positions out of 10000i,1000n,20000p,200000b,80000s
  <C:\Users\Kuro\AppData\Local\MiKTeX\fonts/pk/ljfour/jknappen/ec/dpi600\ectt1
 000.pk> <C:\Users\Kuro\AppData\Local\MiKTeX\fonts/pk/ljfour/jknappen/ec/dpi600\
 eccc1000.pk> <C:\Users\Kuro\AppData\Local\MiKTeX\fonts/pk/ljfour/jknappen/ec/dp
@@ -2503,11 +2162,16 @@ ppen/ec/dpi600\ecbx1000.pk> <C:\Users\Kuro\AppData\Local\MiKTeX\fonts/pk/ljfour
 jfour/jknappen/ec/dpi600\ecti1200.pk> <C:\Users\Kuro\AppData\Local\MiKTeX\fonts
 /pk/ljfour/jknappen/ec/dpi600\ecrm1200.pk> <C:\Users\Kuro\AppData\Local\MiKTeX\
 fonts/pk/ljfour/jknappen/ec/dpi600\ecbx2074.pk> <C:\Users\Kuro\AppData\Local\Mi
-KTeX\fonts/pk/ljfour/jknappen/ec/dpi600\eccc1440.pk>
-Output written on D:/Projets\compilation-marcel16u\doc\livrable\rapport.pdf (14
- pages, 579104 bytes).
+KTeX\fonts/pk/ljfour/jknappen/ec/dpi600\eccc1440.pk><C:/Users/Kuro/AppData/Loca
+l/Programs/MiKTeX/fonts/type1/public/amsfonts/cm/cmmi10.pfb><C:/Users/Kuro/AppD
+ata/Local/Programs/MiKTeX/fonts/type1/public/amsfonts/cm/cmr10.pfb><C:/Users/Ku
+ro/AppData/Local/Programs/MiKTeX/fonts/type1/public/amsfonts/cm/cmsy10.pfb><C:/
+Users/Kuro/AppData/Local/Programs/MiKTeX/fonts/type1/public/amsfonts/cm/cmsy7.p
+fb>
+Output written on D:/Projets\compilation-marcel16u\doc\livrable\rapport.pdf (18
+ pages, 906536 bytes).
 PDF statistics:
- 640 PDF objects out of 1000 (max. 8388607)
- 48 named destinations out of 1000 (max. 500000)
- 273 words of extra memory for PDF output out of 10000 (max. 10000000)
+ 1232 PDF objects out of 1440 (max. 8388607)
+ 485 named destinations out of 1000 (max. 500000)
+ 288 words of extra memory for PDF output out of 10000 (max. 10000000)
 
