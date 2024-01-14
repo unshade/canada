@@ -7,6 +7,7 @@ import org.trad.pcl.Lexer.Lexer;
 import org.trad.pcl.Lexer.Tokens.Tag;
 import org.trad.pcl.Lexer.Tokens.Token;
 import org.trad.pcl.Services.ErrorService;
+import org.trad.pcl.annotation.PrintMethodName;
 import org.trad.pcl.ast.ParameterNode;
 import org.trad.pcl.ast.ProgramNode;
 import org.trad.pcl.ast.declaration.DeclarationNode;
@@ -45,6 +46,7 @@ public class Parser {
         return fichier();
     }
 
+    @PrintMethodName
     private ProgramNode fichier() {
         ProgramNode abstractSyntaxTreeRoot = new ProgramNode();
 
@@ -77,8 +79,9 @@ public class Parser {
         return abstractSyntaxTreeRoot;
     }
 
+    @PrintMethodName
+
     private DeclarationNode decl() {
-        System.out.println("decl");
         DeclarationNode declaration;
         switch (this.currentToken.tag()) {
             case PROCEDURE -> {
@@ -131,8 +134,8 @@ public class Parser {
         return declaration;
     }
 
+    @PrintMethodName
     private void hasischoose() {
-        System.out.println("hasischoose");
         switch (this.currentToken.tag()) {
             case IS -> {
                 analyseTerminal(Tag.IS);
@@ -143,8 +146,8 @@ public class Parser {
         }
     }
 
+    @PrintMethodName
     private void accorrec() {
-        System.out.println("accorrec");
         switch (this.currentToken.tag()) {
             case ACCESS -> {
                 analyseTerminal(Tag.ACCESS);
@@ -158,9 +161,8 @@ public class Parser {
             }
         }
     }
-
+    @PrintMethodName
     private List<DeclarationNode> decls() {
-        System.out.println("decls");
         List<DeclarationNode> declarations = new ArrayList<>();
         switch (this.currentToken.tag()) {
             case PROCEDURE, IDENT, TYPE, FUNCTION -> {
@@ -172,26 +174,23 @@ public class Parser {
         }
         return declarations;
     }
-
+    @PrintMethodName
     private void hasident() {
-        System.out.println("hasident");
         switch (this.currentToken.tag()) {
             case SEMICOLON -> {
             }
             case IDENT -> analyseTerminal(Tag.IDENT);
         }
     }
-
+    @PrintMethodName
     private void identsep() {
-        System.out.println("identsep");
         if (this.currentToken.tag() == Tag.IDENT) {
             analyseTerminal(Tag.IDENT);
             identsep2();
         }
     }
-
+    @PrintMethodName
     private void identsep2() {
-        System.out.println("identsep2");
         switch (this.currentToken.tag()) {
             case COLON -> {
             }
@@ -201,9 +200,8 @@ public class Parser {
             }
         }
     }
-
+    @PrintMethodName
     private void champ() {
-        System.out.println("champ");
         if (this.currentToken.tag() == Tag.IDENT) {
             identsep();
             analyseTerminal(Tag.COLON);
@@ -211,26 +209,23 @@ public class Parser {
             analyseTerminal(Tag.SEMICOLON);
         }
     }
-
+    @PrintMethodName
     private void champs() {
-        System.out.println("champs");
         if (this.currentToken.tag() == Tag.IDENT) {
             champ();
             champs2();
         }
     }
-
+    @PrintMethodName
     private void champs2() {
-        System.out.println("champs2");
         switch (this.currentToken.tag()) {
             case IDENT -> champs();
             case END -> {
             }
         }
     }
-
+    @PrintMethodName
     private TypeNode type_n() {
-        System.out.println("type_n");
         TypeNode type = null;
         switch (this.currentToken.tag()) {
             case ACCESS -> {
@@ -245,9 +240,8 @@ public class Parser {
         }
         return type;
     }
-
+    @PrintMethodName
     private List<ParameterNode> params() {
-        System.out.println("params");
         List<ParameterNode> parameters = new ArrayList<>();
         if (this.currentToken.tag() == Tag.OPEN_PAREN) {
             analyseTerminal(Tag.OPEN_PAREN);
@@ -256,9 +250,8 @@ public class Parser {
         }
         return parameters;
     }
-
+    @PrintMethodName
     private List<ParameterNode> hasparams() {
-        System.out.println("hasparams");
         List<ParameterNode> parameters = new ArrayList<>();
         switch (this.currentToken.tag()) {
             case IS, RETURN -> {
@@ -269,9 +262,8 @@ public class Parser {
         }
         return parameters;
     }
-
+    @PrintMethodName
     private List<ParameterNode> paramsep() {
-        System.out.println("paramsep");
         List<ParameterNode> parameters = new ArrayList<>();
         if (this.currentToken.tag() == Tag.IDENT) {
             parameters.add(param());
@@ -279,9 +271,8 @@ public class Parser {
         }
         return parameters;
     }
-
+    @PrintMethodName
     private List<ParameterNode> paramsep2() {
-        System.out.println("paramsep2");
         List<ParameterNode> parameters = new ArrayList<>();
         switch (this.currentToken.tag()) {
             case SEMICOLON -> {
@@ -293,9 +284,8 @@ public class Parser {
         }
         return parameters;
     }
-
+    @PrintMethodName
     private void typexpr() {
-        System.out.println("typexpr");
         switch (this.currentToken.tag()) {
             case ASSIGN -> {
                 analyseTerminal(Tag.ASSIGN);
@@ -305,9 +295,8 @@ public class Parser {
             }
         }
     }
-
+    @PrintMethodName
     private ParameterNode param() {
-        System.out.println("param");
         ParameterNode parameter = null;
         if (this.currentToken.tag() == Tag.IDENT) {
             parameter = new ParameterNode();
@@ -319,9 +308,8 @@ public class Parser {
         }
         return parameter;
     }
-
+    @PrintMethodName
     private void mode() {
-        System.out.println("mode");
         switch (this.currentToken.tag()) {
             case IDENT, ACCESS -> {
             }
@@ -332,9 +320,8 @@ public class Parser {
 
         }
     }
-
+    @PrintMethodName
     private void modeout() {
-        System.out.println("modeout");
         switch (this.currentToken.tag()) {
             case IDENT, ACCESS -> {
             }
@@ -343,9 +330,8 @@ public class Parser {
             }
         }
     }
-
+    @PrintMethodName
     private void expr() {
-        System.out.println("expr");
         switch (this.currentToken.tag()) {
             case IDENT, OPEN_PAREN, DOT, ENTIER, CARACTERE, TRUE, FALSE, NULL, NEW, CHARACTER -> {
                 or_expr();
@@ -353,9 +339,8 @@ public class Parser {
 
         }
     }
-
+    @PrintMethodName
     private void or_expr() {
-        System.out.println("or_expr");
         switch (this.currentToken.tag()) {
             case IDENT, OPEN_PAREN, DOT, ENTIER, CARACTERE, TRUE, FALSE, NULL, NEW, CHARACTER -> {
                 and_expr();
@@ -363,9 +348,8 @@ public class Parser {
             }
         }
     }
-
+    @PrintMethodName
     private void or_expr2() {
-        System.out.println("or_expr2");
         switch (this.currentToken.tag()) {
             case SEMICOLON, COMMA, CLOSE_PAREN, THEN, DOTDOT, LOOP -> {
             }
@@ -375,9 +359,8 @@ public class Parser {
             }
         }
     }
-
+    @PrintMethodName
     private void or_expr3() {
-        System.out.println("or_expr3");
         switch (this.currentToken.tag()) {
             case IDENT, OPEN_PAREN, ELSE, DOT, MINUS, ENTIER, CARACTERE, TRUE, FALSE, NULL, NEW, CHARACTER -> {
                 and_expr();
@@ -385,9 +368,8 @@ public class Parser {
             }
         }
     }
-
+    @PrintMethodName
     private void and_expr() {
-        System.out.println("and_expr");
         switch (this.currentToken.tag()) {
             case IDENT, OPEN_PAREN, MINUS, ENTIER, CARACTERE, TRUE, FALSE, NULL, NEW, CHARACTER -> {
                 not_expr();
@@ -396,9 +378,8 @@ public class Parser {
 
         }
     }
-
+    @PrintMethodName
     private void and_expr2() {
-        System.out.println("and_expr2");
         switch (this.currentToken.tag()) {
             case SEMICOLON, COMMA, CLOSE_PAREN, OR, THEN, DOTDOT, LOOP -> {
             }
@@ -408,9 +389,8 @@ public class Parser {
             }
         }
     }
-
+    @PrintMethodName
     private void and_expr3() {
-        System.out.println("and_expr3");
         switch (this.currentToken.tag()) {
             case IDENT, OPEN_PAREN, MINUS, ENTIER, CARACTERE, TRUE, FALSE, NULL, NEW, CHARACTER -> {
                 not_expr();
@@ -423,9 +403,8 @@ public class Parser {
             }
         }
     }
-
+    @PrintMethodName
     private void not_expr() {
-        System.out.println("not_expr");
         switch (this.currentToken.tag()) {
             case IDENT, OPEN_PAREN, MINUS, ENTIER, CARACTERE, TRUE, FALSE, NULL, NEW, CHARACTER -> {
                 equality_expr();
@@ -433,9 +412,8 @@ public class Parser {
             }
         }
     }
-
+    @PrintMethodName
     private void not_expr2() {
-        System.out.println("not_expr2");
         switch (this.currentToken.tag()) {
             case SEMICOLON, COMMA, CLOSE_PAREN, OR, AND, THEN, DOTDOT, LOOP -> {
             }
@@ -446,9 +424,8 @@ public class Parser {
             }
         }
     }
-
+    @PrintMethodName
     private void equality_expr() {
-        System.out.println("equality_expr");
         switch (this.currentToken.tag()) {
             case IDENT, OPEN_PAREN, MINUS, ENTIER, CARACTERE, TRUE, FALSE, NULL, NEW, CHARACTER -> {
                 relational_expr();
@@ -456,9 +433,8 @@ public class Parser {
             }
         }
     }
-
+    @PrintMethodName
     private void equality_expr2() {
-        System.out.println("equality_expr2");
         switch (this.currentToken.tag()) {
             case SEMICOLON, COMMA, CLOSE_PAREN, OR, AND, THEN, NOT, DOTDOT, LOOP -> {
             }
@@ -474,9 +450,8 @@ public class Parser {
             }
         }
     }
-
+    @PrintMethodName
     private void relational_expr() {
-        System.out.println("relational_expr");
         switch (this.currentToken.tag()) {
             case IDENT, OPEN_PAREN, MINUS, ENTIER, CARACTERE, TRUE, FALSE, NULL, NEW, CHARACTER -> {
                 additive_expr();
@@ -484,9 +459,8 @@ public class Parser {
             }
         }
     }
-
+    @PrintMethodName
     private void relational_expr2() {
-        System.out.println("relational_expr2");
         switch (this.currentToken.tag()) {
             case SEMICOLON, COMMA, CLOSE_PAREN, OR, AND, THEN, NOT, EQ, NE, DOTDOT, LOOP -> {
             }
@@ -512,9 +486,8 @@ public class Parser {
             }
         }
     }
-
+    @PrintMethodName
     private void additive_expr() {
-        System.out.println("additive_expr");
         switch (this.currentToken.tag()) {
             case IDENT, OPEN_PAREN, MINUS, ENTIER, CARACTERE, TRUE, FALSE, NULL, NEW, CHARACTER -> {
                 multiplicative_expr();
@@ -522,9 +495,8 @@ public class Parser {
             }
         }
     }
-
+    @PrintMethodName
     private void additive_expr2() {
-        System.out.println("additive_expr2");
         switch (this.currentToken.tag()) {
             case SEMICOLON, COMMA, CLOSE_PAREN, OR, AND, THEN, NOT, EQ, NE, LT, LE, GT, GE, DOTDOT, LOOP -> {
             }
@@ -540,9 +512,8 @@ public class Parser {
             }
         }
     }
-
+    @PrintMethodName
     private void multiplicative_expr() {
-        System.out.println("multiplicative_expr");
         switch (this.currentToken.tag()) {
             case IDENT, OPEN_PAREN, MINUS, ENTIER, CARACTERE, TRUE, FALSE, NULL, NEW, CHARACTER -> {
                 unary_expr();
@@ -550,9 +521,8 @@ public class Parser {
             }
         }
     }
-
+    @PrintMethodName
     private void multiplicative_expr2() {
-        System.out.println("multiplicative_expr2");
         switch (this.currentToken.tag()) {
             case SEMICOLON, COMMA, CLOSE_PAREN, OR, AND, THEN, NOT, EQ, NE, LT, LE, GT, GE, PLUS, MINUS, DOTDOT, LOOP -> {
             }
@@ -573,9 +543,8 @@ public class Parser {
             }
         }
     }
-
+    @PrintMethodName
     private void unary_expr() {
-        System.out.println("unary_expr");
         switch (this.currentToken.tag()) {
             case MINUS -> {
                 analyseTerminal(Tag.MINUS);
@@ -586,9 +555,8 @@ public class Parser {
             }
         }
     }
-
+    @PrintMethodName
     private void primary() {
-        System.out.println("primary");
         switch (this.currentToken.tag()) {
             case IDENT -> {
                 analyseTerminal(Tag.IDENT);
@@ -629,9 +597,8 @@ public class Parser {
 
         }
     }
-
+    @PrintMethodName
     private void primary2() {
-        System.out.println("primary2");
         switch (this.currentToken.tag()) {
             case SEMICOLON, COMMA, CLOSE_PAREN, OR, AND, THEN, NOT, EQ, NE, LT, LE, GT, GE, PLUS, MINUS, MULTI, DIV, REM, DOTDOT, LOOP, DOT -> {
                 acces();
@@ -644,9 +611,8 @@ public class Parser {
             }
         }
     }
-
+    @PrintMethodName
     private void exprsep() {
-        System.out.println("exprsep");
         switch (this.currentToken.tag()) {
             case IDENT, OPEN_PAREN, MINUS, ENTIER, CARACTERE, TRUE, FALSE, NULL, NEW, CHARACTER -> {
                 expr();
@@ -654,9 +620,8 @@ public class Parser {
             }
         }
     }
-
+    @PrintMethodName
     private void exprsep2() {
-        System.out.println("exprsep2");
         switch (this.currentToken.tag()) {
             case COMMA -> {
                 analyseTerminal(Tag.COMMA);
@@ -666,9 +631,8 @@ public class Parser {
             }
         }
     }
-
+    @PrintMethodName
     private void hasexpr() {
-        System.out.println("hasexpr");
         switch (this.currentToken.tag()) {
             case SEMICOLON -> {
             }
@@ -680,9 +644,8 @@ public class Parser {
             }
         }
     }
-
+    @PrintMethodName
     private StatementNode instr() {
-        System.out.println("instr");
         StatementNode statement;
         switch (this.currentToken.tag()) {
             case IDENT -> {
@@ -747,9 +710,8 @@ public class Parser {
         }
         return statement;
     }
-
+    @PrintMethodName
     private void instr2() {
-        System.out.println("instr2");
         switch (this.currentToken.tag()) {
             case SEMICOLON -> {
                 analyseTerminal(Tag.SEMICOLON);
@@ -770,9 +732,8 @@ public class Parser {
             }
         }
     }
-
+    @PrintMethodName
     private void instr3() {
-        System.out.println("instr3");
         switch (this.currentToken.tag()) {
             case ASSIGN -> {
             }
@@ -783,9 +744,8 @@ public class Parser {
             }
         }
     }
-
+    @PrintMethodName
     private void hasassign() {
-        System.out.println("hasassign");
         switch (this.currentToken.tag()) {
             case SEMICOLON -> {
             }
@@ -795,9 +755,8 @@ public class Parser {
             }
         }
     }
-
+    @PrintMethodName
     private void elifn() {
-        System.out.println("elifn");
         switch (this.currentToken.tag()) {
             case END, ELSE -> {
             }
@@ -810,9 +769,8 @@ public class Parser {
             }
         }
     }
-
+    @PrintMethodName
     private void elsen() {
-        System.out.println("elsen");
         switch (this.currentToken.tag()) {
             case END -> {
             }
@@ -822,9 +780,8 @@ public class Parser {
             }
         }
     }
-
+    @PrintMethodName
     private void hasreverse() {
-        System.out.println("hasreverse");
         switch (this.currentToken.tag()) {
             case IDENT, OPEN_PAREN, MINUS, ENTIER, CARACTERE, TRUE, FALSE, NULL, NEW, CHARACTER -> {
             }
@@ -833,9 +790,8 @@ public class Parser {
             }
         }
     }
-
+    @PrintMethodName
     private List<StatementNode> instrs() {
-        System.out.println("instrs");
         List<StatementNode> statements = new ArrayList<>();
         switch (this.currentToken.tag()) {
             case IDENT, BEGIN, RETURN, IF, FOR, WHILE -> {
@@ -847,9 +803,8 @@ public class Parser {
         //TODO
         return statements;
     }
-
+    @PrintMethodName
     private List<StatementNode> instrs2() {
-        System.out.println("instrs2");
         List<StatementNode> statements = new ArrayList<>();
         switch (this.currentToken.tag()) {
             case IDENT, BEGIN, RETURN, IF, FOR, WHILE -> {
@@ -861,9 +816,8 @@ public class Parser {
         }
         return statements;
     }
-
+    @PrintMethodName
     private void acces() {
-        System.out.println("acces");
         switch (this.currentToken.tag()) {
             case SEMICOLON, COMMA, CLOSE_PAREN, OR, END, THEN, NOT, EQ, NE, LT, LE, GT, GE, PLUS, MINUS, MULTI, DIV, REM, DOTDOT, LOOP -> {
             }
@@ -875,9 +829,9 @@ public class Parser {
         }
 
     }
-
+    @PrintMethodName
     private void analyseTerminal(Tag tag) {
-        System.out.println(this.currentToken);
+        System.out.println("\t\t↪️ " + this.currentToken);
         if (!(this.currentToken.tag() == tag)) {
             Token expectedToken = new Token(tag, this.currentToken.line(), TagHelper.getTagString(tag));
             if (expectedToken.tag() == Tag.SEMICOLON) {

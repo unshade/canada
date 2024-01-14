@@ -1,0 +1,8 @@
+<aspectj>
+    <weaver options="-verbose -showWeaveInfo">
+        <include within="org.trad.pcl.*"/>
+    </weaver>
+    <aspects>
+        <aspect name="org.trad.pcl.annotation.MethodLoggerAspect"/>
+    </aspects>
+</aspectj>
