@@ -7,6 +7,7 @@ import org.trad.pcl.Helpers.FileHelper;
 import org.trad.pcl.Lexer.Lexer;
 import org.trad.pcl.Parser.Parser;
 import org.trad.pcl.Services.ErrorService;
+import org.trad.pcl.Services.PythonRunner;
 import org.trad.pcl.ast.ProgramNode;
 
 import java.io.File;
@@ -48,6 +49,9 @@ public class Main {
                 AnsiFormat fWarning = new AnsiFormat(Attribute.WHITE_TEXT(), Attribute.GREEN_BACK(), Attribute.BOLD());
                 System.out.println("\n✅ "+colorize("PARSING PHASE COMPLETED, GENERATING AST", fWarning));
                 System.out.println(AST);
+                AST.setJson(true);
+                String json = AST.toString();
+                PythonRunner.exec(json);
             } else {
                 AnsiFormat fWarning = new AnsiFormat(Attribute.WHITE_TEXT(), Attribute.RED_BACK(), Attribute.BOLD());
                 System.out.println("\n❌ "+colorize("PARSING PHASE FAILED, STOPPING", fWarning));
