@@ -23,9 +23,11 @@
 \contentsline {subsection}{\numberline {6.2}Représentation des Structures Syntaxiques}{14}{subsection.6.2}%
 \contentsline {subsection}{\numberline {6.3}Rôle dans le Processus de Compilation}{14}{subsection.6.3}%
 \contentsline {section}{\numberline {7}Tests et Validation}{14}{section.7}%
-\contentsline {section}{\numberline {8}Gestion de projet}{15}{section.8}%
-\contentsline {subsection}{\numberline {8.1}Équipe de projet}{15}{subsection.8.1}%
-\contentsline {subsection}{\numberline {8.2}Organisation au sein de l’équipe projet}{15}{subsection.8.2}%
-\contentsline {subsection}{\numberline {8.3}Matrice RACI}{16}{subsection.8.3}%
-\contentsline {subsection}{\numberline {8.4}Répartition du Temps de Travail sur le Projet}{16}{subsection.8.4}%
-\contentsline {section}{\numberline {9}Conclusion}{17}{section.9}%
+\contentsline {subsection}{\numberline {7.1}Pour un code source valide}{14}{subsection.7.1}%
+\contentsline {subsection}{\numberline {7.2}Pour un code source invalide}{17}{subsection.7.2}%
+\contentsline {section}{\numberline {8}Gestion de projet}{19}{section.8}%
+\contentsline {subsection}{\numberline {8.1}Équipe de projet}{19}{subsection.8.1}%
+\contentsline {subsection}{\numberline {8.2}Organisation au sein de l’équipe projet}{19}{subsection.8.2}%
+\contentsline {subsection}{\numberline {8.3}Matrice RACI}{19}{subsection.8.3}%
+\contentsline {subsection}{\numberline {8.4}Répartition du Temps de Travail sur le Projet}{20}{subsection.8.4}%
+\contentsline {section}{\numberline {9}Conclusion}{20}{section.9}%

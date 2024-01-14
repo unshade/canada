@@ -686,6 +686,8 @@
 
     \section{Tests et Validation}\label{sec:tests-et-validation}
 
+    \subsection{Pour un code source valide}\label{subsec:pour-un-code-source-valide}
+
     Voici un code source valide en canAda qui permet de tester notre compilateur :
 
     \begin{lstlisting}[label={lst:lstlisting16}]
@@ -716,16 +718,63 @@
     \begin{figure}[H]
         \centering
         \includegraphics[width=1\textwidth]{arbre_json}
-        \caption{Arbre abstrait syntaxique}\label{fig:figure5}
+        \caption{Arbre abstrait}\label{fig:figure5}
     \end{figure}
 
-    Et à l'aide de notre script python et de graphviz on obtient l'arbre abstrait syntaxique suivant :
+    Et à l'aide de notre script python et de graphviz on obtient l'arbre abstrait suivant :
 
     \begin{figure}[H]
         \centering
         \includegraphics[width=1\textwidth]{arbre_draw}
-        \caption{Arbre abstrait syntaxique}\label{fig:figure6}
+        \caption{Arbre abstrait}\label{fig:figure6}
     \end{figure}
+
+    \subsection{Pour un code source invalide}\label{subsec:pour-un-code-source-invalide}
+
+    Voici un code source invalide en canAda qui permet de tester notre compilateur, on a volontairement rajouter un ; en trop à la fin de la ligne 5 :
+
+    \begin{lstlisting}[label={lst:lstlisting17}]
+        with Ada.Text_IO; useAda.Text_IO;
+        procedure Main is
+            A : Integer := 5;
+            B : Integer := 10;
+            Sum : Integer;
+        begin ;
+            Sum := A + B;
+        end Main;
+    \end{lstlisting}
+
+    On obtient alors après l'analyse lexicale et syntaxique la sortie suivante, on l'a découpé en 3 parties pour plus de lisibilité et laisser sur fond noir pour faciliter la lisibilité des couleurs :
+
+    \begin{figure}[H]
+        \centering
+        \includegraphics[width=0.3\textwidth]{sortie1_err}
+        \hfill
+        \includegraphics[width=0.3\textwidth]{sortie2_err}
+        \hfill
+        \includegraphics[width=0.3\textwidth]{sortie3_err}
+        \caption{Sortie découpée de gauche à droite}\label{fig:figure7}
+    \end{figure}
+
+    Et on obtient les erreurs et les warnings suivantes :
+
+    \begin{figure}[H]
+        \centering
+        \includegraphics[width=1\textwidth]{syntax_err}
+        \caption{Erreurs}\label{fig:figure8}
+    \end{figure}
+
+    \begin{figure}[H]
+        \centering
+        \includegraphics[width=1\textwidth]{syntax_warn}
+        \caption{Warnings}\label{fig:figure9}
+    \end{figure}
+
+    On peut ainsi voir que notre compilateur est capable de gérer les erreurs syntaxiques et de les afficher de manière claire et précise.
+    Ainsi que de nous aider à le corriger notamment à travers les warnings et le \("\)panic mode\("\) qui permet de continuer à analyser le programme source jusqu'à la fin tout en indiquant les erreurs rencontrées.
+
+    Ce qui conclue la partie sur les tests et la validation de notre compilateur.
+    Bien évidemment, de nombreux autres tests ont été réalisés pour valider notre compilateur notamment des tests unitaires pour tester le Lexer et le Parser ainsi que la construction l'arbre asbtrait.
 
     \section{Gestion de projet}\label{sec:gestion-de-projet}
 
