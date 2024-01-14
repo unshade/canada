@@ -3,13 +3,12 @@
 \contentsline {section}{\numberline {2}Introduction}{2}{section.2}%
 \contentsline {section}{\numberline {3}Grammaire}{2}{section.3}%
 \contentsline {subsection}{\numberline {3.1}Présentation}{2}{subsection.3.1}%
-\contentsline {subsection}{\numberline {3.2}Étapes de Transformation de la Grammaire}{3}{subsection.3.2}%
-\contentsline {subsection}{\numberline {3.3}Grammaire Originale en BNF}{3}{subsection.3.3}%
-\contentsline {subsubsection}{\numberline {3.3.1}Élimination de la Récursivité à Gauche}{5}{subsubsection.3.3.1}%
-\contentsline {subsubsection}{\numberline {3.3.2}Factorisation à Gauche}{5}{subsubsection.3.3.2}%
-\contentsline {subsubsection}{\numberline {3.3.3}Gestion des Priorités de Calculs}{6}{subsubsection.3.3.3}%
-\contentsline {subsection}{\numberline {3.4}Grammaire Transformée en LL(1)}{6}{subsection.3.4}%
-\contentsline {subsection}{\numberline {3.5}Table LL(1)}{9}{subsection.3.5}%
+\contentsline {subsection}{\numberline {3.2}Étapes de transformation de la Grammaire}{3}{subsection.3.2}%
+\contentsline {subsubsection}{\numberline {3.2.1}Élimination de la Récursivité à Gauche}{5}{subsubsection.3.2.1}%
+\contentsline {subsubsection}{\numberline {3.2.2}Factorisation à Gauche}{5}{subsubsection.3.2.2}%
+\contentsline {subsubsection}{\numberline {3.2.3}Gestion des Priorités de Calculs}{6}{subsubsection.3.2.3}%
+\contentsline {subsection}{\numberline {3.3}Grammaire Transformée en LL(1)}{6}{subsection.3.3}%
+\contentsline {subsection}{\numberline {3.4}Table LL(1)}{9}{subsection.3.4}%
 \contentsline {section}{\numberline {4}Analyse Lexicale pour canAda}{9}{section.4}%
 \contentsline {subsection}{\numberline {4.1}Structure et Fonctionnement du Lexer}{10}{subsection.4.1}%
 \contentsline {subsection}{\numberline {4.2}Gestion des Tokens}{10}{subsection.4.2}%
