@@ -1,7 +1,6 @@
 package org.trad.pcl.Helpers;
 
 import java.io.File;
-import java.nio.file.Path;
 
 /**
  * FileHelper class

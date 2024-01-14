@@ -1,5 +1,6 @@
 package org.trad.pcl.Parser;
 
+import org.trad.pcl.Exceptions.Syntax.MissingSemicolonException;
 import org.trad.pcl.Exceptions.Syntax.UnexpectedTokenException;
 import org.trad.pcl.Helpers.TagHelper;
 import org.trad.pcl.Lexer.Lexer;
@@ -879,7 +880,10 @@ public class Parser {
         System.out.println(this.currentToken);
         if (!(this.currentToken.tag() == tag)) {
             Token expectedToken = new Token(tag, this.currentToken.line(), TagHelper.getTagString(tag));
-            this.errorService.registerSyntaxError(new UnexpectedTokenException(expectedToken, this.currentToken));
+            if (expectedToken.tag() == Tag.SEMICOLON) {
+                this.errorService.registerSyntaxWarning(new MissingSemicolonException(this.currentToken));
+            } else {
+            this.errorService.registerSyntaxError(new UnexpectedTokenException(expectedToken, this.currentToken));}
         }
         // Contient le prochain token ou <EOF, currentLine,""> si fin de fichier
         if (this.currentToken.tag() == Tag.EOF) {

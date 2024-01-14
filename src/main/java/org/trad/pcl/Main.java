@@ -12,9 +12,6 @@ import org.trad.pcl.ast.ProgramNode;
 
 import java.io.File;
 import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.Objects;
 
 import static com.diogonunes.jcolor.Ansi.colorize;
@@ -47,7 +44,7 @@ public class Main {
             ProgramNode AST = parser.parse();
             if (!errorService.hasErrors()) {
                 AnsiFormat fWarning = new AnsiFormat(Attribute.WHITE_TEXT(), Attribute.GREEN_BACK(), Attribute.BOLD());
-                System.out.println("\n✅ "+colorize("PARSING PHASE COMPLETED, GENERATING AST", fWarning));
+                System.out.println("\n✅ " + colorize("PARSING PHASE COMPLETED, GENERATING AST", fWarning));
                 System.out.println(AST);
                 if (args.length > 1 && "-g".equals(args[1])) {
                     AST.setJson(true);
@@ -56,14 +53,13 @@ public class Main {
                 }
             } else {
                 AnsiFormat fWarning = new AnsiFormat(Attribute.WHITE_TEXT(), Attribute.RED_BACK(), Attribute.BOLD());
-                System.out.println("\n❌ "+colorize("PARSING PHASE FAILED, STOPPING", fWarning));
+                System.out.println("\n❌ " + colorize("PARSING PHASE FAILED, STOPPING", fWarning));
             }
 
         }
 
-        if (errorService.hasErrors()) {
-            errorService.handleErrorsDisplay();
-        }
+        errorService.handleErrorsDisplay();
+
     }
 
 }

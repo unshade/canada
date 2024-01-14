@@ -36,7 +36,7 @@ public class PeekingReader extends Reader {
 
     public int peek(int n) {
         while (this.nextChars.size() < n) {
-            int nextChar = 0;
+            int nextChar;
             try {
                 nextChar = this.reader.read();
             } catch (IOException e) {

@@ -264,9 +264,7 @@ public class Lexer {
                 }
             }
         }
-        Token unknownToken = new Token(Tag.UNKNOWN, this.reader.getCurrentLine(), lexeme);
-        //this.errorService.registerLexicalError(new UnknownTokenException(unknownToken));
-        return unknownToken;
+        return new Token(Tag.UNKNOWN, this.reader.getCurrentLine(), lexeme);
     }
 
     /**

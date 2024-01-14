@@ -10,7 +10,7 @@ import static com.diogonunes.jcolor.Ansi.colorize;
 public class PythonRunner {
     public static void exec(String json) {
         try {
-            String pythonScriptPath = "python/ast_grapher.py";
+            String pythonScriptPath = "python/ast_graphe.py";
             String pythonInterpreterPath = "python/venv/bin/python3";
             if (System.getProperty("os.name").startsWith("Windows")) {
                 pythonInterpreterPath = "python\\venv\\Scripts\\python.exe";
@@ -21,7 +21,7 @@ public class PythonRunner {
 
         } catch (IOException | InterruptedException e) {
             AnsiFormat fWarning = new AnsiFormat(Attribute.WHITE_TEXT(), Attribute.RED_BACK(), Attribute.BOLD());
-            System.out.println("\n❌ "+colorize("ERROR WHILE ATTEMPTING TO GRAPH AST", fWarning));
+            System.out.println("\n❌ " + colorize("ERROR WHILE ATTEMPTING TO GRAPH AST", fWarning));
         }
     }
 }

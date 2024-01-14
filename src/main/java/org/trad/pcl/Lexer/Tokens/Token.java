@@ -1,4 +1,5 @@
 package org.trad.pcl.Lexer.Tokens;
+
 import com.diogonunes.jcolor.Attribute;
 
 import static com.diogonunes.jcolor.Ansi.colorize;
