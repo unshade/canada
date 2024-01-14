@@ -1,0 +1,8 @@
+with Ada.Text_IO; useAda.Text_IO;
+procedure Main is
+    A : Integer := 5;
+    B : Integer := 10;
+    Sum : Integer;
+begin
+    Sum := A + B;
+end Main;
