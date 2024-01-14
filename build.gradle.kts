@@ -6,7 +6,6 @@ plugins {
 group = "org.trad.pcl"
 version = "1.0-SNAPSHOT"
 
-// mettre l'encodage en utf-8
 tasks.withType<JavaCompile> {
     options.encoding = "UTF-8"
 }
