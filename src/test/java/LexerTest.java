@@ -24,8 +24,8 @@ public class LexerTest {
 
     @BeforeEach
     public void setUp() {
-        testFolder = Paths.get("tests/lexer/tests");
-        solutionFolder = Paths.get("tests/lexer/solutions");
+        testFolder = Paths.get("src", "main", "resources", "tests", "lexer", "tests");
+        solutionFolder = Paths.get("src", "main", "resources", "tests", "lexer", "solutions");
     }
 
     private void performLexerTest(File testFile, File solutionFile) {
