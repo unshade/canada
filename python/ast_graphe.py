@@ -20,7 +20,9 @@ def build_graph(node, graph, path, labels):
 
 def main():
     if len(sys.argv) > 1:
-        json_str = sys.argv[1]
+        json_path = sys.argv[1]
+        with open(json_path, 'r') as f:
+            json_str = f.read()
         try:
             data = json.loads(json_str)
             G = nx.DiGraph()
