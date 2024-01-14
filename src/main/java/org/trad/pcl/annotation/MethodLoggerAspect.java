@@ -17,7 +17,7 @@ public class MethodLoggerAspect {
 
     @Before("log()")
     public void logMethod(JoinPoint jp) {
-        System.out.println("\t↪️ " + colorize("Parser rule " + jp.getSignature().getName() + " called", Attribute.GREEN_TEXT()));
+        System.out.println("\t↪️ " + colorize("Parser rule ", Attribute.GREEN_TEXT()) + colorize(jp.getSignature().getName(), Attribute.MAGENTA_TEXT()) + colorize(" called", Attribute.GREEN_TEXT()));
     }
 
 }
