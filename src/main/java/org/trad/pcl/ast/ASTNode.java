@@ -3,7 +3,10 @@ package org.trad.pcl.ast;
 import com.diogonunes.jcolor.Attribute;
 
 import static com.diogonunes.jcolor.Ansi.colorize;
+
 import java.lang.reflect.Field;
+import java.util.ArrayList;
+import java.util.List;
 
 public abstract class ASTNode {
     protected ASTNode parent;
@@ -36,18 +39,36 @@ public abstract class ASTNode {
         return "\t".repeat(this.getDepth());
     }
 
+
     @Override
     public String toString() {
-        Field[] fields = this.getClass().getDeclaredFields();
+        List<Field> fields = new ArrayList<>();
+        fields.addAll(List.of(this.getClass().getDeclaredFields()));
+
+        List<Field> superClassFields = new ArrayList<>();
+        superClassFields.addAll(List.of(this.getClass().getSuperclass().getDeclaredFields()));
+
+        superClassFields.forEach(field -> {
+            field.setAccessible(true);
+            try {
+                if (field.get(this) instanceof String) {
+                    fields.add(field);
+                }
+            } catch (IllegalAccessException e) {
+                throw new RuntimeException(e);
+            }
+        });
+
+
         String className = this.getClass().getSimpleName();
         StringBuilder res = new StringBuilder(colorize(className, Attribute.YELLOW_TEXT()) + " : { \n");
         if (isJson) {
             res = new StringBuilder("{ \n");
         }
-        int lastIndex = fields.length - 1;
+        int lastIndex = fields.size() - 1;
 
-        for (int i = 0; i < fields.length; i++) {
-            Field field = fields[i];
+        for (int i = 0; i < fields.size(); i++) {
+            Field field = fields.get(i);
             field.setAccessible(true);
             try {
                 Object attributeValue = field.get(this);
@@ -70,5 +91,6 @@ public abstract class ASTNode {
         res.append("}");
         return format(res.toString());
     }
+
 
 }

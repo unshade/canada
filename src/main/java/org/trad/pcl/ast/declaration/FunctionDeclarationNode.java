@@ -13,8 +13,7 @@ public class FunctionDeclarationNode extends DeclarationNode {
     private TypeNode returnType;
     private BlockNode body;
 
-    public FunctionDeclarationNode(String name) {
-        super(name);
+    public FunctionDeclarationNode() {
         this.parameters = new ArrayList<>();
     }
 
@@ -27,6 +26,11 @@ public class FunctionDeclarationNode extends DeclarationNode {
         for (ParameterNode parameter : parameters) {
             addParameter(parameter);
         }
+    }
+
+    public void setReturnType(TypeNode returnType) {
+        this.returnType = returnType;
+        returnType.setParent(this);
     }
 
 }

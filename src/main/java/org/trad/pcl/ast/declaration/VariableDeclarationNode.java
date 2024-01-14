@@ -5,8 +5,7 @@ import org.trad.pcl.ast.type.TypeNode;
 public class VariableDeclarationNode extends DeclarationNode {
     private TypeNode type;
 
-    public VariableDeclarationNode(String name, TypeNode type) {
-        super(name);
+    public void setType(TypeNode type) {
         this.type = type;
     }
 }

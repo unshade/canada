@@ -7,4 +7,15 @@ import java.util.List;
 public class RecordTypeNode extends TypeNode {
     private List<VariableDeclarationNode> fields;
 
+    public void addField(VariableDeclarationNode field) {
+        fields.add(field);
+        field.setParent(this);
+    }
+
+    public void addFields(List<VariableDeclarationNode> fields) {
+        for (VariableDeclarationNode field : fields) {
+            addField(field);
+        }
+    }
+
 }

@@ -9,12 +9,9 @@ public class ProcedureDeclarationNode extends DeclarationNode {
     private List<ParameterNode> parameters;
     private BlockNode body;
 
-    public ProcedureDeclarationNode(String name) {
-        super(name);
-    }
-
     public void setBody(BlockNode body) {
         this.body = body;
+        body.setParent(this);
     }
 
     public void addParameter(ParameterNode parameter) {

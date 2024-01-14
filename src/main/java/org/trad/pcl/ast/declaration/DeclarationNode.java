@@ -6,7 +6,7 @@ public class DeclarationNode extends ASTNode {
     // Classe de base pour les déclarations
     protected String name;
 
-    public DeclarationNode(String name) {
+    public void setName(String name) {
         this.name = name;
     }
 }

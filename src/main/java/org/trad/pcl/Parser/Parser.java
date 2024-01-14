@@ -15,6 +15,8 @@ import org.trad.pcl.ast.declaration.FunctionDeclarationNode;
 import org.trad.pcl.ast.declaration.ProcedureDeclarationNode;
 import org.trad.pcl.ast.declaration.TypeDeclarationNode;
 import org.trad.pcl.ast.statement.*;
+import org.trad.pcl.ast.type.AccessTypeNode;
+import org.trad.pcl.ast.type.RecordTypeNode;
 import org.trad.pcl.ast.type.SimpleTypeNode;
 import org.trad.pcl.ast.type.TypeNode;
 
@@ -60,13 +62,11 @@ public class Parser {
         analyseTerminal(Tag.IDENT);
         analyseTerminal(Tag.SEMICOLON);
         analyseTerminal(Tag.PROCEDURE);
-        String rootProcedureName = currentToken.getValue();
-        analyseTerminal(Tag.IDENT);
+        ProcedureDeclarationNode rootProcedure = new ProcedureDeclarationNode();
+        rootProcedure.setName(analyseTerminal(Tag.IDENT).getValue());
         analyseTerminal(Tag.IS);
-        ProcedureDeclarationNode rootProcedure = new ProcedureDeclarationNode(rootProcedureName);
         BlockNode rootProcedureBody = new BlockNode();
-        rootProcedureBody.setParent(rootProcedure);
-        rootProcedureBody.addDeclarations(decls());
+        rootProcedureBody.addDeclarations(multipleDeclarations());
         analyseTerminal(Tag.BEGIN);
         rootProcedureBody.addStatements(instrs());
         rootProcedure.setBody(rootProcedureBody);
@@ -79,95 +79,128 @@ public class Parser {
         return abstractSyntaxTreeRoot;
     }
 
+    /**
+     * Grammar rule : decl
+     */
     @PrintMethodName
-
-    private DeclarationNode decl() {
-        DeclarationNode declaration;
+    private List<DeclarationNode> declaration() {
+        List<DeclarationNode> declarations = new ArrayList<>();
         switch (this.currentToken.tag()) {
             case PROCEDURE -> {
-                declaration = new ProcedureDeclarationNode(currentToken.getValue());
+                ProcedureDeclarationNode declaration = new ProcedureDeclarationNode();
+                declarations.add(declaration);
                 analyseTerminal(Tag.PROCEDURE);
-                analyseTerminal(Tag.IDENT);
-                ((ProcedureDeclarationNode) declaration).addParameters(hasparams());
+                declaration.setName(analyseTerminal(Tag.IDENT).getValue());
+                declaration.addParameters(hasparams());
                 analyseTerminal(Tag.IS);
-                decls();
+                BlockNode procedureBody = new BlockNode();
+                procedureBody.addDeclarations(multipleDeclarations());
                 analyseTerminal(Tag.BEGIN);
-                instrs();
+                procedureBody.addStatements(instrs());
                 analyseTerminal(Tag.END);
                 hasident();
                 analyseTerminal(Tag.SEMICOLON);
             }
             case IDENT -> {
-                declaration = new TypeDeclarationNode(currentToken.getValue());
-                identsep();
+                //declaration.setName(this.currentToken.getValue());
+                List<TypeDeclarationNode> typeNodes = identsep();
                 analyseTerminal(Tag.COLON);
-                type_n();
+                TypeNode typeNode = type_n();
+                for (TypeDeclarationNode typeDeclarationNode : typeNodes) {
+                    typeDeclarationNode.setType(typeNode);
+                    declarations.add(typeDeclarationNode);
+                }
+                // TODO : typexpr();
                 typexpr();
                 analyseTerminal(Tag.SEMICOLON);
             }
             case TYPE -> {
-                declaration = new TypeDeclarationNode(currentToken.getValue());
+                TypeDeclarationNode declaration = new TypeDeclarationNode();
+                declarations.add(declaration);
                 analyseTerminal(Tag.TYPE);
-                analyseTerminal(Tag.IDENT);
-                hasischoose();
+                declaration.setName(analyseTerminal(Tag.IDENT).getValue());
+                declaration.setType(isAccessOrRecord());
                 analyseTerminal(Tag.SEMICOLON);
             }
             case FUNCTION -> {
-                declaration = new FunctionDeclarationNode(currentToken.getValue());
+                FunctionDeclarationNode declaration = new FunctionDeclarationNode();
+                declarations.add(declaration);
                 analyseTerminal(Tag.FUNCTION);
-                analyseTerminal(Tag.IDENT);
-                ((FunctionDeclarationNode) declaration).addParameters(hasparams());
+                declaration.setName(analyseTerminal(Tag.IDENT).getValue());
+                declaration.addParameters(hasparams());
                 analyseTerminal(Tag.RETURN);
-                type_n();
+                declaration.setReturnType(type_n());
                 analyseTerminal(Tag.IS);
-                decls();
+                BlockNode functionBody = new BlockNode();
+                functionBody.addDeclarations(multipleDeclarations());
                 analyseTerminal(Tag.BEGIN);
-                instrs();
+                functionBody.addStatements(instrs());
                 analyseTerminal(Tag.END);
                 hasident();
                 analyseTerminal(Tag.SEMICOLON);
             }
             default -> {
-                declaration = null;
+                declarations = null;
             }
         }
-        return declaration;
+        return declarations;
     }
 
+    /**
+     * Grammar rule : hasischoose
+     */
     @PrintMethodName
-    private void hasischoose() {
+    private TypeNode isAccessOrRecord() {
+        TypeNode type = null;
         switch (this.currentToken.tag()) {
             case IS -> {
                 analyseTerminal(Tag.IS);
-                accorrec();
+                type = AccessOrRecord();
             }
             case SEMICOLON -> {
+                type = new SimpleTypeNode();
             }
         }
+        return type;
     }
 
+
+    /**
+     * Grammar rule : accorrec
+     */
     @PrintMethodName
-    private void accorrec() {
+    private TypeNode AccessOrRecord() {
+        TypeNode type = null;
         switch (this.currentToken.tag()) {
             case ACCESS -> {
+                type = new AccessTypeNode();
                 analyseTerminal(Tag.ACCESS);
-                analyseTerminal(Tag.IDENT);
+                SimpleTypeNode simpleTypeNode = new SimpleTypeNode();
+                simpleTypeNode.setTypeName(analyseTerminal(Tag.IDENT).getValue());
+                ((AccessTypeNode) type).setBaseType(simpleTypeNode);
             }
             case RECORD -> {
+                type = new RecordTypeNode();
                 analyseTerminal(Tag.RECORD);
+                // TODO : ((RecordTypeNode) type).addFields(champs());
                 champs();
                 analyseTerminal(Tag.END);
                 analyseTerminal(Tag.RECORD);
             }
         }
+        return type;
     }
+
+    /**
+     * Grammar rule : decls
+     */
     @PrintMethodName
-    private List<DeclarationNode> decls() {
+    private List<DeclarationNode> multipleDeclarations() {
         List<DeclarationNode> declarations = new ArrayList<>();
         switch (this.currentToken.tag()) {
             case PROCEDURE, IDENT, TYPE, FUNCTION -> {
-                declarations.add(decl());
-                declarations.addAll(decls());
+                declarations.addAll(declaration());
+                declarations.addAll(multipleDeclarations());
             }
             case BEGIN -> {
             }
@@ -183,22 +216,28 @@ public class Parser {
         }
     }
     @PrintMethodName
-    private void identsep() {
+    private List<TypeDeclarationNode> identsep() {
+        List<TypeDeclarationNode> declarations = new ArrayList<>();
         if (this.currentToken.tag() == Tag.IDENT) {
-            analyseTerminal(Tag.IDENT);
-            identsep2();
+            TypeDeclarationNode declaration = new TypeDeclarationNode();
+            declarations.add(declaration);
+            declaration.setName(analyseTerminal(Tag.IDENT).getValue());
+            declarations.addAll(identsep2());
         }
+        return declarations;
     }
     @PrintMethodName
-    private void identsep2() {
+    private List<TypeDeclarationNode> identsep2() {
+        List<TypeDeclarationNode> declarations = new ArrayList<>();
         switch (this.currentToken.tag()) {
             case COLON -> {
             }
             case COMMA -> {
                 analyseTerminal(Tag.COMMA);
-                identsep();
+                declarations.addAll(identsep());
             }
         }
+        return declarations;
     }
     @PrintMethodName
     private void champ() {
@@ -830,7 +869,7 @@ public class Parser {
 
     }
     @PrintMethodName
-    private void analyseTerminal(Tag tag) {
+    private Token analyseTerminal(Tag tag) {
         System.out.println("\t\t↪️ " + this.currentToken);
         if (!(this.currentToken.tag() == tag)) {
             Token expectedToken = new Token(tag, this.currentToken.line(), TagHelper.getTagString(tag));
@@ -841,9 +880,11 @@ public class Parser {
         }
         // Contient le prochain token ou <EOF, currentLine,""> si fin de fichier
         if (this.currentToken.tag() == Tag.EOF) {
-            return;
+            return this.currentToken;
         }
+        Token temp = this.currentToken;
         this.currentToken = lexer.nextToken();
+        return temp;
     }
 
 }
