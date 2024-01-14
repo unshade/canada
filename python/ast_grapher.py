@@ -2,6 +2,7 @@ import matplotlib.pyplot as plt
 import sys
 import json
 import networkx as nx
+import pygraphviz
 
 def build_graph(node, graph, path):
     if isinstance(node, dict):
@@ -22,7 +23,10 @@ def main():
             data = json.loads(json_str)
             G = nx.DiGraph()
             build_graph(data, G, 'root')
-            pos = nx.spring_layout(G)
+
+            # Utiliser graphviz_layout avec le paramètre 'dot' pour une disposition de haut en bas
+            pos = nx.drawing.nx_agraph.graphviz_layout(G, prog='dot')
+
             nx.draw(G, pos, with_labels=True, arrows=True)
             plt.show()
         except json.JSONDecodeError:
