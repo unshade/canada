@@ -3,7 +3,7 @@ package org.trad.pcl.ast;
 public class OperatorNode extends ASTNode {
     private String operator;
 
-    public OperatorNode(String operator) {
+    public void setOperator(String operator) {
         this.operator = operator;
     }
 

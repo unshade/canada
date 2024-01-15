@@ -9,13 +9,14 @@ import org.trad.pcl.Lexer.Tokens.Token;
 import org.trad.pcl.Services.ErrorService;
 import org.trad.pcl.annotation.PrintMethodName;
 import org.trad.pcl.ast.AccessReferenceNode;
+import org.trad.pcl.ast.OperatorNode;
 import org.trad.pcl.ast.ParameterNode;
 import org.trad.pcl.ast.ProgramNode;
 import org.trad.pcl.ast.declaration.DeclarationNode;
 import org.trad.pcl.ast.declaration.FunctionDeclarationNode;
 import org.trad.pcl.ast.declaration.ProcedureDeclarationNode;
 import org.trad.pcl.ast.declaration.TypeDeclarationNode;
-import org.trad.pcl.ast.expression.ExpressionNode;
+import org.trad.pcl.ast.expression.*;
 import org.trad.pcl.ast.statement.*;
 import org.trad.pcl.ast.type.AccessTypeNode;
 import org.trad.pcl.ast.type.RecordTypeNode;
@@ -106,14 +107,13 @@ public class Parser {
             }
             case IDENT -> {
                 //declaration.setName(this.currentToken.getValue());
-                List<TypeDeclarationNode> typeNodes = identsep();
+                List<TypeDeclarationNode> typeNodes = multipleIdent();
                 analyseTerminal(Tag.COLON);
                 TypeNode typeNode = type_n();
                 for (TypeDeclarationNode typeDeclarationNode : typeNodes) {
                     typeDeclarationNode.setType(typeNode);
                     declarations.add(typeDeclarationNode);
                 }
-                // TODO : typexpr();
                 declarationExpression();
                 analyseTerminal(Tag.SEMICOLON);
             }
@@ -162,7 +162,6 @@ public class Parser {
                 type = AccessOrRecord();
             }
             case SEMICOLON -> {
-                type = new SimpleTypeNode();
             }
         }
         return type;
@@ -220,26 +219,33 @@ public class Parser {
         }
     }
 
+    /**
+     * Grammar rule : identsep
+     */
     @PrintMethodName
-    private List<TypeDeclarationNode> identsep() {
+    private List<TypeDeclarationNode> multipleIdent() {
         List<TypeDeclarationNode> declarations = new ArrayList<>();
         if (this.currentToken.tag() == Tag.IDENT) {
             TypeDeclarationNode declaration = new TypeDeclarationNode();
             declarations.add(declaration);
             declaration.setName(analyseTerminal(Tag.IDENT).getValue());
-            declarations.addAll(identsep2());
+            declarations.addAll(identSeparator());
         }
         return declarations;
     }
+
+    /**
+     * Grammar rule : identsep2
+     */
     @PrintMethodName
-    private List<TypeDeclarationNode> identsep2() {
+    private List<TypeDeclarationNode> identSeparator() {
         List<TypeDeclarationNode> declarations = new ArrayList<>();
         switch (this.currentToken.tag()) {
             case COLON -> {
             }
             case COMMA -> {
                 analyseTerminal(Tag.COMMA);
-                declarations.addAll(identsep());
+                declarations.addAll(multipleIdent());
             }
         }
         return declarations;
@@ -247,7 +253,7 @@ public class Parser {
     @PrintMethodName
     private void champ() {
         if (this.currentToken.tag() == Tag.IDENT) {
-            identsep();
+            multipleIdent();
             analyseTerminal(Tag.COLON);
             type_n();
             analyseTerminal(Tag.SEMICOLON);
@@ -347,7 +353,7 @@ public class Parser {
         switch (this.currentToken.tag()) {
             case ASSIGN -> {
                 analyseTerminal(Tag.ASSIGN);
-                expression = expr();
+                expression = expression();
             }
             case SEMICOLON -> {
             }
@@ -364,7 +370,7 @@ public class Parser {
         if (this.currentToken.tag() == Tag.IDENT) {
             parameter = new ParameterNode();
             parameter.setName(currentToken.getValue());
-            identsep();
+            multipleIdent();
             analyseTerminal(Tag.COLON);
             mode();
             parameter.setType(type_n());
@@ -393,327 +399,669 @@ public class Parser {
             }
         }
     }
+
+    /**
+     * Grammar rule : expr
+     */
     @PrintMethodName
-    private ExpressionNode expr() {
-        // TODO : expr
-        ExpressionNode expression = new ExpressionNode();
+    private ExpressionNode expression() {
         switch (this.currentToken.tag()) {
             case IDENT, OPEN_PAREN, DOT, ENTIER, CARACTERE, TRUE, FALSE, NULL, NEW, CHARACTER -> {
-                expression = or_expr();
+                return LeftOrExpression();
             }
 
         }
-        return expression;
+        return null;
     }
+
+    /**
+     * Grammar rule : or_expr
+     * TODO : refactor
+     */
     @PrintMethodName
-    private ExpressionNode or_expr() {
-        // TODO : or_expr
-        ExpressionNode expression = new ExpressionNode();
+    private ExpressionNode LeftOrExpression() {
         switch (this.currentToken.tag()) {
             case IDENT, OPEN_PAREN, DOT, ENTIER, CARACTERE, TRUE, FALSE, NULL, NEW, CHARACTER -> {
-                and_expr();
-                or_expr2();
+                ExpressionNode firstExpression = LeftAndExpression();
+                BinaryExpressionNode secondExpression = OrExpression();
+                if (secondExpression != null) {
+                    secondExpression.setLeft(firstExpression);
+                    return secondExpression;
+                } else {
+                    return firstExpression;
+                }
             }
         }
-        return expression;
+        return null;
     }
+
+    /**
+     * Grammar rule : or_expr2
+     * TODO : refactor
+     */
     @PrintMethodName
-    private void or_expr2() {
+    private BinaryExpressionNode OrExpression() {
+        BinaryExpressionNode expression = null;
         switch (this.currentToken.tag()) {
             case SEMICOLON, COMMA, CLOSE_PAREN, THEN, DOTDOT, LOOP -> {
             }
             case OR -> {
-                analyseTerminal(Tag.OR);
-                or_expr3();
+                expression = new BinaryExpressionNode();
+
+                OperatorNode operator = new OperatorNode();
+                operator.setOperator(analyseTerminal(Tag.OR).getValue());
+                expression.setOperator(operator);
+
+                ExpressionNode secondExpression = RightOrExpression();
+                expression.setRight(secondExpression);
+
             }
         }
+        return expression;
     }
+
+    /**
+     * Grammar rule : or_expr3
+     * TODO : refactor
+     */
     @PrintMethodName
-    private void or_expr3() {
+    private ExpressionNode RightOrExpression() {
         switch (this.currentToken.tag()) {
             case IDENT, OPEN_PAREN, ELSE, DOT, MINUS, ENTIER, CARACTERE, TRUE, FALSE, NULL, NEW, CHARACTER -> {
-                and_expr();
-                or_expr2();
+                ExpressionNode firstExpression = LeftAndExpression();
+                BinaryExpressionNode secondExpression = OrExpression();
+
+                if (secondExpression != null) {
+                    secondExpression.setLeft(firstExpression);
+                    return secondExpression;
+                } else {
+                    return firstExpression;
+                }
             }
         }
+        return null;
     }
+
+    /**
+     * Grammar rule : and_expr
+     * TODO : refactor
+     */
     @PrintMethodName
-    private void and_expr() {
+    private ExpressionNode LeftAndExpression() {
         switch (this.currentToken.tag()) {
             case IDENT, OPEN_PAREN, MINUS, ENTIER, CARACTERE, TRUE, FALSE, NULL, NEW, CHARACTER -> {
-                not_expr();
-                and_expr2();
-            }
+                ExpressionNode firstExpression = not_expr();
+                BinaryExpressionNode secondExpression = AndExpression();
 
+                if (secondExpression != null) {
+                    secondExpression.setLeft(firstExpression);
+                    return secondExpression;
+                } else {
+                    return firstExpression;
+                }
+            }
         }
+        return null;
     }
+
+    /**
+     * Grammar rule : and_expr2
+     * TODO : refactor
+     */
     @PrintMethodName
-    private void and_expr2() {
+    private BinaryExpressionNode AndExpression() {
+        BinaryExpressionNode expression = null;
         switch (this.currentToken.tag()) {
             case SEMICOLON, COMMA, CLOSE_PAREN, OR, THEN, DOTDOT, LOOP -> {
             }
             case AND -> {
-                analyseTerminal(Tag.AND);
-                and_expr3();
+                expression = new BinaryExpressionNode();
+                OperatorNode operator = new OperatorNode();
+                operator.setOperator(analyseTerminal(Tag.AND).getValue());
+                expression.setOperator(operator);
+
+                ExpressionNode secondExpression = RightAndExpression();
+                expression.setRight(secondExpression);
+
             }
         }
+        return expression;
     }
+
+    /**
+     * Grammar rule : and_expr3
+     * TODO : refactor
+     */
     @PrintMethodName
-    private void and_expr3() {
+    private ExpressionNode RightAndExpression() {
         switch (this.currentToken.tag()) {
             case IDENT, OPEN_PAREN, MINUS, ENTIER, CARACTERE, TRUE, FALSE, NULL, NEW, CHARACTER -> {
-                not_expr();
-                and_expr2();
+                ExpressionNode firstExpression = not_expr();
+                BinaryExpressionNode secondExpression = AndExpression();
+
+                if (secondExpression != null) {
+                    secondExpression.setLeft(firstExpression);
+                    return secondExpression;
+                } else {
+                    return firstExpression;
+                }
             }
             case THEN -> {
+                // TODO : then
                 analyseTerminal(Tag.THEN);
                 not_expr();
-                and_expr2();
+                AndExpression();
             }
         }
+        return null;
     }
+
+    /**
+     * Grammar rule : not_expr
+     * TODO : refactor
+     */
     @PrintMethodName
-    private void not_expr() {
+    private ExpressionNode not_expr() {
         switch (this.currentToken.tag()) {
             case IDENT, OPEN_PAREN, MINUS, ENTIER, CARACTERE, TRUE, FALSE, NULL, NEW, CHARACTER -> {
-                equality_expr();
-                not_expr2();
+                ExpressionNode firstExpression = equality_expr();
+                BinaryExpressionNode secondExpression = not_expr2();
+
+                if (secondExpression != null) {
+                    secondExpression.setLeft(firstExpression);
+                    return secondExpression;
+                } else {
+                    return firstExpression;
+                }
             }
         }
+        return null;
     }
+
+    /**
+     * Grammar rule : not_expr2
+     * TODO : refactor
+     */
     @PrintMethodName
-    private void not_expr2() {
+    private BinaryExpressionNode not_expr2() {
+        BinaryExpressionNode expression = null;
         switch (this.currentToken.tag()) {
             case SEMICOLON, COMMA, CLOSE_PAREN, OR, AND, THEN, DOTDOT, LOOP -> {
             }
             case NOT -> {
-                analyseTerminal(Tag.NOT);
-                equality_expr();
-                not_expr2();
+                expression = new BinaryExpressionNode();
+                OperatorNode operator = new OperatorNode();
+                operator.setOperator(analyseTerminal(Tag.NOT).getValue());
+                expression.setOperator(operator);
+
+                ExpressionNode firstExpression = equality_expr();
+                BinaryExpressionNode secondExpression = not_expr2();
+                if (secondExpression != null) {
+                    secondExpression.setLeft(firstExpression);
+                    expression.setRight(secondExpression);
+                } else {
+                    expression.setRight(firstExpression);
+                }
             }
         }
+        return expression;
     }
+
+    /**
+     * Grammar rule : equality_expr
+     * TODO : refactor
+     */
     @PrintMethodName
-    private void equality_expr() {
+    private ExpressionNode equality_expr() {
         switch (this.currentToken.tag()) {
             case IDENT, OPEN_PAREN, MINUS, ENTIER, CARACTERE, TRUE, FALSE, NULL, NEW, CHARACTER -> {
-                relational_expr();
-                equality_expr2();
+                ExpressionNode firstExpression = relational_expr();
+                BinaryExpressionNode secondExpression = equality_expr2();
+
+                if (secondExpression != null) {
+                    secondExpression.setLeft(firstExpression);
+                    return secondExpression;
+                } else {
+                    return firstExpression;
+                }
             }
         }
+        return null;
     }
+
+    /**
+     * Grammar rule : equality_expr2
+     * TODO : refactor
+     */
     @PrintMethodName
-    private void equality_expr2() {
+    private BinaryExpressionNode equality_expr2() {
+        BinaryExpressionNode expression = null;
         switch (this.currentToken.tag()) {
             case SEMICOLON, COMMA, CLOSE_PAREN, OR, AND, THEN, NOT, DOTDOT, LOOP -> {
             }
             case EQ -> {
-                analyseTerminal(Tag.EQ);
-                relational_expr();
-                equality_expr2();
+                expression = new BinaryExpressionNode();
+                OperatorNode operator = new OperatorNode();
+                operator.setOperator(analyseTerminal(Tag.EQ).getValue());
+                expression.setOperator(operator);
+
+                ExpressionNode firstExpression = relational_expr();
+                BinaryExpressionNode secondExpression = equality_expr2();
+                if (secondExpression != null) {
+                    secondExpression.setLeft(firstExpression);
+                    expression.setRight(secondExpression);
+                } else {
+                    expression.setRight(firstExpression);
+                }
             }
             case NE -> {
-                analyseTerminal(Tag.NE);
-                relational_expr();
-                equality_expr2();
+                expression = new BinaryExpressionNode();
+                OperatorNode operator = new OperatorNode();
+                operator.setOperator(analyseTerminal(Tag.NE).getValue());
+                expression.setOperator(operator);
+
+                ExpressionNode firstExpression = relational_expr();
+                BinaryExpressionNode secondExpression = equality_expr2();
+                if (secondExpression != null) {
+                    secondExpression.setLeft(firstExpression);
+                    expression.setRight(secondExpression);
+                } else {
+                    expression.setRight(firstExpression);
+                }
             }
         }
+        return expression;
     }
+    /**
+     * Grammar rule : relational_expr
+     * TODO : refactor
+     */
     @PrintMethodName
-    private void relational_expr() {
+    private ExpressionNode relational_expr() {
         switch (this.currentToken.tag()) {
             case IDENT, OPEN_PAREN, MINUS, ENTIER, CARACTERE, TRUE, FALSE, NULL, NEW, CHARACTER -> {
-                additive_expr();
-                relational_expr2();
+                ExpressionNode firstExpression = additive_expr();
+                BinaryExpressionNode secondExpression = relational_expr2();
+
+                if (secondExpression != null) {
+                    secondExpression.setLeft(firstExpression);
+                    return secondExpression;
+                } else {
+                    return firstExpression;
+                }
             }
         }
+        return null;
     }
+
+    /**
+     * Grammar rule : relational_expr2
+     * TODO : refactor
+     */
     @PrintMethodName
-    private void relational_expr2() {
+    private BinaryExpressionNode relational_expr2() {
+        BinaryExpressionNode expression = null;
         switch (this.currentToken.tag()) {
             case SEMICOLON, COMMA, CLOSE_PAREN, OR, AND, THEN, NOT, EQ, NE, DOTDOT, LOOP -> {
             }
             case LT -> {
-                analyseTerminal(Tag.LT);
-                additive_expr();
-                relational_expr2();
+                expression = new BinaryExpressionNode();
+                OperatorNode operator = new OperatorNode();
+                operator.setOperator(analyseTerminal(Tag.LT).getValue());
+                expression.setOperator(operator);
+
+                ExpressionNode firstExpression = additive_expr();
+                BinaryExpressionNode secondExpression = relational_expr2();
+                if (secondExpression != null) {
+                    secondExpression.setLeft(firstExpression);
+                    expression.setRight(secondExpression);
+                } else {
+                    expression.setRight(firstExpression);
+                }
             }
             case LE -> {
-                analyseTerminal(Tag.LE);
-                additive_expr();
-                relational_expr2();
+                expression = new BinaryExpressionNode();
+                OperatorNode operator = new OperatorNode();
+                operator.setOperator(analyseTerminal(Tag.LE).getValue());
+                expression.setOperator(operator);
+
+                ExpressionNode firstExpression = additive_expr();
+                BinaryExpressionNode secondExpression = relational_expr2();
+                if (secondExpression != null) {
+                    secondExpression.setLeft(firstExpression);
+                    expression.setRight(secondExpression);
+                } else {
+                    expression.setRight(firstExpression);
+                }
             }
             case GT -> {
-                analyseTerminal(Tag.GT);
-                additive_expr();
-                relational_expr2();
+                expression = new BinaryExpressionNode();
+                OperatorNode operator = new OperatorNode();
+                operator.setOperator(analyseTerminal(Tag.GT).getValue());
+                expression.setOperator(operator);
+
+                ExpressionNode firstExpression = additive_expr();
+                BinaryExpressionNode secondExpression = relational_expr2();
+                if (secondExpression != null) {
+                    secondExpression.setLeft(firstExpression);
+                    expression.setRight(secondExpression);
+                } else {
+                    expression.setRight(firstExpression);
+                }
             }
             case GE -> {
-                analyseTerminal(Tag.GE);
-                additive_expr();
-                relational_expr2();
+                expression = new BinaryExpressionNode();
+                OperatorNode operator = new OperatorNode();
+                operator.setOperator(analyseTerminal(Tag.GE).getValue());
+                expression.setOperator(operator);
+
+                ExpressionNode firstExpression = additive_expr();
+                BinaryExpressionNode secondExpression = relational_expr2();
+                if (secondExpression != null) {
+                    secondExpression.setLeft(firstExpression);
+                    expression.setRight(secondExpression);
+                } else {
+                    expression.setRight(firstExpression);
+                }
             }
         }
+        return expression;
     }
+
+    /**
+     * Grammar rule : additive_expr
+     * TODO : refactor
+     */
     @PrintMethodName
-    private void additive_expr() {
+    private ExpressionNode additive_expr() {
         switch (this.currentToken.tag()) {
             case IDENT, OPEN_PAREN, MINUS, ENTIER, CARACTERE, TRUE, FALSE, NULL, NEW, CHARACTER -> {
-                multiplicative_expr();
-                additive_expr2();
+                ExpressionNode firstExpression =  multiplicative_expr();
+                BinaryExpressionNode secondExpression = additive_expr2();
+                if (secondExpression != null) {
+                    secondExpression.setLeft(firstExpression);
+                    return secondExpression;
+                } else {
+                    return firstExpression;
+                }
             }
         }
+        return null;
     }
+
+    /**
+     * Grammar rule : additive_expr2
+     * TODO : refactor
+     */
     @PrintMethodName
-    private void additive_expr2() {
+    private BinaryExpressionNode additive_expr2() {
+        BinaryExpressionNode expression = null;
         switch (this.currentToken.tag()) {
             case SEMICOLON, COMMA, CLOSE_PAREN, OR, AND, THEN, NOT, EQ, NE, LT, LE, GT, GE, DOTDOT, LOOP -> {
             }
             case PLUS -> {
-                analyseTerminal(Tag.PLUS);
-                multiplicative_expr();
-                additive_expr2();
+                expression = new BinaryExpressionNode();
+                OperatorNode operator = new OperatorNode();
+                operator.setOperator(analyseTerminal(Tag.PLUS).getValue());
+                expression.setOperator(operator);
+
+                ExpressionNode firstExpression = multiplicative_expr();
+                BinaryExpressionNode secondExpression = additive_expr2();
+                if (secondExpression != null) {
+                    secondExpression.setLeft(firstExpression);
+                    expression.setRight(secondExpression);
+                } else {
+                    expression.setRight(firstExpression);
+                }
             }
             case MINUS -> {
-                analyseTerminal(Tag.MINUS);
-                multiplicative_expr();
-                additive_expr2();
+                expression = new BinaryExpressionNode();
+                OperatorNode operator = new OperatorNode();
+                operator.setOperator(analyseTerminal(Tag.MINUS).getValue());
+                expression.setOperator(operator);
+
+                ExpressionNode firstExpression = multiplicative_expr();
+                BinaryExpressionNode secondExpression = additive_expr2();
+                if (secondExpression != null) {
+                    secondExpression.setLeft(firstExpression);
+                    expression.setRight(secondExpression);
+                } else {
+                    expression.setRight(firstExpression);
+                }
             }
         }
+        return expression;
     }
+
+    /**
+     * Grammar rule : multiplicative_expr
+     * TODO : refactor
+     */
     @PrintMethodName
-    private void multiplicative_expr() {
+    private ExpressionNode multiplicative_expr() {
+        ExpressionNode expression = null;
         switch (this.currentToken.tag()) {
             case IDENT, OPEN_PAREN, MINUS, ENTIER, CARACTERE, TRUE, FALSE, NULL, NEW, CHARACTER -> {
-                unary_expr();
-                multiplicative_expr2();
+                ExpressionNode firstExpression = unaryExpression();
+                BinaryExpressionNode secondExpression = multiplicative_expr2();
+                if (secondExpression != null) {
+                    secondExpression.setLeft(firstExpression);
+                    return secondExpression;
+                } else {
+                    return firstExpression;
+                }
             }
         }
+        return null;
     }
+
+    /**
+     * Grammar rule : multiplicative_expr2
+     * TODO : refactor
+     */
     @PrintMethodName
-    private void multiplicative_expr2() {
+    private BinaryExpressionNode multiplicative_expr2() {
+        BinaryExpressionNode expression = null;
         switch (this.currentToken.tag()) {
             case SEMICOLON, COMMA, CLOSE_PAREN, OR, AND, THEN, NOT, EQ, NE, LT, LE, GT, GE, PLUS, MINUS, DOTDOT, LOOP -> {
             }
             case MULTI -> {
-                analyseTerminal(Tag.MULTI);
-                unary_expr();
-                multiplicative_expr2();
+                expression = new BinaryExpressionNode();
+                OperatorNode operator = new OperatorNode();
+                operator.setOperator(analyseTerminal(Tag.MULTI).getValue());
+                expression.setOperator(operator);
+
+                ExpressionNode firstExpression = unaryExpression();
+                BinaryExpressionNode secondExpression = multiplicative_expr2();
+                if (secondExpression != null) {
+                    secondExpression.setLeft(firstExpression);
+                    expression.setRight(secondExpression);
+                } else {
+                    expression.setRight(firstExpression);
+                }
             }
             case DIV -> {
-                analyseTerminal(Tag.DIV);
-                unary_expr();
-                multiplicative_expr2();
+                expression = new BinaryExpressionNode();
+                OperatorNode operator = new OperatorNode();
+                operator.setOperator(analyseTerminal(Tag.DIV).getValue());
+                expression.setOperator(operator);
+
+                ExpressionNode firstExpression = unaryExpression();
+                BinaryExpressionNode secondExpression = multiplicative_expr2();
+                if (secondExpression != null) {
+                    secondExpression.setLeft(firstExpression);
+                    expression.setRight(secondExpression);
+                } else {
+                    expression.setRight(firstExpression);
+                }
             }
             case REM -> {
-                analyseTerminal(Tag.REM);
-                unary_expr();
-                multiplicative_expr2();
+                expression = new BinaryExpressionNode();
+                OperatorNode operator = new OperatorNode();
+                operator.setOperator(analyseTerminal(Tag.REM).getValue());
+                expression.setOperator(operator);
+
+                ExpressionNode firstExpression = unaryExpression();
+                BinaryExpressionNode secondExpression = multiplicative_expr2();
+                if (secondExpression != null) {
+                    secondExpression.setLeft(firstExpression);
+                    expression.setRight(secondExpression);
+                } else {
+                    expression.setRight(firstExpression);
+                }
             }
         }
+        return expression;
     }
+
+    /**
+     * Grammar rule : unary_expr
+     */
     @PrintMethodName
-    private void unary_expr() {
+    private ExpressionNode unaryExpression() {
+        ExpressionNode expression = null;
         switch (this.currentToken.tag()) {
             case MINUS -> {
-                analyseTerminal(Tag.MINUS);
-                primary();
+                expression = new UnaryExpressionNode();
+                OperatorNode operator = new OperatorNode();
+                operator.setOperator(analyseTerminal(Tag.MINUS).getValue());
+                ((UnaryExpressionNode) expression).setOperator(operator);
+                ((UnaryExpressionNode) expression).setOperand(primary());
             }
             case IDENT, OPEN_PAREN, ENTIER, CARACTERE, TRUE, FALSE, NULL, NEW, CHARACTER -> {
-                primary();
+                expression = primary();
             }
         }
+        return expression;
     }
     @PrintMethodName
-    private void primary() {
+    private ExpressionNode primary() {
+        ExpressionNode expression = null;
         switch (this.currentToken.tag()) {
             case IDENT -> {
-                analyseTerminal(Tag.IDENT);
-                primary2();
+                String ident = analyseTerminal(Tag.IDENT).getValue();
+                expression = identPrimary();
+                ((VariableReferenceNode) expression).setVariableName(ident);
             }
             case OPEN_PAREN -> {
                 analyseTerminal(Tag.OPEN_PAREN);
-                expr();
+                expression = expression();
                 analyseTerminal(Tag.CLOSE_PAREN);
             }
             case ENTIER -> {
-                analyseTerminal(Tag.ENTIER);
+                expression = new LiteralNode();
+                ((LiteralNode) expression).setValue(Integer.parseInt(analyseTerminal(Tag.ENTIER).getValue()));
             }
             case CARACTERE -> {
-                analyseTerminal(Tag.CARACTERE);
+                expression = new LiteralNode();
+                ((LiteralNode) expression).setValue(analyseTerminal(Tag.CARACTERE).getValue().charAt(0));
             }
             case TRUE -> {
+                expression = new LiteralNode();
                 analyseTerminal(Tag.TRUE);
+                ((LiteralNode) expression).setValue(true);
+
             }
             case FALSE -> {
+                expression = new LiteralNode();
                 analyseTerminal(Tag.FALSE);
+                ((LiteralNode) expression).setValue(false);
             }
             case NULL -> {
+                expression = new LiteralNode();
                 analyseTerminal(Tag.NULL);
+                ((LiteralNode) expression).setValue(null);
             }
             case NEW -> {
+                // TODO : new
                 analyseTerminal(Tag.NEW);
                 analyseTerminal(Tag.IDENT);
             }
             case CHARACTER -> {
+                // TODO : character ' val(ENTIER)
                 analyseTerminal(Tag.CHARACTER);
                 analyseTerminal(Tag.APOSTROPHE);
                 analyseTerminal(Tag.VAL);
                 analyseTerminal(Tag.OPEN_PAREN);
-                expr();
+                expression();
                 analyseTerminal(Tag.CLOSE_PAREN);
             }
 
         }
+        return expression;
     }
+
+    /**
+     * Grammar rule : primary2
+     */
     @PrintMethodName
-    private void primary2() {
+    private VariableReferenceNode identPrimary() {
+        VariableReferenceNode expression = null;
         switch (this.currentToken.tag()) {
             case SEMICOLON, COMMA, CLOSE_PAREN, OR, AND, THEN, NOT, EQ, NE, LT, LE, GT, GE, PLUS, MINUS, MULTI, DIV, REM, DOTDOT, LOOP, DOT -> {
-                acces();
+                expression = new VariableReferenceNode();
+                expression.setNextExpression(acces());
             }
             case OPEN_PAREN -> {
                 analyseTerminal(Tag.OPEN_PAREN);
-                exprsep();
+                expression = new FunctionCallNode();
+                ((FunctionCallNode) expression).setArguments(multipleExpressions());
                 analyseTerminal(Tag.CLOSE_PAREN);
-                acces();
+                expression.setNextExpression(acces());
             }
         }
+        return expression;
     }
+
+    /**
+     * Grammar rule : exprsep
+     */
     @PrintMethodName
-    private void exprsep() {
+    private List<ExpressionNode> multipleExpressions() {
+        List<ExpressionNode> expressions = new ArrayList<>();
         switch (this.currentToken.tag()) {
             case IDENT, OPEN_PAREN, MINUS, ENTIER, CARACTERE, TRUE, FALSE, NULL, NEW, CHARACTER -> {
-                expr();
-                exprsep2();
+                expressions.add(expression());
+                expressions.addAll(expressionSeparator());
             }
         }
+        return expressions;
     }
+
+    /**
+     * Grammar rule : exprsep2
+     */
     @PrintMethodName
-    private void exprsep2() {
+    private List<ExpressionNode> expressionSeparator() {
+        List<ExpressionNode> expressions = new ArrayList<>();
         switch (this.currentToken.tag()) {
             case COMMA -> {
                 analyseTerminal(Tag.COMMA);
-                exprsep();
+                expressions.addAll(multipleExpressions());
             }
             case CLOSE_PAREN -> {
             }
         }
+        return expressions;
     }
+
+    /**
+     * Grammar rule : hasexpr
+     */
     @PrintMethodName
-    private ExpressionNode hasexpr() {
-        ExpressionNode expression = null;
+    private List<ExpressionNode> hasExpression() {
+        List<ExpressionNode> expressions = new ArrayList<>();
         switch (this.currentToken.tag()) {
             case SEMICOLON -> {
             }
             case IDENT, OPEN_PAREN, MINUS, ENTIER, CARACTERE, TRUE, FALSE, NULL, NEW, CHARACTER -> {
-                expression = expr();
+                expressions.add(expression());
             }
             case ASSIGN, DOT -> {
-                exprsep();
+                expressions.addAll(multipleExpressions());
             }
         }
-        return expression;
+        return expressions;
     }
 
     /**
@@ -739,23 +1087,19 @@ public class Parser {
             case RETURN -> {
                 statement = new ReturnStatementNode();
                 analyseTerminal(Tag.RETURN);
-                // TODO
-                hasexpr();
+                ((ReturnStatementNode) statement).addExpressions(hasExpression());
                 analyseTerminal(Tag.SEMICOLON);
             }
             case IF -> {
                 statement = new IfStatementNode();
                 analyseTerminal(Tag.IF);
-                expr();
+                ((IfStatementNode) statement).setCondition(expression());
                 analyseTerminal(Tag.THEN);
                 BlockNode thenBranch = new BlockNode();
                 thenBranch.addStatements(multipleStatements());
                 ((IfStatementNode) statement).setThenBranch(thenBranch);
-                // TODO
-                elifn();
-                BlockNode elseBranch = new BlockNode();
-                elseBranch.addStatements(elsen());
-                ((IfStatementNode) statement).setElseBranch(elseBranch);
+                ((IfStatementNode) statement).setElseIfBranch(elifn());
+                ((IfStatementNode) statement).setElseBranch(elsen());
                 analyseTerminal(Tag.END);
                 analyseTerminal(Tag.IF);
                 analyseTerminal(Tag.SEMICOLON);
@@ -767,9 +1111,9 @@ public class Parser {
                 analyseTerminal(Tag.IDENT);
                 analyseTerminal(Tag.IN);
                 ((LoopStatementNode) statement).setReverse(hasreverse());
-                ((LoopStatementNode) statement).setStartExpression(expr());
+                ((LoopStatementNode) statement).setStartExpression(expression());
                 analyseTerminal(Tag.DOTDOT);
-                ((LoopStatementNode) statement).setEndExpression(expr());
+                ((LoopStatementNode) statement).setEndExpression(expression());
                 analyseTerminal(Tag.LOOP);
                 BlockNode loopBody = new BlockNode();
                 loopBody.addStatements(multipleStatements());
@@ -781,7 +1125,7 @@ public class Parser {
             case WHILE -> {
                 statement = new WhileStatementNode();
                 analyseTerminal(Tag.WHILE);
-                ((WhileStatementNode) statement).setCondition(expr());
+                ((WhileStatementNode) statement).setCondition(expression());
                 analyseTerminal(Tag.LOOP);
                 BlockNode loopBody = new BlockNode();
                 loopBody.addStatements(multipleStatements());
@@ -812,37 +1156,36 @@ public class Parser {
             }
 
             case OPEN_PAREN -> {
-                // TODO
                 statement = new FunctionCallStatementNode();
                 analyseTerminal(Tag.OPEN_PAREN);
-                exprsep();
+                ((FunctionCallStatementNode) statement).setArguments(multipleExpressions());
                 analyseTerminal(Tag.CLOSE_PAREN);
+                // TODO
                 instr3();
                 hasassign();
                 analyseTerminal(Tag.SEMICOLON);
             }
             case ASSIGN, DOT -> {
-                // TODO : Assign recursive variable.variable.variable
                 statement = new AssignmentNode();
-                ((AssignmentNode) statement).setVariableReference(instr3());
+                ((AssignmentNode) statement).setNextIdentifier(instr3());
                 analyseTerminal(Tag.ASSIGN);
-                ((AssignmentNode)statement).setExpression(expr());
+                ((AssignmentNode)statement).setExpression(expression());
                 analyseTerminal(Tag.SEMICOLON);
             }
         }
         return statement;
     }
     @PrintMethodName
-    private AccessReferenceNode instr3() {
-        AccessReferenceNode accessReferenceNode = null;
+    private VariableReferenceNode instr3() {
+        VariableReferenceNode accessReferenceNode = null;
         switch (this.currentToken.tag()) {
             case ASSIGN -> {
             }
             case DOT -> {
                 analyseTerminal(Tag.DOT);
-                accessReferenceNode = new AccessReferenceNode();
+                accessReferenceNode = new VariableReferenceNode();
                 accessReferenceNode.setVariableName(analyseTerminal(Tag.IDENT).getValue());
-                accessReferenceNode.setNextVariable(instr3());
+                accessReferenceNode.setNextExpression(instr3());
             }
         }
         return accessReferenceNode ;
@@ -854,36 +1197,42 @@ public class Parser {
             }
             case ASSIGN -> {
                 analyseTerminal(Tag.ASSIGN);
-                expr();
+                expression();
             }
         }
     }
     @PrintMethodName
-    private void elifn() {
+    private IfStatementNode elifn() {
+        IfStatementNode statement = null;
         switch (this.currentToken.tag()) {
             case END, ELSE -> {
             }
             case ELSIF -> {
                 analyseTerminal(Tag.ELSIF);
-                expr();
+                statement = new IfStatementNode();
+                statement.setCondition(expression());
                 analyseTerminal(Tag.THEN);
-                statement();
-                elifn();
+                BlockNode thenBranch = new BlockNode();
+                thenBranch.addStatements(multipleStatements());
+                statement.setThenBranch(thenBranch);
+                statement.setElseIfBranch(elifn());
             }
         }
+        return statement;
     }
     @PrintMethodName
-    private List<StatementNode> elsen() {
-        List<StatementNode> statements = new ArrayList<>();
+    private BlockNode elsen() {
+        BlockNode block = null;
         switch (this.currentToken.tag()) {
             case END -> {
             }
             case ELSE -> {
                 analyseTerminal(Tag.ELSE);
-                statements.addAll(multipleStatements());
+                block = new BlockNode();
+                block.addStatements(multipleStatements());
             }
         }
-        return statements;
+        return block;
     }
     @PrintMethodName
     private boolean hasreverse() {
@@ -927,17 +1276,19 @@ public class Parser {
         return statements;
     }
     @PrintMethodName
-    private void acces() {
+    private VariableReferenceNode acces() {
+        VariableReferenceNode variableReferenceNode = null;
         switch (this.currentToken.tag()) {
             case SEMICOLON, COMMA, CLOSE_PAREN, OR, END, THEN, NOT, EQ, NE, LT, LE, GT, GE, PLUS, MINUS, MULTI, DIV, REM, DOTDOT, LOOP -> {
             }
             case DOT -> {
                 analyseTerminal(Tag.DOT);
-                analyseTerminal(Tag.IDENT);
-                acces();
+                variableReferenceNode = new VariableReferenceNode();
+                variableReferenceNode.setVariableName(analyseTerminal(Tag.IDENT).getValue());
+                variableReferenceNode.setNextExpression(acces());
             }
         }
-
+        return variableReferenceNode;
     }
     @PrintMethodName
     private Token analyseTerminal(Tag tag) {

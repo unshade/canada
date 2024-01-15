@@ -3,9 +3,9 @@ package org.trad.pcl.ast.statement;
 
 import org.trad.pcl.ast.AccessReferenceNode;
 import org.trad.pcl.ast.expression.ExpressionNode;
+import org.trad.pcl.ast.expression.VariableReferenceNode;
 
 public class AssignmentNode extends IdentifiableStatementNode {
-    private AccessReferenceNode variable;
     private ExpressionNode expression;
 
     public void setExpression(ExpressionNode expression) {
@@ -13,11 +13,5 @@ public class AssignmentNode extends IdentifiableStatementNode {
         expression.setParent(this);
     }
 
-    public void setVariableReference(AccessReferenceNode variable) {
-        this.variable = variable;
-        if (variable != null) {
-            variable.setParent(this);
-        }
-    }
 
 }

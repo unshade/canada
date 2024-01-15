@@ -2,9 +2,13 @@ package org.trad.pcl.ast.expression;
 
 import java.util.List;
 
-public class FunctionCallNode extends ExpressionNode {
+public class FunctionCallNode extends VariableReferenceNode {
 
-    private String functionName;
     private List<ExpressionNode> arguments;
+
+    public void setArguments(List<ExpressionNode> arguments) {
+        this.arguments = arguments;
+        arguments.forEach(argument -> argument.setParent(this));
+    }
 
 }

@@ -8,4 +8,9 @@ public class FunctionCallStatementNode extends IdentifiableStatementNode {
 
     private List<ExpressionNode> arguments;
 
+    public void setArguments(List<ExpressionNode> arguments) {
+        this.arguments = arguments;
+        arguments.forEach(argument -> argument.setParent(this));
+    }
+
 }

@@ -22,6 +22,9 @@ begin
     if choix = 1
         then valeur := perimetreRectangle(2, 3) ;
             put(valeur) ;
+        elsif choix = 2
+            then valeur := aireRectangale(2, 3) ;
+            put(valeur) ;
         else valeur := aireRectangale(2, 3) ;
             put(valeur) ;
     end if;
