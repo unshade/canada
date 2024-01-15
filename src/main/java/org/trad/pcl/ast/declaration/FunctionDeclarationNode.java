@@ -19,7 +19,6 @@ public class FunctionDeclarationNode extends DeclarationNode {
 
     public void addParameter(ParameterNode parameter) {
         parameters.add(parameter);
-        parameter.setParent(this);
     }
 
     public void addParameters(List<ParameterNode> parameters) {
@@ -30,12 +29,10 @@ public class FunctionDeclarationNode extends DeclarationNode {
 
     public void setReturnType(TypeNode returnType) {
         this.returnType = returnType;
-        returnType.setParent(this);
     }
 
     public void setBody(BlockNode body) {
         this.body = body;
-        body.setParent(this);
     }
 
 }

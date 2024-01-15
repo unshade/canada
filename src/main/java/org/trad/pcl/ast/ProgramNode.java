@@ -8,7 +8,6 @@ public class ProgramNode extends ASTNode {
 
     public void setRootProcedure(ProcedureDeclarationNode rootProcedure) {
         this.rootProcedure = rootProcedure;
-        rootProcedure.setParent(this);
     }
 
 }

@@ -11,12 +11,10 @@ public class ProcedureDeclarationNode extends DeclarationNode {
 
     public void setBody(BlockNode body) {
         this.body = body;
-        body.setParent(this);
     }
 
     public void addParameter(ParameterNode parameter) {
         parameters.add(parameter);
-        parameter.setParent(this);
     }
 
     public void addParameters(List<ParameterNode> parameters) {

@@ -8,11 +8,9 @@ public class UnaryExpressionNode extends ExpressionNode {
 
     public void setOperand(ExpressionNode operand) {
         this.operand = operand;
-        operand.setParent(this);
     }
 
     public void setOperator(OperatorNode operator) {
         this.operator = operator;
-        operator.setParent(this);
     }
 }

@@ -7,9 +7,6 @@ public class TypeDeclarationNode extends DeclarationNode {
 
     public void setType(TypeNode type) {
         this.type = type;
-        if (type != null) {
-            type.setParent(this);
-        }
     }
 
 

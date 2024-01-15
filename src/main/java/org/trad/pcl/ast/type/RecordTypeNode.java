@@ -9,7 +9,6 @@ public class RecordTypeNode extends TypeNode {
 
     public void addField(VariableDeclarationNode field) {
         fields.add(field);
-        field.setParent(this);
     }
 
     public void addFields(List<VariableDeclarationNode> fields) {

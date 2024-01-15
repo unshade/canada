@@ -15,19 +15,14 @@ public class IfStatementNode extends StatementNode {
 
     public void setThenBranch(BlockNode thenBranch) {
         this.thenBranch = thenBranch;
-        thenBranch.setParent(this);
     }
 
     public void setElseBranch(BlockNode elseBranch) {
         this.elseBranch = elseBranch;
-        elseBranch.setParent(this);
     }
 
     public void setElseIfBranch(IfStatementNode elseIfBranch) {
         this.elseIfBranch = elseIfBranch;
-        if (elseIfBranch != null) {
-            elseIfBranch.setParent(this);
-        }
     }
 
 }

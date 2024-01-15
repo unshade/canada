@@ -10,21 +10,8 @@ import java.util.List;
 
 public abstract class ASTNode {
     protected ASTNode parent;
-    protected int depth;
 
     private static boolean isJson = false;
-
-    public ASTNode getParent() {
-        return parent;
-    }
-
-    public void setParent(ASTNode parent) {
-        this.parent = parent;
-    }
-
-    public int getDepth() {
-        return parent == null ? 0 : parent.getDepth() + 1;
-    }
 
     public String format(String toFormat) {
         String tab = this.getTab();
@@ -36,12 +23,15 @@ public abstract class ASTNode {
     }
 
     public String getTab() {
-        return "\t".repeat(this.getDepth());
+        return "\t".repeat(depth);
     }
+
+    private static int depth = 0;
 
 
     @Override
     public String toString() {
+        depth++;
         List<Field> fields = new ArrayList<>();
         fields.addAll(List.of(this.getClass().getDeclaredFields()));
 
@@ -89,6 +79,7 @@ public abstract class ASTNode {
             }
         }
         res.append("}");
+        depth--;
         return format(res.toString());
     }
 

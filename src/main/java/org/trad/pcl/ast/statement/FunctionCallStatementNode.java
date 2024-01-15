@@ -10,7 +10,6 @@ public class FunctionCallStatementNode extends IdentifiableStatementNode {
 
     public void setArguments(List<ExpressionNode> arguments) {
         this.arguments = arguments;
-        arguments.forEach(argument -> argument.setParent(this));
     }
 
 }

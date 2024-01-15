@@ -8,7 +8,6 @@ public class FunctionCallNode extends VariableReferenceNode {
 
     public void setArguments(List<ExpressionNode> arguments) {
         this.arguments = arguments;
-        arguments.forEach(argument -> argument.setParent(this));
     }
 
 }

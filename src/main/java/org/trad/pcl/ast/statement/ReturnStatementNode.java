@@ -14,12 +14,10 @@ public class ReturnStatementNode extends StatementNode {
 
     public void addExpression(ExpressionNode expression) {
         this.expressions.add(expression);
-        expression.setParent(this);
     }
 
     public void addExpressions(List<ExpressionNode> expressions) {
         this.expressions.addAll(expressions);
-        expressions.forEach(expression -> expression.setParent(this));
     }
 
 }

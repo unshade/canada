@@ -7,6 +7,5 @@ public class VariableDeclarationNode extends DeclarationNode {
 
     public void setType(TypeNode type) {
         this.type = type;
-        type.setParent(this);
     }
 }

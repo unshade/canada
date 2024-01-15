@@ -15,9 +15,6 @@ public class IdentifiableStatementNode extends StatementNode {
 
     public void setNextIdentifier(VariableReferenceNode nextIdentifier) {
         this.identifier.setNextExpression(nextIdentifier);
-        if (nextIdentifier != null) {
-            nextIdentifier.setParent(this);
-        }
     }
 
 }

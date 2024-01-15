@@ -11,8 +11,5 @@ public class VariableReferenceNode extends ExpressionNode {
 
     public void setNextExpression(VariableReferenceNode nextExpression) {
         this.nextExpression = nextExpression;
-        if (nextExpression != null) {
-            nextExpression.setParent(this);
-        }
     }
 }

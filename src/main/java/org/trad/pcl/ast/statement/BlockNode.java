@@ -17,12 +17,10 @@ public class BlockNode extends StatementNode {
 
     public void addStatement(StatementNode statement) {
         statements.add(statement);
-        statement.setParent(this);
     }
 
     public void addDeclaration(DeclarationNode declaration) {
         declarations.add(declaration);
-        declaration.setParent(this);
     }
 
     public void addDeclarations(List<DeclarationNode> declarations) {
