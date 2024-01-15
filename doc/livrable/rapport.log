@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.141592653-2.6-1.40.24 (MiKTeX 22.10) (preloaded format=pdflatex 2022.10.19)  15 JAN 2024 01:00
+This is pdfTeX, Version 3.141592653-2.6-1.40.24 (MiKTeX 22.10) (preloaded format=pdflatex 2022.10.19)  15 JAN 2024 01:11
 entering extended mode
  restricted \write18 enabled.
  file:line:error style messages enabled.
@@ -2159,6 +2159,9 @@ Underfull \hbox (badness 10000) in paragraph at lines 810--812
  []
 
 [20 <./img//RACI.png>] [21] (rapport.aux)
+
+LaTeX Warning: Label(s) may have changed. Rerun to get cross-references right.
+
 Package rerunfilecheck Info: File `rapport.out' has not changed.
 (rerunfilecheck)             Checksum: 8612477D9FE5F786D6BB8BEFCA8CFDC8;6134.
  ) 
@@ -2188,7 +2191,7 @@ rs/Kuro/AppData/Local/Programs/MiKTeX/fonts/type1/public/amsfonts/cm/cmsy10.pfb
 ><C:/Users/Kuro/AppData/Local/Programs/MiKTeX/fonts/type1/public/amsfonts/cm/cm
 sy7.pfb>
 Output written on D:/Projets\compilation-marcel16u\doc\livrable\rapport.pdf (22
- pages, 1211821 bytes).
+ pages, 1211800 bytes).
 PDF statistics:
  1327 PDF objects out of 1440 (max. 8388607)
  504 named destinations out of 1000 (max. 500000)

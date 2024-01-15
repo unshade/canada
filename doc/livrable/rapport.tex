@@ -191,14 +191,14 @@
                  | $ident$ ( <exprsep> ) $;$
                  | $return$ <hasexpr> $;$
                  | $begin$ <instrs> $end$ $;$
-                 | $if$ <expr> $then$ <instrs> <elsif> <else> $end$ $if$ $;$
+                 | $if$ <expr> $then$ <instrs> <elsif> <$else$> $end$ $if$ $;$
                  | $for$ $ident$ $in$ <hasreverse> <expr> .. <expr> $loop$ <instrs> $end$ $loop$ $;$
                  | $while$ <expr> $loop$ <instrs> $end$ $loop$ $;$
 
         elsif -> $elsif$ <expr> $then$ <instrs> <elsif>
                  | $\epsilon$
 
-        else -> $else$ <instrs>
+        $else$ -> $else$ <instrs>
                  | $\epsilon$
 
         hasreverse -> $reverse$
