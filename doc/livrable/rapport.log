@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.141592653-2.6-1.40.24 (MiKTeX 22.10) (preloaded format=pdflatex 2022.10.19)  15 JAN 2024 00:30
+This is pdfTeX, Version 3.141592653-2.6-1.40.24 (MiKTeX 22.10) (preloaded format=pdflatex 2022.10.19)  15 JAN 2024 01:11
 entering extended mode
  restricted \write18 enabled.
  file:line:error style messages enabled.
@@ -1907,7 +1907,7 @@ LaTeX Info: Command `\overleftrightarrow' is already robust on input line 54.
 LaTeX Info: Command `\underrightarrow' is already robust on input line 54.
 LaTeX Info: Command `\underleftarrow' is already robust on input line 54.
 LaTeX Info: Command `\underleftrightarrow' is already robust on input line 54.
-<img//tele_univ.png, id=134, 532.23843pt x 265.74281pt>
+<img//tele_univ.png, id=130, 532.23843pt x 265.74281pt>
 File: img//tele_univ.png Graphic file (type png)
 <use img//tele_univ.png>
 Package pdftex.def Info: img//tele_univ.png  used on input line 61.
@@ -1926,7 +1926,7 @@ been already used, duplicate ignored
                    \relax 
 l.93     \newpage
                   [1]
-<img//grammaire_init.png, id=185, 504.38437pt x 759.58781pt>
+<img//grammaire_init.png, id=180, 504.38437pt x 759.58781pt>
 File: img//grammaire_init.png Graphic file (type png)
 <use img//grammaire_init.png>
 Package pdftex.def Info: img//grammaire_init.png  used on input line 115.
@@ -2013,36 +2013,6 @@ or specify an encoding such as \usepackage [latin1]{inputenc}
 in the document preamble.
 Alternatively, save the file in UTF-8 using your editor or another tool
 
-
-rapport.tex:221: LaTeX Error: Invalid UTF-8 byte sequence (Ã\expandafter).
-
-See the LaTeX manual or LaTeX Companion for explanation.
-Type  H <return>  for immediate help.
- ...                                              
-                                                  
-l.221         expr -> <accÃ¨s>
-                              
-The document does not appear to be in UTF-8 encoding.
-Try adding \UseRawInputEncoding as the first line of the file
-or specify an encoding such as \usepackage [latin1]{inputenc}
-in the document preamble.
-Alternatively, save the file in UTF-8 using your editor or another tool
-
-
-rapport.tex:221: LaTeX Error: Invalid UTF-8 byte "A8.
-
-See the LaTeX manual or LaTeX Companion for explanation.
-Type  H <return>  for immediate help.
- ...                                              
-                                                  
-l.221         expr -> <accÃ¨s>
-                              
-The document does not appear to be in UTF-8 encoding.
-Try adding \UseRawInputEncoding as the first line of the file
-or specify an encoding such as \usepackage [latin1]{inputenc}
-in the document preamble.
-Alternatively, save the file in UTF-8 using your editor or another tool
-
 [5]
 
 LaTeX Warning: Command \` invalid in math mode on input line 267.
@@ -2054,7 +2024,7 @@ LaTeX Warning: Command \` invalid in math mode on input line 391.
 
 Missing character: There is no è in font cmr10!
 [8]
-<img//partial_table.png, id=486, 1939.245pt x 809.27344pt>
+<img//partial_table.png, id=478, 1939.245pt x 809.27344pt>
 File: img//partial_table.png Graphic file (type png)
 <use img//partial_table.png>
 Package pdftex.def Info: img//partial_table.png  used on input line 453.
@@ -2122,63 +2092,63 @@ in the document preamble.
 Alternatively, save the file in UTF-8 using your editor or another tool
 
 [12] [13]
-<img//sortie1.png, id=671, 259.7203pt x 893.58844pt>
+<img//sortie1.png, id=663, 259.7203pt x 893.58844pt>
 File: img//sortie1.png Graphic file (type png)
 <use img//sortie1.png>
 Package pdftex.def Info: img//sortie1.png  used on input line 708.
 (pdftex.def)             Requested size: 136.57462pt x 469.89088pt.
-<img//sortie2.png, id=672, 263.48438pt x 894.34125pt>
+<img//sortie2.png, id=664, 263.48438pt x 894.34125pt>
 File: img//sortie2.png Graphic file (type png)
 <use img//sortie2.png>
 Package pdftex.def Info: img//sortie2.png  used on input line 710.
 (pdftex.def)             Requested size: 136.57462pt x 463.5863pt.
-<img//sortie3.png, id=673, 261.97874pt x 923.70094pt>
+<img//sortie3.png, id=665, 261.97874pt x 923.70094pt>
 File: img//sortie3.png Graphic file (type png)
 <use img//sortie3.png>
 Package pdftex.def Info: img//sortie3.png  used on input line 712.
 (pdftex.def)             Requested size: 136.57462pt x 481.55348pt.
  [14]
-<img//arbre_json.png, id=691, 470.75874pt x 616.3025pt>
+<img//arbre_json.png, id=683, 470.75874pt x 616.3025pt>
 File: img//arbre_json.png Graphic file (type png)
 <use img//arbre_json.png>
 Package pdftex.def Info: img//arbre_json.png  used on input line 720.
 (pdftex.def)             Requested size: 455.24411pt x 595.99774pt.
  [15 <./img//sortie1.png> <./img//sortie2.png> <./img//sortie3.png>]
-<img//arbre_draw.png, id=700, 1052.21678pt x 574.28839pt>
+<img//arbre_draw.png, id=692, 1052.21678pt x 574.28839pt>
 File: img//arbre_draw.png Graphic file (type png)
 <use img//arbre_draw.png>
 Package pdftex.def Info: img//arbre_draw.png  used on input line 728.
 (pdftex.def)             Requested size: 455.24411pt x 248.4727pt.
  [16 <./img//arbre_json.png>]
-<img//sortie1_err.png, id=707, 261.22594pt x 846.91406pt>
+<img//sortie1_err.png, id=699, 261.22594pt x 846.91406pt>
 File: img//sortie1_err.png Graphic file (type png)
 <use img//sortie1_err.png>
 Package pdftex.def Info: img//sortie1_err.png  used on input line 751.
 (pdftex.def)             Requested size: 136.57462pt x 442.78857pt.
-<img//sortie2_err.png, id=708, 264.99pt x 813.79031pt>
+<img//sortie2_err.png, id=700, 264.99pt x 813.79031pt>
 File: img//sortie2_err.png Graphic file (type png)
 <use img//sortie2_err.png>
 Package pdftex.def Info: img//sortie2_err.png  used on input line 753.
 (pdftex.def)             Requested size: 136.57462pt x 419.42334pt.
-<img//sortie3_err.png, id=709, 272.51813pt x 402.00188pt>
+<img//sortie3_err.png, id=701, 272.51813pt x 402.00188pt>
 File: img//sortie3_err.png Graphic file (type png)
 <use img//sortie3_err.png>
 Package pdftex.def Info: img//sortie3_err.png  used on input line 755.
 (pdftex.def)             Requested size: 136.57462pt x 201.46663pt.
  [17 <./img//arbre_draw.png>]
-<img//syntax_err.png, id=725, 468.24937pt x 56.46094pt>
+<img//syntax_err.png, id=717, 468.24937pt x 56.46094pt>
 File: img//syntax_err.png Graphic file (type png)
 <use img//syntax_err.png>
 Package pdftex.def Info: img//syntax_err.png  used on input line 763.
 (pdftex.def)             Requested size: 455.24411pt x 54.89539pt.
-<img//syntax_warn.png, id=726, 409.53pt x 36.88782pt>
+<img//syntax_warn.png, id=718, 409.53pt x 36.88782pt>
 File: img//syntax_warn.png Graphic file (type png)
 <use img//syntax_warn.png>
 Package pdftex.def Info: img//syntax_warn.png  used on input line 769.
 (pdftex.def)             Requested size: 455.24411pt x 41.00786pt.
  [18 <./img//sortie1_err.png> <./img//sortie2_err.png> <./img//sortie3_err.png>
  <./img//syntax_err.png> <./img//syntax_warn.png>]
-<img//RACI.png, id=740, 798.73407pt x 679.78969pt>
+<img//RACI.png, id=732, 798.73407pt x 679.78969pt>
 File: img//RACI.png Graphic file (type png)
 <use img//RACI.png>
 Package pdftex.def Info: img//RACI.png  used on input line 804.
@@ -2192,60 +2162,38 @@ Underfull \hbox (badness 10000) in paragraph at lines 810--812
 
 LaTeX Warning: Label(s) may have changed. Rerun to get cross-references right.
 
-
-Package rerunfilecheck Warning: File `rapport.out' has changed.
-(rerunfilecheck)                Rerun to get outlines right
-(rerunfilecheck)                or use package `bookmark'.
-
-Package rerunfilecheck Info: Checksums for `rapport.out':
-(rerunfilecheck)             Before: 70AC44ABE3C3B425128AF08906C94EB6;6331
-(rerunfilecheck)             After:  8612477D9FE5F786D6BB8BEFCA8CFDC8;6134.
+Package rerunfilecheck Info: File `rapport.out' has not changed.
+(rerunfilecheck)             Checksum: 8612477D9FE5F786D6BB8BEFCA8CFDC8;6134.
  ) 
 Here is how much of TeX's memory you used:
- 27552 strings out of 475385
- 527738 string characters out of 2777378
- 1328063 words of memory out of 3000000
- 47977 multiletter control sequences out of 15000+600000
+ 27545 strings out of 475385
+ 527629 string characters out of 2777378
+ 1328064 words of memory out of 3000000
+ 47974 multiletter control sequences out of 15000+600000
  478917 words of font info for 43 fonts, out of 8000000 for 9000
  1141 hyphenation exceptions out of 8191
  84i,6n,80p,411b,2026s stack positions out of 10000i,1000n,20000p,200000b,80000s
-
-pdfTeX warning (dest): name{subsection.3.5} has been referenced but does not ex
-ist, replaced by a fixed one
-
-
-pdfTeX warning (dest): name{subsubsection.3.3.3} has been referenced but does n
-ot exist, replaced by a fixed one
-
-
-pdfTeX warning (dest): name{subsubsection.3.3.2} has been referenced but does n
-ot exist, replaced by a fixed one
-
-
-pdfTeX warning (dest): name{subsubsection.3.3.1} has been referenced but does n
-ot exist, replaced by a fixed one
-
- <C:\Users\Kuro\AppData\Local\MiKTeX\fonts/pk/ljfour/jknappen/ec/dpi600\ectt100
-0.pk> <C:\Users\Kuro\AppData\Local\MiKTeX\fonts/pk/ljfour/jknappen/ec/dpi600\ec
-cc1000.pk> <C:\Users\Kuro\AppData\Local\MiKTeX\fonts/pk/ljfour/jknappen/ec/dpi6
-00\ecbx1200.pk> <C:\Users\Kuro\AppData\Local\MiKTeX\fonts/pk/ljfour/jknappen/ec
-/dpi600\ecti1000.pk> <C:\Users\Kuro\AppData\Local\MiKTeX\fonts/pk/ljfour/jknapp
-en/ec/dpi600\ecrm1000.pk> <C:\Users\Kuro\AppData\Local\MiKTeX\fonts/pk/ljfour/j
-knappen/ec/dpi600\ecbx1000.pk> <C:\Users\Kuro\AppData\Local\MiKTeX\fonts/pk/ljf
-our/jknappen/ec/dpi600\ecbx1440.pk> <C:\Users\Kuro\AppData\Local\MiKTeX\fonts/p
-k/ljfour/jknappen/ec/dpi600\ecti1200.pk> <C:\Users\Kuro\AppData\Local\MiKTeX\fo
-nts/pk/ljfour/jknappen/ec/dpi600\ecrm1200.pk> <C:\Users\Kuro\AppData\Local\MiKT
-eX\fonts/pk/ljfour/jknappen/ec/dpi600\ecbx2074.pk> <C:\Users\Kuro\AppData\Local
-\MiKTeX\fonts/pk/ljfour/jknappen/ec/dpi600\eccc1440.pk><C:/Users/Kuro/AppData/L
-ocal/Programs/MiKTeX/fonts/type1/public/amsfonts/cm/cmmi10.pfb><C:/Users/Kuro/A
-ppData/Local/Programs/MiKTeX/fonts/type1/public/amsfonts/cm/cmr10.pfb><C:/Users
-/Kuro/AppData/Local/Programs/MiKTeX/fonts/type1/public/amsfonts/cm/cmsy10.pfb><
-C:/Users/Kuro/AppData/Local/Programs/MiKTeX/fonts/type1/public/amsfonts/cm/cmsy
-7.pfb>
+ <C:\Users\Kuro\AppData\Local\MiKTeX\fonts/pk/ljfour/jknappen/ec/dpi600\ectt1
+000.pk> <C:\Users\Kuro\AppData\Local\MiKTeX\fonts/pk/ljfour/jknappen/ec/dpi600\
+eccc1000.pk> <C:\Users\Kuro\AppData\Local\MiKTeX\fonts/pk/ljfour/jknappen/ec/dp
+i600\ecbx1200.pk> <C:\Users\Kuro\AppData\Local\MiKTeX\fonts/pk/ljfour/jknappen/
+ec/dpi600\ecti1000.pk> <C:\Users\Kuro\AppData\Local\MiKTeX\fonts/pk/ljfour/jkna
+ppen/ec/dpi600\ecrm1000.pk> <C:\Users\Kuro\AppData\Local\MiKTeX\fonts/pk/ljfour
+/jknappen/ec/dpi600\ecbx1000.pk> <C:\Users\Kuro\AppData\Local\MiKTeX\fonts/pk/l
+jfour/jknappen/ec/dpi600\ecbx1440.pk> <C:\Users\Kuro\AppData\Local\MiKTeX\fonts
+/pk/ljfour/jknappen/ec/dpi600\ecti1200.pk> <C:\Users\Kuro\AppData\Local\MiKTeX\
+fonts/pk/ljfour/jknappen/ec/dpi600\ecrm1200.pk> <C:\Users\Kuro\AppData\Local\Mi
+KTeX\fonts/pk/ljfour/jknappen/ec/dpi600\ecbx2074.pk> <C:\Users\Kuro\AppData\Loc
+al\MiKTeX\fonts/pk/ljfour/jknappen/ec/dpi600\eccc1440.pk><C:/Users/Kuro/AppData
+/Local/Programs/MiKTeX/fonts/type1/public/amsfonts/cm/cmmi10.pfb><C:/Users/Kuro
+/AppData/Local/Programs/MiKTeX/fonts/type1/public/amsfonts/cm/cmr10.pfb><C:/Use
+rs/Kuro/AppData/Local/Programs/MiKTeX/fonts/type1/public/amsfonts/cm/cmsy10.pfb
+><C:/Users/Kuro/AppData/Local/Programs/MiKTeX/fonts/type1/public/amsfonts/cm/cm
+sy7.pfb>
 Output written on D:/Projets\compilation-marcel16u\doc\livrable\rapport.pdf (22
- pages, 1212985 bytes).
+ pages, 1211800 bytes).
 PDF statistics:
- 1337 PDF objects out of 1440 (max. 8388607)
- 508 named destinations out of 1000 (max. 500000)
- 339 words of extra memory for PDF output out of 10000 (max. 10000000)
+ 1327 PDF objects out of 1440 (max. 8388607)
+ 504 named destinations out of 1000 (max. 500000)
+ 331 words of extra memory for PDF output out of 10000 (max. 10000000)
 

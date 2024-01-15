@@ -92,7 +92,7 @@
     \tableofcontents
     \newpage
     \section{Contexte du projet}\label{sec:contexte-du-projet}
-    Ce rapport présente le projet réalisé dans le cadre du module PCL1 de la première année du cycle ingénieur à TELECOM Nancy.
+    Ce rapport présente le projet réalisé dans le cadre du module PCL1 de la deuxième année du cycle ingénieur à TELECOM Nancy.
     L'objectif principal est de développer, en groupe, un compilateur pour le langage \textit{canAda}, une version simplifiée d'Ada.
     Ce projet est une opportunité d'approfondir nos compétences en analyse lexicale et syntaxique ainsi que la construction d'un arbre abstrait.
 
@@ -191,14 +191,14 @@
                  | $ident$ ( <exprsep> ) $;$
                  | $return$ <hasexpr> $;$
                  | $begin$ <instrs> $end$ $;$
-                 | $if$ <expr> $then$ <instrs> <elsif> <else> $end$ $if$ $;$
+                 | $if$ <expr> $then$ <instrs> <elsif> <$else$> $end$ $if$ $;$
                  | $for$ $ident$ $in$ <hasreverse> <expr> .. <expr> $loop$ <instrs> $end$ $loop$ $;$
                  | $while$ <expr> $loop$ <instrs> $end$ $loop$ $;$
 
         elsif -> $elsif$ <expr> $then$ <instrs> <elsif>
                  | $\epsilon$
 
-        else -> $else$ <instrs>
+        $else$ -> $else$ <instrs>
                  | $\epsilon$
 
         hasreverse -> $reverse$
@@ -218,7 +218,7 @@
     La grammaire initiale comportait plusieurs instances de récursivité à gauche.
     Par exemple, la règle:
     \begin{lstlisting}[label={lst:lstlisting2}]
-        expr -> <accès>
+        expr -> <acces>
         acces -> $ident$ | <expr> . ident
     \end{lstlisting}
     a été transformée en:
