@@ -8,12 +8,14 @@ import org.trad.pcl.Lexer.Tokens.Tag;
 import org.trad.pcl.Lexer.Tokens.Token;
 import org.trad.pcl.Services.ErrorService;
 import org.trad.pcl.annotation.PrintMethodName;
+import org.trad.pcl.ast.AccessReferenceNode;
 import org.trad.pcl.ast.ParameterNode;
 import org.trad.pcl.ast.ProgramNode;
 import org.trad.pcl.ast.declaration.DeclarationNode;
 import org.trad.pcl.ast.declaration.FunctionDeclarationNode;
 import org.trad.pcl.ast.declaration.ProcedureDeclarationNode;
 import org.trad.pcl.ast.declaration.TypeDeclarationNode;
+import org.trad.pcl.ast.expression.ExpressionNode;
 import org.trad.pcl.ast.statement.*;
 import org.trad.pcl.ast.type.AccessTypeNode;
 import org.trad.pcl.ast.type.RecordTypeNode;
@@ -68,7 +70,7 @@ public class Parser {
         BlockNode rootProcedureBody = new BlockNode();
         rootProcedureBody.addDeclarations(multipleDeclarations());
         analyseTerminal(Tag.BEGIN);
-        rootProcedureBody.addStatements(instrs());
+        rootProcedureBody.addStatements(multipleStatements());
         rootProcedure.setBody(rootProcedureBody);
         abstractSyntaxTreeRoot.setRootProcedure(rootProcedure);
         analyseTerminal(Tag.END);
@@ -91,12 +93,13 @@ public class Parser {
                 declarations.add(declaration);
                 analyseTerminal(Tag.PROCEDURE);
                 declaration.setName(analyseTerminal(Tag.IDENT).getValue());
-                declaration.addParameters(hasparams());
+                declaration.addParameters(hasParameters());
                 analyseTerminal(Tag.IS);
                 BlockNode procedureBody = new BlockNode();
                 procedureBody.addDeclarations(multipleDeclarations());
                 analyseTerminal(Tag.BEGIN);
-                procedureBody.addStatements(instrs());
+                procedureBody.addStatements(multipleStatements());
+                declaration.setBody(procedureBody);
                 analyseTerminal(Tag.END);
                 hasident();
                 analyseTerminal(Tag.SEMICOLON);
@@ -111,7 +114,7 @@ public class Parser {
                     declarations.add(typeDeclarationNode);
                 }
                 // TODO : typexpr();
-                typexpr();
+                declarationExpression();
                 analyseTerminal(Tag.SEMICOLON);
             }
             case TYPE -> {
@@ -127,14 +130,15 @@ public class Parser {
                 declarations.add(declaration);
                 analyseTerminal(Tag.FUNCTION);
                 declaration.setName(analyseTerminal(Tag.IDENT).getValue());
-                declaration.addParameters(hasparams());
+                declaration.addParameters(hasParameters());
                 analyseTerminal(Tag.RETURN);
                 declaration.setReturnType(type_n());
                 analyseTerminal(Tag.IS);
                 BlockNode functionBody = new BlockNode();
                 functionBody.addDeclarations(multipleDeclarations());
                 analyseTerminal(Tag.BEGIN);
-                functionBody.addStatements(instrs());
+                functionBody.addStatements(multipleStatements());
+                declaration.setBody(functionBody);
                 analyseTerminal(Tag.END);
                 hasident();
                 analyseTerminal(Tag.SEMICOLON);
@@ -215,6 +219,7 @@ public class Parser {
             case IDENT -> analyseTerminal(Tag.IDENT);
         }
     }
+
     @PrintMethodName
     private List<TypeDeclarationNode> identsep() {
         List<TypeDeclarationNode> declarations = new ArrayList<>();
@@ -279,8 +284,12 @@ public class Parser {
         }
         return type;
     }
+
+    /**
+     * Grammar rule : params
+     */
     @PrintMethodName
-    private List<ParameterNode> params() {
+    private List<ParameterNode> multipleParameters() {
         List<ParameterNode> parameters = new ArrayList<>();
         if (this.currentToken.tag() == Tag.OPEN_PAREN) {
             analyseTerminal(Tag.OPEN_PAREN);
@@ -289,23 +298,28 @@ public class Parser {
         }
         return parameters;
     }
+
+    /**
+     * Grammar rule : hasparams
+     */
     @PrintMethodName
-    private List<ParameterNode> hasparams() {
+    private List<ParameterNode> hasParameters() {
         List<ParameterNode> parameters = new ArrayList<>();
         switch (this.currentToken.tag()) {
             case IS, RETURN -> {
             }
             case OPEN_PAREN -> {
-                parameters.addAll(params());
+                parameters.addAll(multipleParameters());
             }
         }
         return parameters;
     }
+
     @PrintMethodName
     private List<ParameterNode> paramsep() {
         List<ParameterNode> parameters = new ArrayList<>();
         if (this.currentToken.tag() == Tag.IDENT) {
-            parameters.add(param());
+            parameters.add(parameter());
             parameters.addAll(paramsep2());
         }
         return parameters;
@@ -323,19 +337,29 @@ public class Parser {
         }
         return parameters;
     }
+
+    /**
+     * Grammar rule : typexpr
+     */
     @PrintMethodName
-    private void typexpr() {
+    private ExpressionNode declarationExpression() {
+        ExpressionNode expression = null;
         switch (this.currentToken.tag()) {
             case ASSIGN -> {
                 analyseTerminal(Tag.ASSIGN);
-                expr();
+                expression = expr();
             }
             case SEMICOLON -> {
             }
         }
+        return expression;
     }
+
+    /**
+     * Grammar rule : param
+     */
     @PrintMethodName
-    private ParameterNode param() {
+    private ParameterNode parameter() {
         ParameterNode parameter = null;
         if (this.currentToken.tag() == Tag.IDENT) {
             parameter = new ParameterNode();
@@ -370,22 +394,28 @@ public class Parser {
         }
     }
     @PrintMethodName
-    private void expr() {
+    private ExpressionNode expr() {
+        // TODO : expr
+        ExpressionNode expression = new ExpressionNode();
         switch (this.currentToken.tag()) {
             case IDENT, OPEN_PAREN, DOT, ENTIER, CARACTERE, TRUE, FALSE, NULL, NEW, CHARACTER -> {
-                or_expr();
+                expression = or_expr();
             }
 
         }
+        return expression;
     }
     @PrintMethodName
-    private void or_expr() {
+    private ExpressionNode or_expr() {
+        // TODO : or_expr
+        ExpressionNode expression = new ExpressionNode();
         switch (this.currentToken.tag()) {
             case IDENT, OPEN_PAREN, DOT, ENTIER, CARACTERE, TRUE, FALSE, NULL, NEW, CHARACTER -> {
                 and_expr();
                 or_expr2();
             }
         }
+        return expression;
     }
     @PrintMethodName
     private void or_expr2() {
@@ -671,38 +701,45 @@ public class Parser {
         }
     }
     @PrintMethodName
-    private void hasexpr() {
+    private ExpressionNode hasexpr() {
+        ExpressionNode expression = null;
         switch (this.currentToken.tag()) {
             case SEMICOLON -> {
             }
             case IDENT, OPEN_PAREN, MINUS, ENTIER, CARACTERE, TRUE, FALSE, NULL, NEW, CHARACTER -> {
-                expr();
+                expression = expr();
             }
             case ASSIGN, DOT -> {
                 exprsep();
             }
         }
+        return expression;
     }
+
+    /**
+     * Grammar rule : instr
+     */
     @PrintMethodName
-    private StatementNode instr() {
+    private StatementNode statement() {
         StatementNode statement;
         switch (this.currentToken.tag()) {
             case IDENT -> {
-                // TODO ??
-                statement = new BlockNode();
-                analyseTerminal(Tag.IDENT);
-                instr2();
+                // appel de fonction et Assign
+                String ident = analyseTerminal(Tag.IDENT).getValue();
+                statement = identifiableStatement();
+                ((IdentifiableStatementNode) statement).setIdentifier(ident);
             }
             case BEGIN -> {
                 statement = new BlockNode();
                 analyseTerminal(Tag.BEGIN);
-                instrs();
+                ((BlockNode) statement).addStatements(multipleStatements());
                 analyseTerminal(Tag.END);
                 analyseTerminal(Tag.SEMICOLON);
             }
             case RETURN -> {
                 statement = new ReturnStatementNode();
                 analyseTerminal(Tag.RETURN);
+                // TODO
                 hasexpr();
                 analyseTerminal(Tag.SEMICOLON);
             }
@@ -711,34 +748,44 @@ public class Parser {
                 analyseTerminal(Tag.IF);
                 expr();
                 analyseTerminal(Tag.THEN);
-                instrs();
+                BlockNode thenBranch = new BlockNode();
+                thenBranch.addStatements(multipleStatements());
+                ((IfStatementNode) statement).setThenBranch(thenBranch);
+                // TODO
                 elifn();
-                elsen();
+                BlockNode elseBranch = new BlockNode();
+                elseBranch.addStatements(elsen());
+                ((IfStatementNode) statement).setElseBranch(elseBranch);
                 analyseTerminal(Tag.END);
                 analyseTerminal(Tag.IF);
                 analyseTerminal(Tag.SEMICOLON);
             }
+            // For var in reverse expr .. expr loop  end loop;
             case FOR -> {
                 statement = new LoopStatementNode();
                 analyseTerminal(Tag.FOR);
                 analyseTerminal(Tag.IDENT);
                 analyseTerminal(Tag.IN);
-                hasreverse();
-                expr();
+                ((LoopStatementNode) statement).setReverse(hasreverse());
+                ((LoopStatementNode) statement).setStartExpression(expr());
                 analyseTerminal(Tag.DOTDOT);
-                expr();
+                ((LoopStatementNode) statement).setEndExpression(expr());
                 analyseTerminal(Tag.LOOP);
-                instrs();
+                BlockNode loopBody = new BlockNode();
+                loopBody.addStatements(multipleStatements());
+                ((LoopStatementNode) statement).setBody(loopBody);
                 analyseTerminal(Tag.END);
                 analyseTerminal(Tag.LOOP);
                 analyseTerminal(Tag.SEMICOLON);
             }
             case WHILE -> {
-                statement = new LoopStatementNode();
+                statement = new WhileStatementNode();
                 analyseTerminal(Tag.WHILE);
-                expr();
+                ((WhileStatementNode) statement).setCondition(expr());
                 analyseTerminal(Tag.LOOP);
-                instrs();
+                BlockNode loopBody = new BlockNode();
+                loopBody.addStatements(multipleStatements());
+                ((WhileStatementNode) statement).setBody(loopBody);
                 analyseTerminal(Tag.END);
                 analyseTerminal(Tag.LOOP);
                 analyseTerminal(Tag.SEMICOLON);
@@ -749,13 +796,24 @@ public class Parser {
         }
         return statement;
     }
+
+    /**
+     * Grammar rule : instr2
+     */
     @PrintMethodName
-    private void instr2() {
+    private IdentifiableStatementNode identifiableStatement() {
+        IdentifiableStatementNode statement = null;
         switch (this.currentToken.tag()) {
+
+            // var;
             case SEMICOLON -> {
+                statement = new FunctionCallStatementNode();
                 analyseTerminal(Tag.SEMICOLON);
             }
+
             case OPEN_PAREN -> {
+                // TODO
+                statement = new FunctionCallStatementNode();
                 analyseTerminal(Tag.OPEN_PAREN);
                 exprsep();
                 analyseTerminal(Tag.CLOSE_PAREN);
@@ -764,24 +822,30 @@ public class Parser {
                 analyseTerminal(Tag.SEMICOLON);
             }
             case ASSIGN, DOT -> {
-                instr3();
+                // TODO : Assign recursive variable.variable.variable
+                statement = new AssignmentNode();
+                ((AssignmentNode) statement).setVariableReference(instr3());
                 analyseTerminal(Tag.ASSIGN);
-                expr();
+                ((AssignmentNode)statement).setExpression(expr());
                 analyseTerminal(Tag.SEMICOLON);
             }
         }
+        return statement;
     }
     @PrintMethodName
-    private void instr3() {
+    private AccessReferenceNode instr3() {
+        AccessReferenceNode accessReferenceNode = null;
         switch (this.currentToken.tag()) {
             case ASSIGN -> {
             }
             case DOT -> {
                 analyseTerminal(Tag.DOT);
-                analyseTerminal(Tag.IDENT);
-                instr3();
+                accessReferenceNode = new AccessReferenceNode();
+                accessReferenceNode.setVariableName(analyseTerminal(Tag.IDENT).getValue());
+                accessReferenceNode.setNextVariable(instr3());
             }
         }
+        return accessReferenceNode ;
     }
     @PrintMethodName
     private void hasassign() {
@@ -803,43 +867,50 @@ public class Parser {
                 analyseTerminal(Tag.ELSIF);
                 expr();
                 analyseTerminal(Tag.THEN);
-                instr();
+                statement();
                 elifn();
             }
         }
     }
     @PrintMethodName
-    private void elsen() {
+    private List<StatementNode> elsen() {
+        List<StatementNode> statements = new ArrayList<>();
         switch (this.currentToken.tag()) {
             case END -> {
             }
             case ELSE -> {
                 analyseTerminal(Tag.ELSE);
-                instrs();
+                statements.addAll(multipleStatements());
             }
         }
+        return statements;
     }
     @PrintMethodName
-    private void hasreverse() {
+    private boolean hasreverse() {
+        boolean hasReverse = false;
         switch (this.currentToken.tag()) {
             case IDENT, OPEN_PAREN, MINUS, ENTIER, CARACTERE, TRUE, FALSE, NULL, NEW, CHARACTER -> {
             }
             case REVERSE -> {
                 analyseTerminal(Tag.REVERSE);
+                hasReverse = true;
             }
         }
+        return hasReverse;
     }
+
+    /**
+     * Grammar rule : instrs
+     */
     @PrintMethodName
-    private List<StatementNode> instrs() {
+    private List<StatementNode> multipleStatements() {
         List<StatementNode> statements = new ArrayList<>();
         switch (this.currentToken.tag()) {
             case IDENT, BEGIN, RETURN, IF, FOR, WHILE -> {
-                statements.add(instr());
+                statements.add(statement());
                 statements.addAll(instrs2());
             }
         }
-
-        //TODO
         return statements;
     }
     @PrintMethodName
@@ -847,7 +918,7 @@ public class Parser {
         List<StatementNode> statements = new ArrayList<>();
         switch (this.currentToken.tag()) {
             case IDENT, BEGIN, RETURN, IF, FOR, WHILE -> {
-                statements.add(instr());
+                statements.add(statement());
                 statements.addAll(instrs2());
             }
             case END, ELSE, ELSIF -> {

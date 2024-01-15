@@ -8,4 +8,16 @@ public class IfStatementNode extends StatementNode {
     private BlockNode thenBranch;
     private BlockNode elseBranch;
 
+    public void setCondition(ExpressionNode condition) {
+        this.condition = condition;
+    }
+
+    public void setThenBranch(BlockNode thenBranch) {
+        this.thenBranch = thenBranch;
+    }
+
+    public void setElseBranch(BlockNode elseBranch) {
+        this.elseBranch = elseBranch;
+    }
+
 }

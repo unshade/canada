@@ -33,4 +33,9 @@ public class FunctionDeclarationNode extends DeclarationNode {
         returnType.setParent(this);
     }
 
+    public void setBody(BlockNode body) {
+        this.body = body;
+        body.setParent(this);
+    }
+
 }
