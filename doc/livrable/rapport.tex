@@ -43,12 +43,13 @@
     basicstyle=\ttfamily\small,
     keywordstyle=\color{blue},
     stringstyle=\color{red},
-    commentstyle=\color{green},
+    commentstyle=\color{gray},
     morecomment=[l][\color{magenta}]{\#},
     extendedchars=true,        % lets you use non-ASCII characters; for 8-bits encodings only, does not work with UTF-8
     captionpos=b,              % sets the caption-position to bottom
     basicstyle=\ttfamily,
-    mathescape=true
+    mathescape=true,
+    language=Java,
 }
 
 \begin{document}
@@ -60,10 +61,10 @@
 
             \includegraphics[width=0.5\textwidth]{tele_univ}
 
-            \textsc{\Large Rapport final de Projet de compilation}\\[1.5cm]
+            \textsc{\Large Rapport d'activité du Projet de compilation}\\[1.5cm]
 
             \HRule \\[0.4cm]
-            { \huge \bfseries Développement d'un compilateur pour le language CanAda\\[0.4cm] }
+            { \huge \bfseries Développement d'un compilateur pour le langage CanAda\\[0.4cm] }
 
             \HRule \\[2cm]
 
@@ -76,7 +77,7 @@
             \end{minipage}
             \begin{minipage}{0.4\textwidth}
                 \begin{flushright} \large
-                \emph{Responsable du module :}\\
+                \emph{Responsables du module :}\\
                 M. Olivier FESTOR\\
                 Mme. Suzanne COLLIN\\
                 \end{flushright}
@@ -101,7 +102,7 @@
     Cette connaissance est essentielle pour optimiser les performances des programmes, assurer leur sécurité, et développer des logiciels fiables et efficaces.
     Le projet \textit{canAda} s'inspire d'Ada, un langage connu pour sa fiabilité et sa sécurité.
     Ce travail nous plonge dans la complexité de la compilation, nous préparant à des applications concrètes dans divers secteurs tels que les systèmes embarqués, la défense, ou l'aéronautique.
-    En développant un compilateur, nous affrontons non seulement les défis techniques relatifs à la conception d'un tel compilateur mais aussi nous nous créons une base de connaissances fondamentale pour nous, futurs ingénieurs.
+    En développant un compilateur, nous affrontons non seulement les défis techniques relatifs à la conception d'un tel compilateur mais cela constitue aussi une base de connaissances fondamentale pour nous, futurs ingénieurs.
     Nous avons pris comme décision de faire ce projet en Java car nous avions envie d'approfondir notre connaissance de ce langage et de ses outils.
 
     \section{Grammaire}\label{sec:grammaire}
@@ -122,7 +123,7 @@
 
     La grammaire initiale du langage \textit{canAda}, avant sa transformation en grammaire LL(1), se présente comme suit en BNF sans les regex:
 
-    \begin{lstlisting}[label={lst:lstlisting}]
+    \begin{lstlisting}[keywordstyle=\color{black},label={lst:lstlisting}]
         fichier -> $withAda.Text$_$IO$ $;$ $useAda.Text$_$IO$ $;$ $procedure$ $ident$ $is$ <decls> $begin$ <instrs> $end$ <hasident> $;$ $EOF$
 
         decl -> $type$ $ident$ $;$
@@ -173,7 +174,7 @@
                | $null$
                | $($ <expr> $)$
                | <acces>
-               | <expr> <opérateur> <expr>
+               | <expr> <operateur> <expr>
                | $not$ <expr>
                | $-$ <expr>
                | $new$ $ident$
@@ -191,14 +192,14 @@
                  | $ident$ ( <exprsep> ) $;$
                  | $return$ <hasexpr> $;$
                  | $begin$ <instrs> $end$ $;$
-                 | $if$ <expr> $then$ <instrs> <elsif> <$else$> $end$ $if$ $;$
+                 | $if$ <expr> $then$ <instrs> <elsif> <else> $end$ $if$ $;$
                  | $for$ $ident$ $in$ <hasreverse> <expr> .. <expr> $loop$ <instrs> $end$ $loop$ $;$
                  | $while$ <expr> $loop$ <instrs> $end$ $loop$ $;$
 
         elsif -> $elsif$ <expr> $then$ <instrs> <elsif>
                  | $\epsilon$
 
-        $else$ -> $else$ <instrs>
+        else -> $else$ <instrs>
                  | $\epsilon$
 
         hasreverse -> $reverse$
@@ -207,7 +208,7 @@
         instrs -> <instr> <instrs>
                   | <instr>
 
-        opérateur -> $=$ | $/=$ | $<$ | $<=$ | $>$ | $>=$ | $+$ | $-$ | $*$ | $/$ | $rem$ | $and$ | $and$ $then$ | $or$ | $or$ $else$
+        operateur -> $=$ | $/=$ | $<$ | $<=$ | $>$ | $>=$ | $+$ | $-$ | $*$ | $/$ | $rem$ | $and$ | $and$ $then$ | $or$ | $or$ $else$
 
         acces -> $ident$
                 | <expr> $.$ $ident$
@@ -216,28 +217,30 @@
 
     \subsubsection{Élimination de la Récursivité à Gauche}
     La grammaire initiale comportait plusieurs instances de récursivité à gauche.
-    Par exemple, la règle:
+    Par exemple, les deux règles suivantes:
     \begin{lstlisting}[label={lst:lstlisting2}]
         expr -> <acces>
         acces -> $ident$ | <expr> . ident
     \end{lstlisting}
-    a été transformée en:
+    ont été transformées en:
     \begin{lstlisting}[label={lst:lstlisting3}]
-        expr -> $ident$ <primary2>
+        expr -> [$\dots$] -> primary
+        primary -> $ident$ <primary2>
         primary2 -> $($ <exprsep> $)$ <acces> | <acces>
         acces -> $.$ ident <acces> | $\epsilon$
     \end{lstlisting}
+    Comme la priorisation des calculs a beaucoup impacté la structure de la grammaire, on note [\dots] pour représenter l'enchainement de règles permettant de se retrouver dans le cas de la règle \textit{expr} de départ.
     Cette modification élimine la (double ici) récursivité à gauche, rendant la grammaire adaptée pour une analyse LL(1).
     Une autre récursivité à gauche a été supprimé mais elle a été faite aussi à travers la priorisation des règles.
 
     \subsubsection{Factorisation à Gauche}
     La factorisation à gauche a été nécessaire pour certaines règles.
-    Par exemple:
+    Par exemple, les règles suivantes:
     \begin{lstlisting}[label={lst:lstlisting4}]
         exprsep -> <expr> $,$ <exprsep>
         exprsep -> <expr>
     \end{lstlisting}
-    a été réécrite en:
+    ont été réécrites en:
     \begin{lstlisting}[label={lst:lstlisting5}]
         exprsep -> <expr> <exprsep$'$>
         exprsep$'$ -> $,$ <expr> <exprsep$'$> | $\epsilon$
@@ -245,12 +248,12 @@
     Ceci assure que la règle peut être analysée de manière déterministe en LL(1).
 
     \subsubsection{Gestion des Priorités de Calculs}
-    Pour gérer correctement les priorités des opérations, la grammaire a été ajustée.
-    Par exemple, les opérations de multiplication et division ont été séparées des opérations d'addition et de soustraction pour respecter leur priorité:
+    Pour gérer correctement les priorités des opérations, la grammaire a été ajustée notamment au niveau des règles de \textit{expr}.
+    Par exemple, les opérations de \textit{Ou} et \textit{Et} ont été séparées des opérations d'addition et de soustraction pour respecter leur priorité selon le sujet, par exemple:
     \begin{lstlisting}[label={lst:lstlisting6}]
         expr -> <expr> <operateur> <expr>
     \end{lstlisting}
-    a été réécrite en:
+    a été réécrite en partie de cette manière:
     \begin{lstlisting}[label={lst:lstlisting7}]
         expr -> <or_expr>
         or_expr -> <and_expr> <or_expr$'$>
@@ -258,9 +261,7 @@
         or_expr$'$2 -> <and_expr> <or_expr$'$>
         or_expr$'$2 -> $else$ <and_expr> <or_expr$'$>
         and_expr -> <not_expr> <and_expr$'$>
-    \end{lstlisting}
-    [\dots]
-    \begin{lstlisting}[label={lst:lstlisting8}]
+        [$\dots$]
         unary_expr -> $-$ <unary_expr>
         unary_expr -> <primary>
         primary -> $entier$
@@ -273,7 +274,7 @@
         primary -> $new$ $ident$
         primary -> $character$ $'$ $val$ ( <expr> )
     \end{lstlisting}
-    Cela permet de respecter la hiérarchie des opérations dans les expressions arithmétiques.
+    Cela permet de respecter la hiérarchie des opérations dans les expressions arithmétiques et logiques.
 
     Les ensembles de sélection distincts ont été calculés pour assurer une sélection univoque lors de l'analyse.
 
@@ -445,7 +446,7 @@
 
     \subsection{Table LL(1)}\label{subsec:table-ll(1)}
 
-    A l'aide de la grammaire transformée en LL(1), nous avons pu construire la table LL(1) suivante pour produire notre Parser.
+    A l'aide de la grammaire transformée en LL(1), nous avons pu construire la table LL(1) suivante pour produire notre \textit{Parser}.
     Ci-dessous, nous présentons une partie de la table LL(1) pour des raisons de lisibilité.
 
     \begin{figure}[H]
@@ -472,7 +473,7 @@
     La classe \textit{Tag} définit les différents types de tokens, c'est une enum, tandis que \textit{PeekingReader} permet de lire en avance dans le flux de caractères pour identifier correctement les tokens complexes en se passant donc d'un automate à états finis.
     Cela repose sur deux fonctions complexes qui permettent de lire le flux de caractères et de déterminer si le caractère courant est la fin d'un token.
 
-    \begin{lstlisting}[label={lst:lstlisting1}]
+    \begin{lstlisting}[language=Java,label={lst:lstlisting1}]
         /**
          * Check if the current character is the end of a token
          *
@@ -541,16 +542,20 @@
 
     Le \textit{Lexer} est conçu pour être à la fois rapide et fiable, capable d'identifier précisément les tokens même dans des cas de syntaxe complexe grâce aux fonctions présentées ci-dessus.
     Cette précision est essentielle pour garantir une analyse syntaxique sans erreur dans les étapes suivantes du processus de compilation.
+    Le fait de se passer d'un automate à états finis permet d'optimiser le temps d'exécution du \textit{Lexer}.
 
     \section{Analyse Syntaxique}\label{sec:analyse-syntaxique}
 
     \subsection{Structure et Fonctionnement}\label{subsec:structure-et-fonctionnement}
 
     La classe \textit{Parser} a été conçue pour analyser les programmes écrits dans le langage \textit{canAda}, il est codé, lui aussi, à l'aide du pattern \textit{Singleton} pour éviter d'avoir plusieurs instances de la classe.
-    Il contient le token courant et l'analyseur lexical, qui sont utilisés pour analyser le programme source.
+    Il contient le token courant et l'analyseur lexical qui est utilisé pour analyser le programme source.
     Chaque méthode de cette classe correspond à un non-terminal de la grammaire LL(1) et est responsable de l'analyse d'une structure syntaxique spécifique du langage.
     Par exemple, une méthode \textit{expr()} est utilisée pour analyser les expressions, correspondant au non-terminal \textit{expr} de la grammaire.
     Ces méthodes sont appelées récursivement pour construire l'arbre syntaxique du programme source.
+    En fonction du token courant, on applique la règle associée à ce token d'après la table LL(1) construite précédemment.
+    Si des terminaux sont dans cette règle, ils ont lu à travers la fonction \textit{analyseTerminal()} trouvable dans la suite du rapport qui permet de vérifier si le token courant correspond bien au terminal attendu.
+    Sinon on appelle la méthode associée au non-terminal de la règle et ainsi de suite \dots
 
     \begin{lstlisting}[label={lst:lstlisting10}]
         @PrintMethodName
@@ -575,7 +580,7 @@
     \begin{lstlisting}[label={lst:lstlisting11}]
         @PrintMethodName
         private void analyseTerminal(Tag tag) {
-            System.out.println("\t\t↪️ " + this.currentToken);
+            System.out.println("\t\t-> " + this.currentToken);
             if (!(this.currentToken.tag() == tag)) {
                 Token expectedToken = new Token(tag, this.currentToken.line(), TagHelper.getTagString(tag));
                 if (expectedToken.tag() == Tag.SEMICOLON) {
@@ -618,7 +623,6 @@
                 this.rootProcedure = rootProcedure;
                 rootProcedure.setParent(this);
             }
-
         }
     \end{lstlisting}
 
@@ -634,8 +638,8 @@
     \end{lstlisting}
 
     Et ainsi de suite pour chaque nœud de l'arbre.
-    On utilise alors notre fonction \textit{Override} \textit{toString()} pour afficher l'arbre abstrait syntaxique de manière recursive qui est dans notre classe abstraite qui extend de nos différents nœuds.
-    Ainsi on a juste a appeler la fonction \textit{toString()} sur le nœud racine de l'arbre pour afficher l'arbre abstrait syntaxique qui récupère les différents nœuds de l'arbre et les affiche de manière récursivee en recupérant les différents attributs de chaque nœud.
+    On utilise alors notre fonction \textit{Override} \textit{toString()} pour afficher l'arbre abstrait syntaxique de manière recursive qui est dans notre classe abstraite dont extend nos différents nœuds.
+    Ainsi on a juste a appeler la fonction \textit{toString()} sur le nœud racine de l'arbre pour afficher l'arbre abstrait syntaxique qui récupère les différents nœuds de l'arbre et les affiche de manière récursivee en récupérant les différents attributs de chaque nœud.
 
     \begin{lstlisting}[label={lst:lstlisting14}]
         public String toString() {
@@ -701,7 +705,7 @@
         end Main;
     \end{lstlisting}
 
-    On obtient alors après l'analyse lexicale et syntaxique la sortie suivante, on l'a découpé en 3 parties pour plus de lisibilité et laisser sur fond noir pour faciliter la lisibilité des couleurs :
+    On obtient alors après l'analyse lexicale et syntaxique la sortie suivante, on l'a découpée en 3 parties pour plus de lisibilité et laissée sur fond noir pour faciliter la lisibilité des couleurs :
 
     \begin{figure}[H]
         \centering
@@ -744,7 +748,7 @@
         end Main;
     \end{lstlisting}
 
-    On obtient alors après l'analyse lexicale et syntaxique la sortie suivante, on l'a découpé en 3 parties pour plus de lisibilité et laisser sur fond noir pour faciliter la lisibilité des couleurs :
+    On obtient alors après l'analyse lexicale et syntaxique la sortie suivante, on l'a découpée en 3 parties pour plus de lisibilité et laissée sur fond noir pour faciliter la lisibilité des couleurs :
 
     \begin{figure}[H]
         \centering
@@ -795,9 +799,7 @@
     branches nous permettant de travailler simultanément sans conflit.
 
     \subsection{Matrice RACI}\label{subsec:matrice-raci}
-    Nous avons choisi de ne pas faire de matrice RACI à cause des choix d'organisation que nous avons faits.
-    En effet, nous avons décidé de travailler en groupe sur toutes les tâches, ce qui fait que nous sommes tous responsables de toutes les tâches et qu'il n'y a, de ce fait,
-    pas de répartition précise des tâches.
+    Voici la matrice RACI de notre projet, elle nous a permis de nous organiser et de répartir les tâches de manière efficace, on remarque que personne n'approuve les tâches car nous avons travaillé en groupe et que nous avons tous approuvé les tâches entre nous.
 
     \begin{figure}[H]
         \centering
@@ -830,10 +832,10 @@
     \section{Conclusion}\label{sec:conclusion}
     Ce rapport a présenté en détail le processus de développement d'un compilateur pour le langage \textit{canAda}, réalisé dans le cadre du module PCL1 à TELECOM Nancy.
     Le projet a débuté par la transformation de la grammaire originale en une grammaire LL(1), adaptée pour une analyse syntaxique précise.
-    Cette transformation a impliqué l'élimination de la récursivité à gauche, la factorisation, et la gestion des priorités de calculs pour assurer une analyse déterministe.
+    Cette transformation a impliqué tout d'abord d'avoir une grammaire explicite sans regex, puis l'élimination de la récursivité à gauche, la factorisation, et la gestion des priorités de calculs pour assurer une analyse déterministe.
 
     L'analyse lexicale a été effectuée par le \textit{Lexer}, un composant clé qui convertit le code source en tokens, en s'appuyant sur un ensemble de règles prédéfinies et un système efficace de lecture en avance et d'une astuce pour déterminer la fin d'un token ce qui nous a permis de nous passer d'un automate à états finis.
-    La classe \textit{Parser}, quant à elle, a joué un rôle essentiel dans l'analyse syntaxique, en décomposant le programme source en ses composants syntaxiques, tout en gérant les erreurs syntaxiques de manière robuste.
+    La classe \textit{Parser}, quant à elle, a permis l'analyse syntaxique à travers la récupération du flux de \textit{Token} du programme source et l'application des règles établies dans le tableau LL(1), tout en gérant les erreurs/warnings syntaxiques de manière robuste permettant ainsi de continuer à analyser le programme source jusqu'à la fin tout en indiquant les erreurs rencontrées pour aider le développeur à les corriger.
 
     La construction de l'arbre abstrait syntaxique (AST) a été une étape cruciale, permettant une représentation concise et manipulable du programme source pour les étapes ultérieures de la compilation.
     Chaque nœud de l'AST, tel que \textit{OperatorNode} ou \textit{ProgramNode}, a capturé des éléments essentiels des structures syntaxiques du langage \textit{canAda}.
