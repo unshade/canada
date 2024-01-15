@@ -11,10 +11,7 @@ import org.trad.pcl.annotation.PrintMethodName;
 import org.trad.pcl.ast.OperatorNode;
 import org.trad.pcl.ast.ParameterNode;
 import org.trad.pcl.ast.ProgramNode;
-import org.trad.pcl.ast.declaration.DeclarationNode;
-import org.trad.pcl.ast.declaration.FunctionDeclarationNode;
-import org.trad.pcl.ast.declaration.ProcedureDeclarationNode;
-import org.trad.pcl.ast.declaration.TypeDeclarationNode;
+import org.trad.pcl.ast.declaration.*;
 import org.trad.pcl.ast.expression.*;
 import org.trad.pcl.ast.statement.*;
 import org.trad.pcl.ast.type.AccessTypeNode;
@@ -106,10 +103,10 @@ public class Parser {
             }
             case IDENT -> {
                 //declaration.setName(this.currentToken.getValue());
-                List<TypeDeclarationNode> typeNodes = multipleIdent();
+                List<VariableDeclarationNode> typeNodes = multipleIdent();
                 analyseTerminal(Tag.COLON);
                 TypeNode typeNode = type_n();
-                for (TypeDeclarationNode typeDeclarationNode : typeNodes) {
+                for (VariableDeclarationNode typeDeclarationNode : typeNodes) {
                     typeDeclarationNode.setType(typeNode);
                     declarations.add(typeDeclarationNode);
                 }
@@ -222,12 +219,12 @@ public class Parser {
      * Grammar rule : identsep
      */
     @PrintMethodName
-    private List<TypeDeclarationNode> multipleIdent() {
-        List<TypeDeclarationNode> declarations = new ArrayList<>();
+    private List<VariableDeclarationNode> multipleIdent() {
+        List<VariableDeclarationNode> declarations = new ArrayList<>();
         if (this.currentToken.tag() == Tag.IDENT) {
-            TypeDeclarationNode declaration = new TypeDeclarationNode();
-            declarations.add(declaration);
+            VariableDeclarationNode declaration = new VariableDeclarationNode();
             declaration.setName(analyseTerminal(Tag.IDENT).getValue());
+            declarations.add(declaration);
             declarations.addAll(identSeparator());
         }
         return declarations;
@@ -237,8 +234,8 @@ public class Parser {
      * Grammar rule : identsep2
      */
     @PrintMethodName
-    private List<TypeDeclarationNode> identSeparator() {
-        List<TypeDeclarationNode> declarations = new ArrayList<>();
+    private List<VariableDeclarationNode> identSeparator() {
+        List<VariableDeclarationNode> declarations = new ArrayList<>();
         switch (this.currentToken.tag()) {
             case COLON -> {
             }
