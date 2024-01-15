@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.141592653-2.6-1.40.24 (MiKTeX 22.10) (preloaded format=pdflatex 2022.10.19)  15 JAN 2024 00:58
+This is pdfTeX, Version 3.141592653-2.6-1.40.24 (MiKTeX 22.10) (preloaded format=pdflatex 2022.10.19)  15 JAN 2024 01:00
 entering extended mode
  restricted \write18 enabled.
  file:line:error style messages enabled.
@@ -2013,36 +2013,6 @@ or specify an encoding such as \usepackage [latin1]{inputenc}
 in the document preamble.
 Alternatively, save the file in UTF-8 using your editor or another tool
 
-
-rapport.tex:221: LaTeX Error: Invalid UTF-8 byte sequence (�\expandafter).
-
-See the LaTeX manual or LaTeX Companion for explanation.
-Type  H <return>  for immediate help.
- ...                                              
-                                                  
-l.221         expr -> <accès>
-                              
-The document does not appear to be in UTF-8 encoding.
-Try adding \UseRawInputEncoding as the first line of the file
-or specify an encoding such as \usepackage [latin1]{inputenc}
-in the document preamble.
-Alternatively, save the file in UTF-8 using your editor or another tool
-
-
-rapport.tex:221: LaTeX Error: Invalid UTF-8 byte "A8.
-
-See the LaTeX manual or LaTeX Companion for explanation.
-Type  H <return>  for immediate help.
- ...                                              
-                                                  
-l.221         expr -> <accès>
-                              
-The document does not appear to be in UTF-8 encoding.
-Try adding \UseRawInputEncoding as the first line of the file
-or specify an encoding such as \usepackage [latin1]{inputenc}
-in the document preamble.
-Alternatively, save the file in UTF-8 using your editor or another tool
-
 [5]
 
 LaTeX Warning: Command \` invalid in math mode on input line 267.
@@ -2193,10 +2163,10 @@ Package rerunfilecheck Info: File `rapport.out' has not changed.
 (rerunfilecheck)             Checksum: 8612477D9FE5F786D6BB8BEFCA8CFDC8;6134.
  ) 
 Here is how much of TeX's memory you used:
- 27547 strings out of 475385
- 527651 string characters out of 2777378
+ 27545 strings out of 475385
+ 527629 string characters out of 2777378
  1328064 words of memory out of 3000000
- 47976 multiletter control sequences out of 15000+600000
+ 47974 multiletter control sequences out of 15000+600000
  478917 words of font info for 43 fonts, out of 8000000 for 9000
  1141 hyphenation exceptions out of 8191
  84i,6n,80p,411b,2026s stack positions out of 10000i,1000n,20000p,200000b,80000s
@@ -2218,7 +2188,7 @@ rs/Kuro/AppData/Local/Programs/MiKTeX/fonts/type1/public/amsfonts/cm/cmsy10.pfb
 ><C:/Users/Kuro/AppData/Local/Programs/MiKTeX/fonts/type1/public/amsfonts/cm/cm
 sy7.pfb>
 Output written on D:/Projets\compilation-marcel16u\doc\livrable\rapport.pdf (22
- pages, 1211835 bytes).
+ pages, 1211821 bytes).
 PDF statistics:
  1327 PDF objects out of 1440 (max. 8388607)
  504 named destinations out of 1000 (max. 500000)
