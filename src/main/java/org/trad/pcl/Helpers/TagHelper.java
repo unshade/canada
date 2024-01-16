@@ -3,7 +3,7 @@ package org.trad.pcl.Helpers;
 
 import org.trad.pcl.Lexer.Tokens.Tag;
 
-public class TagHelper {
+public final class TagHelper {
     public static String getTagString(Tag tag) {
         return switch (tag) {
             case IDENT -> "IDENT";

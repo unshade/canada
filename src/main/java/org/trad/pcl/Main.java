@@ -16,7 +16,7 @@ import java.util.Objects;
 
 import static com.diogonunes.jcolor.Ansi.colorize;
 
-public class Main {
+public final class Main {
 
     public static void main(String[] args) throws BadFileExtension, IOException {
         if (args.length < 1) {
@@ -42,7 +42,7 @@ public class Main {
         } else {
             Parser parser = Parser.getInstance();
             ProgramNode AST = parser.parse();
-            if (!errorService.hasErrors()) {
+            if (errorService.hasNoErrors()) {
                 AnsiFormat fWarning = new AnsiFormat(Attribute.WHITE_TEXT(), Attribute.GREEN_BACK(), Attribute.BOLD());
                 System.out.println("\n✅ " + colorize("PARSING PHASE COMPLETED, GENERATING AST", fWarning));
                 System.out.println(AST);

@@ -5,7 +5,7 @@ import java.io.Reader;
 import java.util.LinkedList;
 import java.util.Queue;
 
-public class PeekingReader extends Reader {
+public final class PeekingReader extends Reader {
     private final Reader reader;
     private final Queue<Integer> nextChars = new LinkedList<>();
 

@@ -7,7 +7,7 @@ import java.io.*;
 
 import static com.diogonunes.jcolor.Ansi.colorize;
 
-public class PythonRunner {
+public final class PythonRunner {
     public static void exec(String json) {
         try {
             String pythonScriptPath = "python/ast_graphe.py";

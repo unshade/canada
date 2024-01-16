@@ -2,7 +2,7 @@ package org.trad.pcl.ast;
 
 import org.trad.pcl.ast.type.TypeNode;
 
-public class ParameterNode extends ASTNode {
+public final class ParameterNode extends ASTNode {
     private String name;
     private TypeNode type;
 

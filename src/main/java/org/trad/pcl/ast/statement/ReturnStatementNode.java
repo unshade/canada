@@ -5,7 +5,7 @@ import org.trad.pcl.ast.expression.ExpressionNode;
 import java.util.ArrayList;
 import java.util.List;
 
-public class ReturnStatementNode extends StatementNode {
+public final class ReturnStatementNode extends StatementNode {
     private List<ExpressionNode> expressions;
 
     public ReturnStatementNode() {

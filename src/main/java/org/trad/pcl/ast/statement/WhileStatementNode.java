@@ -2,7 +2,7 @@ package org.trad.pcl.ast.statement;
 
 import org.trad.pcl.ast.expression.ExpressionNode;
 
-public class WhileStatementNode extends StatementNode {
+public final class WhileStatementNode extends StatementNode {
 
         private BlockNode body;
 

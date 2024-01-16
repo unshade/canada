@@ -2,7 +2,7 @@ package org.trad.pcl.ast.statement;
 
 import org.trad.pcl.ast.expression.ExpressionNode;
 
-public class LoopStatementNode extends StatementNode {
+public final class LoopStatementNode extends StatementNode {
 
         private BlockNode body;
 

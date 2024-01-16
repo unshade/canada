@@ -2,7 +2,7 @@ import matplotlib.pyplot as plt
 import sys
 import json
 import networkx as nx
-import pygraphviz
+
 
 def build_graph(node, graph, path, labels):
     if isinstance(node, dict):
@@ -18,6 +18,7 @@ def build_graph(node, graph, path, labels):
             labels[child_path] = str(i)
             build_graph(item, graph, child_path, labels)
 
+
 def main():
     if len(sys.argv) > 1:
         json_path = sys.argv[1]
@@ -31,9 +32,11 @@ def main():
 
             pos = nx.drawing.nx_agraph.graphviz_layout(G, prog='dot')
 
-            plt.figure(figsize=(1920/100, 1080/100))
+            plt.figure(figsize=(20, 15))
 
-            nx.draw(G, pos, labels=labels, with_labels=True, arrows=True)
+            nx.draw(G, pos, labels=labels, with_labels=True, arrows=True,
+                    node_size=700, font_size=10, font_weight='bold',
+                    connectionstyle='arc3,rad=0.1')
             plt.show()
         except json.JSONDecodeError:
             print("Invalid JSON")
@@ -42,6 +45,7 @@ def main():
 
     with open('out.json', 'w') as f:
         f.write(json_str)
+
 
 if __name__ == "__main__":
     main()

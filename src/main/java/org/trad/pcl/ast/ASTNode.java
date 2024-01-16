@@ -9,7 +9,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 public abstract class ASTNode {
-    protected ASTNode parent;
 
     private static boolean isJson = false;
 
@@ -32,23 +31,7 @@ public abstract class ASTNode {
     @Override
     public String toString() {
         depth++;
-        List<Field> fields = new ArrayList<>();
-        fields.addAll(List.of(this.getClass().getDeclaredFields()));
-
-        List<Field> superClassFields = new ArrayList<>();
-        superClassFields.addAll(List.of(this.getClass().getSuperclass().getDeclaredFields()));
-
-        superClassFields.forEach(field -> {
-            field.setAccessible(true);
-            try {
-                if (field.get(this) instanceof String) {
-                    fields.add(field);
-                }
-            } catch (IllegalAccessException e) {
-                throw new RuntimeException(e);
-            }
-        });
-
+        List<Field> fields = getFields();
 
         String className = this.getClass().getSimpleName();
         StringBuilder res = new StringBuilder(colorize(className, Attribute.YELLOW_TEXT()) + " : { \n");
@@ -81,6 +64,24 @@ public abstract class ASTNode {
         res.append("}");
         depth--;
         return format(res.toString());
+    }
+
+    private List<Field> getFields() {
+        List<Field> fields = new ArrayList<>(List.of(this.getClass().getDeclaredFields()));
+
+        List<Field> superClassFields = new ArrayList<>(List.of(this.getClass().getSuperclass().getDeclaredFields()));
+
+        superClassFields.forEach(field -> {
+            field.setAccessible(true);
+            try {
+                if (field.get(this) instanceof String) {
+                    fields.add(field);
+                }
+            } catch (IllegalAccessException e) {
+                throw new RuntimeException(e);
+            }
+        });
+        return fields;
     }
 
 

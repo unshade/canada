@@ -8,7 +8,7 @@ import java.util.List;
 
 import static com.diogonunes.jcolor.Ansi.colorize;
 
-public class ErrorService {
+public final class ErrorService {
 
     private static ErrorService instance;
 
@@ -52,8 +52,8 @@ public class ErrorService {
         this.semanticErrors.add(e);
     }
 
-    public boolean hasErrors() {
-        return !this.lexicalErrors.isEmpty() || !this.syntaxErrors.isEmpty() || !this.semanticErrors.isEmpty();
+    public boolean hasNoErrors() {
+        return this.lexicalErrors.isEmpty() && this.syntaxErrors.isEmpty() && this.semanticErrors.isEmpty();
     }
 
     public void handleErrorsDisplay() {

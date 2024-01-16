@@ -6,7 +6,7 @@ import org.trad.pcl.ast.declaration.DeclarationNode;
 import java.util.ArrayList;
 import java.util.List;
 
-public class BlockNode extends StatementNode {
+public final class BlockNode extends StatementNode {
     private List<StatementNode> statements;
     private List<DeclarationNode> declarations;
 

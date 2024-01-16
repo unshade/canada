@@ -7,6 +7,6 @@ package org.trad.pcl;
  * @author Alexis Marcel
  * @author Lucas Laurent
  */
-public class Constants {
+public final class Constants {
     public static final String REQUIRED_EXTENSION = "canAda";
 }

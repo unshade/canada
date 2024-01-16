@@ -9,7 +9,7 @@ import java.io.File;
  * @author Alexis Marcel
  * @author Lucas Laurent
  */
-public class FileHelper {
+public final class FileHelper {
 
     /**
      * Get the file extension of a path

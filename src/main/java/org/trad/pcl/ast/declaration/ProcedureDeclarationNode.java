@@ -5,7 +5,7 @@ import org.trad.pcl.ast.statement.BlockNode;
 
 import java.util.List;
 
-public class ProcedureDeclarationNode extends DeclarationNode {
+public final class ProcedureDeclarationNode extends DeclarationNode {
     private List<ParameterNode> parameters;
     private BlockNode body;
 

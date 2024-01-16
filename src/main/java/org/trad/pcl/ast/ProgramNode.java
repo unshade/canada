@@ -2,7 +2,7 @@ package org.trad.pcl.ast;
 
 import org.trad.pcl.ast.declaration.ProcedureDeclarationNode;
 
-public class ProgramNode extends ASTNode {
+public final class ProgramNode extends ASTNode {
     private ProcedureDeclarationNode rootProcedure;
 
 

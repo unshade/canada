@@ -1,6 +1,5 @@
 import com.diogonunes.jcolor.AnsiFormat;
 import com.diogonunes.jcolor.Attribute;
-import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.trad.pcl.Constants;
@@ -10,7 +9,6 @@ import org.trad.pcl.Lexer.Lexer;
 import org.trad.pcl.Main;
 import org.trad.pcl.Parser.Parser;
 import org.trad.pcl.Services.ErrorService;
-import org.trad.pcl.Services.PythonRunner;
 import org.trad.pcl.ast.ProgramNode;
 
 import java.io.File;
@@ -18,7 +16,6 @@ import java.io.IOException;
 import java.net.URISyntaxException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.Objects;
 import java.util.stream.Stream;
 
@@ -63,7 +60,7 @@ public class CanAdaTest {
         ErrorService errorService = ErrorService.getInstance();
         Parser parser = Parser.newInstance();
         ProgramNode AST = parser.parse();
-        if (!errorService.hasErrors()) {
+        if (errorService.hasNoErrors()) {
             AnsiFormat fWarning = new AnsiFormat(Attribute.WHITE_TEXT(), Attribute.GREEN_BACK(), Attribute.BOLD());
             System.out.println("\n✅ " + colorize("PARSING PHASE COMPLETED, GENERATING AST", fWarning));
             return true;

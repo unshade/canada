@@ -21,7 +21,7 @@ import java.util.regex.Pattern;
  * @author Alexis Marcel
  * @author Lucas Laurent
  */
-public class Lexer {
+public final class Lexer {
 
 
     /**

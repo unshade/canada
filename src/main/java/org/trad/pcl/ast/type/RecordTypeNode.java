@@ -4,7 +4,7 @@ import org.trad.pcl.ast.declaration.VariableDeclarationNode;
 
 import java.util.List;
 
-public class RecordTypeNode extends TypeNode {
+public final class RecordTypeNode extends TypeNode {
     private List<VariableDeclarationNode> fields;
 
     public void addField(VariableDeclarationNode field) {

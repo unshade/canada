@@ -22,7 +22,7 @@ import org.trad.pcl.ast.type.TypeNode;
 import java.util.ArrayList;
 import java.util.List;
 
-public class Parser {
+public final class Parser {
 
     private static Parser instance;
     private final ErrorService errorService;
@@ -145,9 +145,7 @@ public class Parser {
                 hasident();
                 analyseTerminal(Tag.SEMICOLON);
             }
-            default -> {
-                declarations = null;
-            }
+            default -> declarations = null;
         }
         return declarations;
     }
@@ -316,9 +314,7 @@ public class Parser {
         switch (this.currentToken.tag()) {
             case IS, RETURN -> {
             }
-            case OPEN_PAREN -> {
-                parameters.addAll(multipleParameters());
-            }
+            case OPEN_PAREN -> parameters.addAll(multipleParameters());
         }
         return parameters;
     }
@@ -841,7 +837,6 @@ public class Parser {
      */
     @PrintMethodName
     private ExpressionNode multiplicative_expr() {
-        ExpressionNode expression = null;
         switch (this.currentToken.tag()) {
             case IDENT, OPEN_PAREN, MINUS, ENTIER, CARACTERE, TRUE, FALSE, NULL, NEW, CHARACTER -> {
                 ExpressionNode firstExpression = unaryExpression();
@@ -930,9 +925,7 @@ public class Parser {
                 ((UnaryExpressionNode) expression).setOperator(operator);
                 ((UnaryExpressionNode) expression).setOperand(primary());
             }
-            case IDENT, OPEN_PAREN, ENTIER, CARACTERE, TRUE, FALSE, NULL, NEW, CHARACTER -> {
-                expression = primary();
-            }
+            case IDENT, OPEN_PAREN, ENTIER, CARACTERE, TRUE, FALSE, NULL, NEW, CHARACTER -> expression = primary();
         }
         return expression;
     }
@@ -1056,12 +1049,8 @@ public class Parser {
         switch (this.currentToken.tag()) {
             case SEMICOLON -> {
             }
-            case IDENT, OPEN_PAREN, MINUS, ENTIER, CARACTERE, TRUE, FALSE, NULL, NEW, CHARACTER -> {
-                expressions.add(expression());
-            }
-            case ASSIGN, DOT -> {
-                expressions.addAll(multipleExpressions());
-            }
+            case IDENT, OPEN_PAREN, MINUS, ENTIER, CARACTERE, TRUE, FALSE, NULL, NEW, CHARACTER -> expressions.add(expression());
+            case ASSIGN, DOT -> expressions.addAll(multipleExpressions());
         }
         return expressions;
     }
@@ -1136,9 +1125,7 @@ public class Parser {
                 analyseTerminal(Tag.LOOP);
                 analyseTerminal(Tag.SEMICOLON);
             }
-            default -> {
-                statement = null;
-            }
+            default -> statement = null;
         }
         return statement;
     }
@@ -1169,9 +1156,9 @@ public class Parser {
             }
             case ASSIGN, DOT -> {
                 statement = new AssignmentNode();
-                ((AssignmentNode) statement).setNextIdentifier(instr3());
+                statement.setNextIdentifier(instr3());
                 analyseTerminal(Tag.ASSIGN);
-                ((AssignmentNode)statement).setExpression(expression());
+                ((AssignmentNode) statement).setExpression(expression());
                 analyseTerminal(Tag.SEMICOLON);
             }
         }
