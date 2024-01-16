@@ -89,8 +89,8 @@ public final class Lexer {
                 Map.entry(Tag.USE, Pattern.compile("use")),
                 Map.entry(Tag.WITH, Pattern.compile("with")),
                 Map.entry(Tag.NULL, Pattern.compile("null")),
-                Map.entry(Tag.NEW, Pattern.compile("new")),
-                Map.entry(Tag.CHARACTER, Pattern.compile("character"))
+                Map.entry(Tag.NEW, Pattern.compile("new"))
+                //Map.entry(Tag.CHARACTER, Pattern.compile("character"))
         );
 
         this.operators = Map.ofEntries(

@@ -1173,9 +1173,14 @@ public final class Parser {
         ExpressionNode expression = null;
         switch (this.currentToken.tag()) {
             case IDENT -> {
-                String ident = analyseTerminal(Tag.IDENT).getValue();
-                expression = identPrimary();
-                ((VariableReferenceNode) expression).setVariableName(ident);
+                if (this.currentToken.getValue().equalsIgnoreCase("character")) {
+                    expression = characterMethod();
+                } else {
+                    String ident = analyseTerminal(Tag.IDENT).getValue();
+                    expression = identPrimary();
+                    ((VariableReferenceNode) expression).setVariableName(ident);
+                }
+
             }
             case OPEN_PAREN -> {
                 analyseTerminal(Tag.OPEN_PAREN);
@@ -1233,6 +1238,28 @@ public final class Parser {
                             Token.generateExpectedToken(Tag.CHARACTER, this.currentToken))
             );
 
+        }
+        return expression;
+    }
+
+    @PrintMethodName
+    private ExpressionNode characterMethod(){
+        ExpressionNode expression = null;
+        String ident = analyseTerminal(Tag.IDENT).getValue();
+        switch (this.currentToken.tag()) {
+            // TODO CHARACTER ' val(ENTIER)
+            case APOSTROPHE -> {
+                // don't pick the IDENT because it's the CHARACTER keyword
+                analyseTerminal(Tag.APOSTROPHE);
+                analyseTerminal(Tag.VAL);
+                analyseTerminal(Tag.OPEN_PAREN);
+                expression();
+                analyseTerminal(Tag.CLOSE_PAREN);
+            }
+            default -> {
+                expression = identPrimary();
+                ((VariableReferenceNode) expression).setVariableName(ident);
+            }
         }
         return expression;
     }
@@ -1656,7 +1683,7 @@ public final class Parser {
     private VariableReferenceNode acces() {
         VariableReferenceNode variableReferenceNode = null;
         switch (this.currentToken.tag()) {
-            case SEMICOLON, COMMA, CLOSE_PAREN, OR, END, THEN, NOT, EQ, NE, LT, LE, GT, GE, PLUS, MINUS, MULTI, DIV, REM, DOTDOT, LOOP -> {
+            case SEMICOLON, COMMA, CLOSE_PAREN, OR, AND, END, THEN, NOT, EQ, NE, LT, LE, GT, GE, PLUS, MINUS, MULTI, DIV, REM, DOTDOT, LOOP -> {
             }
             case DOT -> {
                 analyseTerminal(Tag.DOT);

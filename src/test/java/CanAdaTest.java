@@ -57,6 +57,7 @@ public class CanAdaTest {
         }
 
         Lexer lexer = Lexer.newInstance(file);
+        ErrorService.resetInstance();
         ErrorService errorService = ErrorService.getInstance();
         Parser parser = Parser.newInstance();
         ProgramNode AST = parser.parse();
