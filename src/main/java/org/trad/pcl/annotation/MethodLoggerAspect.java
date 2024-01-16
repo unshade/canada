@@ -2,6 +2,7 @@ package org.trad.pcl.annotation;
 
 import com.diogonunes.jcolor.Attribute;
 import org.aspectj.lang.JoinPoint;
+import org.aspectj.lang.annotation.After;
 import org.aspectj.lang.annotation.Aspect;
 import org.aspectj.lang.annotation.Before;
 import org.aspectj.lang.annotation.Pointcut;
@@ -18,6 +19,12 @@ public class MethodLoggerAspect {
     @Before("log()")
     public void logMethod(JoinPoint jp) {
         System.out.println("\t↪️ " + colorize("Parser rule ", Attribute.GREEN_TEXT()) + colorize(jp.getSignature().getName(), Attribute.MAGENTA_TEXT()) + colorize(" called", Attribute.GREEN_TEXT()));
+    }
+
+
+    @After("log()")
+    public void lg(JoinPoint jp) {
+        System.out.println("\t↪️ " + colorize("Parser rule ", Attribute.GREEN_TEXT()) + colorize(jp.getSignature().getName(), Attribute.MAGENTA_TEXT()) + colorize(" returned", Attribute.GREEN_TEXT()));
     }
 
 }
