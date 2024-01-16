@@ -260,7 +260,7 @@ public final class Lexer {
                 Pattern p = entry.getValue();
                 Tag tag = entry.getKey();
 
-                if (p.matcher(lexeme).matches()) {
+                if (p.matcher(lexeme.toLowerCase()).matches()) {
                     return new Token(tag, this.reader.getCurrentLine(), lexeme);
                 }
             }

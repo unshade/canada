@@ -360,11 +360,11 @@ public final class Parser {
      * Grammar rule : params
      */
     @PrintMethodName
-    private List<ParameterNode> multipleParameters() {
+    private List<ParameterNode> functionParameters() {
         List<ParameterNode> parameters = new ArrayList<>();
         if (this.currentToken.tag() == Tag.OPEN_PAREN) {
             analyseTerminal(Tag.OPEN_PAREN);
-            parameters.addAll(paramsep());
+            parameters.addAll(multipleParameters());
             analyseTerminal(Tag.CLOSE_PAREN);
         } else {
             this.errorService.registerSyntaxError(new UnexpectedTokenException(Token.generateExpectedToken(Tag.OPEN_PAREN, this.currentToken), this.currentToken));
@@ -381,7 +381,7 @@ public final class Parser {
         switch (this.currentToken.tag()) {
             case IS, RETURN -> {
             }
-            case OPEN_PAREN -> parameters.addAll(multipleParameters());
+            case OPEN_PAREN -> parameters.addAll(functionParameters());
             default -> this.errorService.registerSyntaxError(
                     new UnexpectedTokenListException(this.currentToken,
                             Token.generateExpectedToken(Tag.IS, this.currentToken),
@@ -392,25 +392,33 @@ public final class Parser {
         return parameters;
     }
 
+    /**
+     * Grammar rule : paramsep
+     */
+
     @PrintMethodName
-    private List<ParameterNode> paramsep() {
+    private List<ParameterNode> multipleParameters() {
         List<ParameterNode> parameters = new ArrayList<>();
         if (this.currentToken.tag() == Tag.IDENT) {
             parameters.add(parameter());
-            parameters.addAll(paramsep2());
+            parameters.addAll(paramSeparator());
         } else {
             this.errorService.registerSyntaxError(new UnexpectedTokenException(Token.generateExpectedToken(Tag.IDENT, this.currentToken), this.currentToken));
         }
         return parameters;
     }
 
+
+    /**
+     * Grammar rule : paramsep2
+     */
     @PrintMethodName
-    private List<ParameterNode> paramsep2() {
+    private List<ParameterNode> paramSeparator() {
         List<ParameterNode> parameters = new ArrayList<>();
         switch (this.currentToken.tag()) {
             case SEMICOLON -> {
                 analyseTerminal(Tag.SEMICOLON);
-                parameters.addAll(paramsep());
+                parameters.addAll(multipleParameters());
             }
             case CLOSE_PAREN -> {
             }
