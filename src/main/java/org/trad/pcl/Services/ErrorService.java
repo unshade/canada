@@ -41,6 +41,7 @@ public final class ErrorService {
     }
 
     public void registerSyntaxError(Exception e) {
+        System.out.println("\t\t\t❌ " + colorize(e.getMessage(), Attribute.RED_TEXT()));
         this.syntaxErrors.add(e);
     }
 
