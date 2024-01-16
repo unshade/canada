@@ -113,12 +113,18 @@ public final class Parser {
                 List<VariableDeclarationNode> typeNodes = multipleIdent();
                 analyseTerminal(Tag.COLON);
                 TypeNode typeNode = type_n();
+
+                ExpressionNode assignNode = assignDeclarationExpression();
                 for (VariableDeclarationNode typeDeclarationNode : typeNodes) {
                     typeDeclarationNode.setType(typeNode);
+                    if (assignNode != null) {
+                        AssignmentNode assignmentNode = new AssignmentNode();
+                        assignmentNode.setIdentifier(typeDeclarationNode.getName());
+                        assignmentNode.setExpression(assignNode);
+                        typeDeclarationNode.setAssignment(assignmentNode);
+                    }
                     declarations.add(typeDeclarationNode);
                 }
-                // TODO
-                declarationExpression();
                 analyseTerminal(Tag.SEMICOLON);
             }
             case TYPE -> {
@@ -421,7 +427,7 @@ public final class Parser {
      * Grammar rule : typexpr
      */
     @PrintMethodName
-    private ExpressionNode declarationExpression() {
+    private ExpressionNode assignDeclarationExpression() {
         ExpressionNode expression = null;
         switch (this.currentToken.tag()) {
             case ASSIGN -> {
