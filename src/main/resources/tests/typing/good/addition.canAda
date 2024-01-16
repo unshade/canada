@@ -1,4 +1,4 @@
-with Ada.Text_IO; useAda.Text_IO;
+with Ada.Text_IO; use Ada.Text_IO;
 procedure Main is
     A : Integer := 5;
     B : Integer := 10;
