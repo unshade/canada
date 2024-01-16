@@ -1447,7 +1447,6 @@ public final class Parser {
         IdentifiableStatementNode statement = null;
         switch (this.currentToken.tag()) {
 
-            // var;
             case SEMICOLON -> {
                 statement = new FunctionCallStatementNode();
                 analyseTerminal(Tag.SEMICOLON);
@@ -1492,6 +1491,8 @@ public final class Parser {
                 accessReferenceNode = new VariableReferenceNode();
                 accessReferenceNode.setVariableName(analyseTerminal(Tag.IDENT).getValue());
                 accessReferenceNode.setNextExpression(instr3());
+            }
+            case SEMICOLON -> {
             }
             default -> this.errorService.registerSyntaxError(
                     new UnexpectedTokenListException(this.currentToken,
