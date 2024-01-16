@@ -1,6 +1,7 @@
 package org.trad.pcl.Lexer.Tokens;
 
 import com.diogonunes.jcolor.Attribute;
+import org.trad.pcl.Helpers.TagHelper;
 
 import static com.diogonunes.jcolor.Ansi.colorize;
 
@@ -23,5 +24,9 @@ public record Token(Tag tag, int line, String lexeme) {
 
     public String getValue() {
         return this.lexeme;
+    }
+
+    public static Token generateExpectedToken(Tag tag, Token current) {
+        return new Token(tag, current.line, TagHelper.getTagString(tag));
     }
 }

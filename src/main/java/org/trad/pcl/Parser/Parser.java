@@ -147,7 +147,13 @@ public final class Parser {
                 hasident();
                 analyseTerminal(Tag.SEMICOLON);
             }
-            default -> declarations = null;
+            default -> this.errorService.registerSyntaxError(
+                    new UnexpectedTokenListException(this.currentToken,
+                            Token.generateExpectedToken(Tag.PROCEDURE, this.currentToken),
+                            Token.generateExpectedToken(Tag.IDENT, this.currentToken),
+                            Token.generateExpectedToken(Tag.TYPE, this.currentToken),
+                            Token.generateExpectedToken(Tag.FUNCTION, this.currentToken))
+            );
         }
         return declarations;
     }
@@ -165,6 +171,11 @@ public final class Parser {
             }
             case SEMICOLON -> {
             }
+            default -> this.errorService.registerSyntaxError(
+                    new UnexpectedTokenListException(this.currentToken,
+                            Token.generateExpectedToken(Tag.IS, this.currentToken),
+                            Token.generateExpectedToken(Tag.SEMICOLON, this.currentToken))
+            );
         }
         return type;
     }
@@ -192,6 +203,11 @@ public final class Parser {
                 analyseTerminal(Tag.END);
                 analyseTerminal(Tag.RECORD);
             }
+            default -> this.errorService.registerSyntaxError(
+                    new UnexpectedTokenListException(this.currentToken,
+                            Token.generateExpectedToken(Tag.ACCESS, this.currentToken),
+                            Token.generateExpectedToken(Tag.RECORD, this.currentToken))
+            );
         }
         return type;
     }
@@ -209,15 +225,29 @@ public final class Parser {
             }
             case BEGIN -> {
             }
+            default -> this.errorService.registerSyntaxError(
+                    new UnexpectedTokenListException(this.currentToken,
+                            Token.generateExpectedToken(Tag.PROCEDURE, this.currentToken),
+                            Token.generateExpectedToken(Tag.IDENT, this.currentToken),
+                            Token.generateExpectedToken(Tag.TYPE, this.currentToken),
+                            Token.generateExpectedToken(Tag.FUNCTION, this.currentToken),
+                            Token.generateExpectedToken(Tag.BEGIN, this.currentToken))
+            );
         }
         return declarations;
     }
+
     @PrintMethodName
     private void hasident() {
         switch (this.currentToken.tag()) {
             case SEMICOLON -> {
             }
             case IDENT -> analyseTerminal(Tag.IDENT);
+            default -> this.errorService.registerSyntaxError(
+                    new UnexpectedTokenListException(this.currentToken,
+                            Token.generateExpectedToken(Tag.SEMICOLON, this.currentToken),
+                            Token.generateExpectedToken(Tag.IDENT, this.currentToken))
+            );
         }
     }
 
@@ -232,6 +262,8 @@ public final class Parser {
             declaration.setName(analyseTerminal(Tag.IDENT).getValue());
             declarations.add(declaration);
             declarations.addAll(identSeparator());
+        } else {
+            this.errorService.registerSyntaxError(new UnexpectedTokenException(Token.generateExpectedToken(Tag.IDENT, this.currentToken), this.currentToken));
         }
         return declarations;
     }
@@ -249,9 +281,15 @@ public final class Parser {
                 analyseTerminal(Tag.COMMA);
                 declarations.addAll(multipleIdent());
             }
+            default -> this.errorService.registerSyntaxError(
+                    new UnexpectedTokenListException(this.currentToken,
+                            Token.generateExpectedToken(Tag.COLON, this.currentToken),
+                            Token.generateExpectedToken(Tag.COMMA, this.currentToken))
+            );
         }
         return declarations;
     }
+
     @PrintMethodName
     private void champ() {
         if (this.currentToken.tag() == Tag.IDENT) {
@@ -259,23 +297,35 @@ public final class Parser {
             analyseTerminal(Tag.COLON);
             type_n();
             analyseTerminal(Tag.SEMICOLON);
+        } else {
+            this.errorService.registerSyntaxError(new UnexpectedTokenException(Token.generateExpectedToken(Tag.IDENT, this.currentToken), this.currentToken));
         }
     }
+
     @PrintMethodName
     private void champs() {
         if (this.currentToken.tag() == Tag.IDENT) {
             champ();
             champs2();
+        } else {
+            this.errorService.registerSyntaxError(new UnexpectedTokenException(Token.generateExpectedToken(Tag.IDENT, this.currentToken), this.currentToken));
         }
     }
+
     @PrintMethodName
     private void champs2() {
         switch (this.currentToken.tag()) {
             case IDENT -> champs();
             case END -> {
             }
+            default -> this.errorService.registerSyntaxError(
+                    new UnexpectedTokenListException(this.currentToken,
+                            Token.generateExpectedToken(Tag.IDENT, this.currentToken),
+                            Token.generateExpectedToken(Tag.END, this.currentToken))
+            );
         }
     }
+
     @PrintMethodName
     private TypeNode type_n() {
         TypeNode type = null;
@@ -291,13 +341,11 @@ public final class Parser {
                 type = new SimpleTypeNode();
                 ((SimpleTypeNode) type).setTypeName(analyseTerminal(Tag.IDENT).getValue());
             }
-            default -> {
-                List<Token> expectedTokens = new ArrayList<>();
-                expectedTokens.add(new Token(Tag.ACCESS, this.currentToken.line(), TagHelper.getTagString(Tag.ACCESS)));
-                expectedTokens.add(new Token(Tag.IDENT, this.currentToken.line(), TagHelper.getTagString(Tag.IDENT)));
-
-                this.errorService.registerSyntaxError(new UnexpectedTokenListException(expectedTokens, this.currentToken));
-            }
+            default -> this.errorService.registerSyntaxError(
+                    new UnexpectedTokenListException(this.currentToken,
+                            Token.generateExpectedToken(Tag.ACCESS, this.currentToken),
+                            Token.generateExpectedToken(Tag.IDENT, this.currentToken))
+            );
         }
         return type;
     }
@@ -312,6 +360,8 @@ public final class Parser {
             analyseTerminal(Tag.OPEN_PAREN);
             parameters.addAll(paramsep());
             analyseTerminal(Tag.CLOSE_PAREN);
+        } else {
+            this.errorService.registerSyntaxError(new UnexpectedTokenException(Token.generateExpectedToken(Tag.OPEN_PAREN, this.currentToken), this.currentToken));
         }
         return parameters;
     }
@@ -326,6 +376,12 @@ public final class Parser {
             case IS, RETURN -> {
             }
             case OPEN_PAREN -> parameters.addAll(multipleParameters());
+            default -> this.errorService.registerSyntaxError(
+                    new UnexpectedTokenListException(this.currentToken,
+                            Token.generateExpectedToken(Tag.IS, this.currentToken),
+                            Token.generateExpectedToken(Tag.RETURN, this.currentToken),
+                            Token.generateExpectedToken(Tag.OPEN_PAREN, this.currentToken))
+            );
         }
         return parameters;
     }
@@ -336,9 +392,12 @@ public final class Parser {
         if (this.currentToken.tag() == Tag.IDENT) {
             parameters.add(parameter());
             parameters.addAll(paramsep2());
+        } else {
+            this.errorService.registerSyntaxError(new UnexpectedTokenException(Token.generateExpectedToken(Tag.IDENT, this.currentToken), this.currentToken));
         }
         return parameters;
     }
+
     @PrintMethodName
     private List<ParameterNode> paramsep2() {
         List<ParameterNode> parameters = new ArrayList<>();
@@ -349,6 +408,11 @@ public final class Parser {
             }
             case CLOSE_PAREN -> {
             }
+            default -> this.errorService.registerSyntaxError(
+                    new UnexpectedTokenListException(this.currentToken,
+                            Token.generateExpectedToken(Tag.SEMICOLON, this.currentToken),
+                            Token.generateExpectedToken(Tag.CLOSE_PAREN, this.currentToken))
+            );
         }
         return parameters;
     }
@@ -366,6 +430,11 @@ public final class Parser {
             }
             case SEMICOLON -> {
             }
+            default -> this.errorService.registerSyntaxError(
+                    new UnexpectedTokenListException(this.currentToken,
+                            Token.generateExpectedToken(Tag.ASSIGN, this.currentToken),
+                            Token.generateExpectedToken(Tag.SEMICOLON, this.currentToken))
+            );
         }
         return expression;
     }
@@ -383,9 +452,12 @@ public final class Parser {
             analyseTerminal(Tag.COLON);
             mode();
             parameter.setType(type_n());
+        } else {
+            this.errorService.registerSyntaxError(new UnexpectedTokenException(new Token(Tag.IDENT, this.currentToken.line(), TagHelper.getTagString(Tag.IDENT)), this.currentToken));
         }
         return parameter;
     }
+
     @PrintMethodName
     private void mode() {
         switch (this.currentToken.tag()) {
@@ -395,9 +467,16 @@ public final class Parser {
                 analyseTerminal(Tag.IN);
                 modeout();
             }
+            default -> this.errorService.registerSyntaxError(
+                    new UnexpectedTokenListException(this.currentToken,
+                            Token.generateExpectedToken(Tag.IN, this.currentToken),
+                            Token.generateExpectedToken(Tag.IDENT, this.currentToken),
+                            Token.generateExpectedToken(Tag.ACCESS, this.currentToken))
+            );
 
         }
     }
+
     @PrintMethodName
     private void modeout() {
         switch (this.currentToken.tag()) {
@@ -406,6 +485,12 @@ public final class Parser {
             case OUT -> {
                 analyseTerminal(Tag.OUT);
             }
+            default -> this.errorService.registerSyntaxError(
+                    new UnexpectedTokenListException(this.currentToken,
+                            Token.generateExpectedToken(Tag.OUT, this.currentToken),
+                            Token.generateExpectedToken(Tag.IDENT, this.currentToken),
+                            Token.generateExpectedToken(Tag.ACCESS, this.currentToken))
+            );
         }
     }
 
@@ -418,6 +503,19 @@ public final class Parser {
             case IDENT, OPEN_PAREN, DOT, ENTIER, CARACTERE, TRUE, FALSE, NULL, NEW, CHARACTER -> {
                 return LeftOrExpression();
             }
+            default -> this.errorService.registerSyntaxError(
+                    new UnexpectedTokenListException(this.currentToken,
+                            Token.generateExpectedToken(Tag.IDENT, this.currentToken),
+                            Token.generateExpectedToken(Tag.OPEN_PAREN, this.currentToken),
+                            Token.generateExpectedToken(Tag.DOT, this.currentToken),
+                            Token.generateExpectedToken(Tag.ENTIER, this.currentToken),
+                            Token.generateExpectedToken(Tag.CARACTERE, this.currentToken),
+                            Token.generateExpectedToken(Tag.TRUE, this.currentToken),
+                            Token.generateExpectedToken(Tag.FALSE, this.currentToken),
+                            Token.generateExpectedToken(Tag.NULL, this.currentToken),
+                            Token.generateExpectedToken(Tag.NEW, this.currentToken),
+                            Token.generateExpectedToken(Tag.CHARACTER, this.currentToken))
+            );
 
         }
         return null;
@@ -439,12 +537,26 @@ public final class Parser {
                     return firstExpression;
                 }
             }
+            default -> this.errorService.registerSyntaxError(
+                    new UnexpectedTokenListException(this.currentToken,
+                            Token.generateExpectedToken(Tag.IDENT, this.currentToken),
+                            Token.generateExpectedToken(Tag.OPEN_PAREN, this.currentToken),
+                            Token.generateExpectedToken(Tag.DOT, this.currentToken),
+                            Token.generateExpectedToken(Tag.ENTIER, this.currentToken),
+                            Token.generateExpectedToken(Tag.CARACTERE, this.currentToken),
+                            Token.generateExpectedToken(Tag.TRUE, this.currentToken),
+                            Token.generateExpectedToken(Tag.FALSE, this.currentToken),
+                            Token.generateExpectedToken(Tag.NULL, this.currentToken),
+                            Token.generateExpectedToken(Tag.NEW, this.currentToken),
+                            Token.generateExpectedToken(Tag.CHARACTER, this.currentToken))
+            );
         }
         return null;
     }
 
     /**
      * Grammar rule : or_expr2
+     *
      * @return BinaryExpressionNode with operator and right expression
      * the left expression is set in LeftOrExpression
      */
@@ -465,6 +577,16 @@ public final class Parser {
                 expression.setRight(secondExpression);
 
             }
+            default -> this.errorService.registerSyntaxError(
+                    new UnexpectedTokenListException(this.currentToken,
+                            Token.generateExpectedToken(Tag.OR, this.currentToken),
+                            Token.generateExpectedToken(Tag.SEMICOLON, this.currentToken),
+                            Token.generateExpectedToken(Tag.COMMA, this.currentToken),
+                            Token.generateExpectedToken(Tag.CLOSE_PAREN, this.currentToken),
+                            Token.generateExpectedToken(Tag.THEN, this.currentToken),
+                            Token.generateExpectedToken(Tag.DOTDOT, this.currentToken),
+                            Token.generateExpectedToken(Tag.LOOP, this.currentToken))
+            );
         }
         return expression;
     }
@@ -486,6 +608,21 @@ public final class Parser {
                     return firstExpression;
                 }
             }
+            default -> this.errorService.registerSyntaxError(
+                    new UnexpectedTokenListException(this.currentToken,
+                            Token.generateExpectedToken(Tag.IDENT, this.currentToken),
+                            Token.generateExpectedToken(Tag.OPEN_PAREN, this.currentToken),
+                            Token.generateExpectedToken(Tag.ELSE, this.currentToken),
+                            Token.generateExpectedToken(Tag.DOT, this.currentToken),
+                            Token.generateExpectedToken(Tag.MINUS, this.currentToken),
+                            Token.generateExpectedToken(Tag.ENTIER, this.currentToken),
+                            Token.generateExpectedToken(Tag.CARACTERE, this.currentToken),
+                            Token.generateExpectedToken(Tag.TRUE, this.currentToken),
+                            Token.generateExpectedToken(Tag.FALSE, this.currentToken),
+                            Token.generateExpectedToken(Tag.NULL, this.currentToken),
+                            Token.generateExpectedToken(Tag.NEW, this.currentToken),
+                            Token.generateExpectedToken(Tag.CHARACTER, this.currentToken))
+            );
         }
         return null;
     }
@@ -507,12 +644,26 @@ public final class Parser {
                     return firstExpression;
                 }
             }
+            default -> this.errorService.registerSyntaxError(
+                    new UnexpectedTokenListException(this.currentToken,
+                            Token.generateExpectedToken(Tag.IDENT, this.currentToken),
+                            Token.generateExpectedToken(Tag.OPEN_PAREN, this.currentToken),
+                            Token.generateExpectedToken(Tag.MINUS, this.currentToken),
+                            Token.generateExpectedToken(Tag.ENTIER, this.currentToken),
+                            Token.generateExpectedToken(Tag.CARACTERE, this.currentToken),
+                            Token.generateExpectedToken(Tag.TRUE, this.currentToken),
+                            Token.generateExpectedToken(Tag.FALSE, this.currentToken),
+                            Token.generateExpectedToken(Tag.NULL, this.currentToken),
+                            Token.generateExpectedToken(Tag.NEW, this.currentToken),
+                            Token.generateExpectedToken(Tag.CHARACTER, this.currentToken))
+            );
         }
         return null;
     }
 
     /**
      * Grammar rule : and_expr2
+     *
      * @return BinaryExpressionNode with operator and right expression
      * the left expression is set in LeftAndExpression
      */
@@ -530,6 +681,17 @@ public final class Parser {
                 expression.setRight(secondExpression);
 
             }
+            default -> this.errorService.registerSyntaxError(
+                    new UnexpectedTokenListException(this.currentToken,
+                            Token.generateExpectedToken(Tag.AND, this.currentToken),
+                            Token.generateExpectedToken(Tag.SEMICOLON, this.currentToken),
+                            Token.generateExpectedToken(Tag.COMMA, this.currentToken),
+                            Token.generateExpectedToken(Tag.CLOSE_PAREN, this.currentToken),
+                            Token.generateExpectedToken(Tag.OR, this.currentToken),
+                            Token.generateExpectedToken(Tag.THEN, this.currentToken),
+                            Token.generateExpectedToken(Tag.DOTDOT, this.currentToken),
+                            Token.generateExpectedToken(Tag.LOOP, this.currentToken))
+            );
         }
         return expression;
     }
@@ -557,6 +719,20 @@ public final class Parser {
                 LeftNotExpression();
                 AndExpression();
             }
+            default -> this.errorService.registerSyntaxError(
+                    new UnexpectedTokenListException(this.currentToken,
+                            Token.generateExpectedToken(Tag.IDENT, this.currentToken),
+                            Token.generateExpectedToken(Tag.OPEN_PAREN, this.currentToken),
+                            Token.generateExpectedToken(Tag.MINUS, this.currentToken),
+                            Token.generateExpectedToken(Tag.ENTIER, this.currentToken),
+                            Token.generateExpectedToken(Tag.CARACTERE, this.currentToken),
+                            Token.generateExpectedToken(Tag.TRUE, this.currentToken),
+                            Token.generateExpectedToken(Tag.FALSE, this.currentToken),
+                            Token.generateExpectedToken(Tag.NULL, this.currentToken),
+                            Token.generateExpectedToken(Tag.NEW, this.currentToken),
+                            Token.generateExpectedToken(Tag.CHARACTER, this.currentToken),
+                            Token.generateExpectedToken(Tag.THEN, this.currentToken))
+            );
         }
         return null;
     }
@@ -578,12 +754,26 @@ public final class Parser {
                     return firstExpression;
                 }
             }
+            default -> this.errorService.registerSyntaxError(
+                    new UnexpectedTokenListException(this.currentToken,
+                            Token.generateExpectedToken(Tag.IDENT, this.currentToken),
+                            Token.generateExpectedToken(Tag.OPEN_PAREN, this.currentToken),
+                            Token.generateExpectedToken(Tag.MINUS, this.currentToken),
+                            Token.generateExpectedToken(Tag.ENTIER, this.currentToken),
+                            Token.generateExpectedToken(Tag.CARACTERE, this.currentToken),
+                            Token.generateExpectedToken(Tag.TRUE, this.currentToken),
+                            Token.generateExpectedToken(Tag.FALSE, this.currentToken),
+                            Token.generateExpectedToken(Tag.NULL, this.currentToken),
+                            Token.generateExpectedToken(Tag.NEW, this.currentToken),
+                            Token.generateExpectedToken(Tag.CHARACTER, this.currentToken))
+            );
         }
         return null;
     }
 
     /**
      * Grammar rule : not_expr2
+     *
      * @return BinaryExpressionNode with operator and right expression
      * the left expression is set in LeftNotExpression
      */
@@ -598,12 +788,25 @@ public final class Parser {
                 expression.setOperator(analyseTerminal(Tag.NOT).getValue());
                 expression.setRight(LeftEqualityExpression(), NotExpression());
             }
+            default -> this.errorService.registerSyntaxError(
+                    new UnexpectedTokenListException(this.currentToken,
+                            Token.generateExpectedToken(Tag.NOT, this.currentToken),
+                            Token.generateExpectedToken(Tag.SEMICOLON, this.currentToken),
+                            Token.generateExpectedToken(Tag.COMMA, this.currentToken),
+                            Token.generateExpectedToken(Tag.CLOSE_PAREN, this.currentToken),
+                            Token.generateExpectedToken(Tag.OR, this.currentToken),
+                            Token.generateExpectedToken(Tag.AND, this.currentToken),
+                            Token.generateExpectedToken(Tag.THEN, this.currentToken),
+                            Token.generateExpectedToken(Tag.DOTDOT, this.currentToken),
+                            Token.generateExpectedToken(Tag.LOOP, this.currentToken))
+            );
         }
         return expression;
     }
 
     /**
      * Grammar rule : equality_expr
+     *
      * @return if there is an equality expression, return BinaryExpressionNode with
      */
     @PrintMethodName
@@ -620,12 +823,26 @@ public final class Parser {
                     return firstExpression;
                 }
             }
+            default -> this.errorService.registerSyntaxError(
+                    new UnexpectedTokenListException(this.currentToken,
+                            Token.generateExpectedToken(Tag.IDENT, this.currentToken),
+                            Token.generateExpectedToken(Tag.OPEN_PAREN, this.currentToken),
+                            Token.generateExpectedToken(Tag.MINUS, this.currentToken),
+                            Token.generateExpectedToken(Tag.ENTIER, this.currentToken),
+                            Token.generateExpectedToken(Tag.CARACTERE, this.currentToken),
+                            Token.generateExpectedToken(Tag.TRUE, this.currentToken),
+                            Token.generateExpectedToken(Tag.FALSE, this.currentToken),
+                            Token.generateExpectedToken(Tag.NULL, this.currentToken),
+                            Token.generateExpectedToken(Tag.NEW, this.currentToken),
+                            Token.generateExpectedToken(Tag.CHARACTER, this.currentToken))
+            );
         }
         return null;
     }
 
     /**
      * Grammar rule : equality_expr2
+     *
      * @return BinaryExpressionNode with operator and right expression
      * the left expression is set in LeftEqualityExpression
      */
@@ -645,9 +862,24 @@ public final class Parser {
                 expression.setOperator(analyseTerminal(Tag.NE).getValue());
                 expression.setRight(LeftRelationalExpression(), EqualityExpression());
             }
+            default -> this.errorService.registerSyntaxError(
+                    new UnexpectedTokenListException(this.currentToken,
+                            Token.generateExpectedToken(Tag.EQ, this.currentToken),
+                            Token.generateExpectedToken(Tag.NE, this.currentToken),
+                            Token.generateExpectedToken(Tag.SEMICOLON, this.currentToken),
+                            Token.generateExpectedToken(Tag.COMMA, this.currentToken),
+                            Token.generateExpectedToken(Tag.CLOSE_PAREN, this.currentToken),
+                            Token.generateExpectedToken(Tag.OR, this.currentToken),
+                            Token.generateExpectedToken(Tag.AND, this.currentToken),
+                            Token.generateExpectedToken(Tag.THEN, this.currentToken),
+                            Token.generateExpectedToken(Tag.NOT, this.currentToken),
+                            Token.generateExpectedToken(Tag.DOTDOT, this.currentToken),
+                            Token.generateExpectedToken(Tag.LOOP, this.currentToken))
+            );
         }
         return expression;
     }
+
     /**
      * Grammar rule : relational_expr
      */
@@ -671,6 +903,7 @@ public final class Parser {
 
     /**
      * Grammar rule : relational_expr2
+     *
      * @return BinaryExpressionNode with operator and right expression
      * the left expression is set in LeftRelationalExpression
      */
@@ -700,6 +933,24 @@ public final class Parser {
                 expression.setOperator(analyseTerminal(Tag.GE).getValue());
                 expression.setRight(LeftAdditiveExpression(), RelationalExpression());
             }
+            default -> this.errorService.registerSyntaxError(
+                    new UnexpectedTokenListException(this.currentToken,
+                            Token.generateExpectedToken(Tag.LT, this.currentToken),
+                            Token.generateExpectedToken(Tag.LE, this.currentToken),
+                            Token.generateExpectedToken(Tag.GT, this.currentToken),
+                            Token.generateExpectedToken(Tag.GE, this.currentToken),
+                            Token.generateExpectedToken(Tag.SEMICOLON, this.currentToken),
+                            Token.generateExpectedToken(Tag.COMMA, this.currentToken),
+                            Token.generateExpectedToken(Tag.CLOSE_PAREN, this.currentToken),
+                            Token.generateExpectedToken(Tag.OR, this.currentToken),
+                            Token.generateExpectedToken(Tag.AND, this.currentToken),
+                            Token.generateExpectedToken(Tag.THEN, this.currentToken),
+                            Token.generateExpectedToken(Tag.NOT, this.currentToken),
+                            Token.generateExpectedToken(Tag.EQ, this.currentToken),
+                            Token.generateExpectedToken(Tag.NE, this.currentToken),
+                            Token.generateExpectedToken(Tag.DOTDOT, this.currentToken),
+                            Token.generateExpectedToken(Tag.LOOP, this.currentToken))
+            );
         }
         return expression;
     }
@@ -711,7 +962,7 @@ public final class Parser {
     private ExpressionNode LeftAdditiveExpression() {
         switch (this.currentToken.tag()) {
             case IDENT, OPEN_PAREN, MINUS, ENTIER, CARACTERE, TRUE, FALSE, NULL, NEW, CHARACTER -> {
-                ExpressionNode firstExpression =  LeftMultiplicativeExpression();
+                ExpressionNode firstExpression = LeftMultiplicativeExpression();
                 BinaryExpressionNode secondExpression = AdditiveExpression();
                 if (secondExpression != null) {
                     secondExpression.setLeft(firstExpression);
@@ -720,12 +971,26 @@ public final class Parser {
                     return firstExpression;
                 }
             }
+            default -> this.errorService.registerSyntaxError(
+                    new UnexpectedTokenListException(this.currentToken,
+                            Token.generateExpectedToken(Tag.IDENT, this.currentToken),
+                            Token.generateExpectedToken(Tag.OPEN_PAREN, this.currentToken),
+                            Token.generateExpectedToken(Tag.MINUS, this.currentToken),
+                            Token.generateExpectedToken(Tag.ENTIER, this.currentToken),
+                            Token.generateExpectedToken(Tag.CARACTERE, this.currentToken),
+                            Token.generateExpectedToken(Tag.TRUE, this.currentToken),
+                            Token.generateExpectedToken(Tag.FALSE, this.currentToken),
+                            Token.generateExpectedToken(Tag.NULL, this.currentToken),
+                            Token.generateExpectedToken(Tag.NEW, this.currentToken),
+                            Token.generateExpectedToken(Tag.CHARACTER, this.currentToken))
+            );
         }
         return null;
     }
 
     /**
      * Grammar rule : additive_expr2
+     *
      * @return BinaryExpressionNode with operator and right expression
      * the left expression is set in LeftAdditiveExpression
      */
@@ -745,6 +1010,26 @@ public final class Parser {
                 expression.setOperator(analyseTerminal(Tag.MINUS).getValue());
                 expression.setRight(LeftMultiplicativeExpression(), AdditiveExpression());
             }
+            default -> this.errorService.registerSyntaxError(
+                    new UnexpectedTokenListException(this.currentToken,
+                            Token.generateExpectedToken(Tag.PLUS, this.currentToken),
+                            Token.generateExpectedToken(Tag.MINUS, this.currentToken),
+                            Token.generateExpectedToken(Tag.SEMICOLON, this.currentToken),
+                            Token.generateExpectedToken(Tag.COMMA, this.currentToken),
+                            Token.generateExpectedToken(Tag.CLOSE_PAREN, this.currentToken),
+                            Token.generateExpectedToken(Tag.OR, this.currentToken),
+                            Token.generateExpectedToken(Tag.AND, this.currentToken),
+                            Token.generateExpectedToken(Tag.THEN, this.currentToken),
+                            Token.generateExpectedToken(Tag.NOT, this.currentToken),
+                            Token.generateExpectedToken(Tag.EQ, this.currentToken),
+                            Token.generateExpectedToken(Tag.NE, this.currentToken),
+                            Token.generateExpectedToken(Tag.LT, this.currentToken),
+                            Token.generateExpectedToken(Tag.LE, this.currentToken),
+                            Token.generateExpectedToken(Tag.GT, this.currentToken),
+                            Token.generateExpectedToken(Tag.GE, this.currentToken),
+                            Token.generateExpectedToken(Tag.DOTDOT, this.currentToken),
+                            Token.generateExpectedToken(Tag.LOOP, this.currentToken))
+            );
         }
         return expression;
     }
@@ -765,12 +1050,26 @@ public final class Parser {
                     return firstExpression;
                 }
             }
+            default -> this.errorService.registerSyntaxError(
+                    new UnexpectedTokenListException(this.currentToken,
+                            Token.generateExpectedToken(Tag.IDENT, this.currentToken),
+                            Token.generateExpectedToken(Tag.OPEN_PAREN, this.currentToken),
+                            Token.generateExpectedToken(Tag.MINUS, this.currentToken),
+                            Token.generateExpectedToken(Tag.ENTIER, this.currentToken),
+                            Token.generateExpectedToken(Tag.CARACTERE, this.currentToken),
+                            Token.generateExpectedToken(Tag.TRUE, this.currentToken),
+                            Token.generateExpectedToken(Tag.FALSE, this.currentToken),
+                            Token.generateExpectedToken(Tag.NULL, this.currentToken),
+                            Token.generateExpectedToken(Tag.NEW, this.currentToken),
+                            Token.generateExpectedToken(Tag.CHARACTER, this.currentToken))
+            );
         }
         return null;
     }
 
     /**
      * Grammar rule : multiplicative_expr2
+     *
      * @return BinaryExpressionNode with operator and right expression
      * the left expression is set in LeftMultiplicativeExpression
      */
@@ -796,6 +1095,29 @@ public final class Parser {
                 expression.setOperator(analyseTerminal(Tag.REM).getValue());
                 expression.setRight(unaryExpression(), MultiplicativeExpression());
             }
+            default -> this.errorService.registerSyntaxError(
+                    new UnexpectedTokenListException(this.currentToken,
+                            Token.generateExpectedToken(Tag.MULTI, this.currentToken),
+                            Token.generateExpectedToken(Tag.DIV, this.currentToken),
+                            Token.generateExpectedToken(Tag.REM, this.currentToken),
+                            Token.generateExpectedToken(Tag.SEMICOLON, this.currentToken),
+                            Token.generateExpectedToken(Tag.COMMA, this.currentToken),
+                            Token.generateExpectedToken(Tag.CLOSE_PAREN, this.currentToken),
+                            Token.generateExpectedToken(Tag.OR, this.currentToken),
+                            Token.generateExpectedToken(Tag.AND, this.currentToken),
+                            Token.generateExpectedToken(Tag.THEN, this.currentToken),
+                            Token.generateExpectedToken(Tag.NOT, this.currentToken),
+                            Token.generateExpectedToken(Tag.EQ, this.currentToken),
+                            Token.generateExpectedToken(Tag.NE, this.currentToken),
+                            Token.generateExpectedToken(Tag.LT, this.currentToken),
+                            Token.generateExpectedToken(Tag.LE, this.currentToken),
+                            Token.generateExpectedToken(Tag.GT, this.currentToken),
+                            Token.generateExpectedToken(Tag.GE, this.currentToken),
+                            Token.generateExpectedToken(Tag.PLUS, this.currentToken),
+                            Token.generateExpectedToken(Tag.MINUS, this.currentToken),
+                            Token.generateExpectedToken(Tag.DOTDOT, this.currentToken),
+                            Token.generateExpectedToken(Tag.LOOP, this.currentToken))
+            );
         }
         return expression;
     }
@@ -815,9 +1137,23 @@ public final class Parser {
                 ((UnaryExpressionNode) expression).setOperand(primary());
             }
             case IDENT, OPEN_PAREN, ENTIER, CARACTERE, TRUE, FALSE, NULL, NEW, CHARACTER -> expression = primary();
+            default -> this.errorService.registerSyntaxError(
+                    new UnexpectedTokenListException(this.currentToken,
+                            Token.generateExpectedToken(Tag.MINUS, this.currentToken),
+                            Token.generateExpectedToken(Tag.IDENT, this.currentToken),
+                            Token.generateExpectedToken(Tag.OPEN_PAREN, this.currentToken),
+                            Token.generateExpectedToken(Tag.ENTIER, this.currentToken),
+                            Token.generateExpectedToken(Tag.CARACTERE, this.currentToken),
+                            Token.generateExpectedToken(Tag.TRUE, this.currentToken),
+                            Token.generateExpectedToken(Tag.FALSE, this.currentToken),
+                            Token.generateExpectedToken(Tag.NULL, this.currentToken),
+                            Token.generateExpectedToken(Tag.NEW, this.currentToken),
+                            Token.generateExpectedToken(Tag.CHARACTER, this.currentToken))
+            );
         }
         return expression;
     }
+
     @PrintMethodName
     private ExpressionNode primary() {
         ExpressionNode expression = null;
@@ -870,6 +1206,18 @@ public final class Parser {
                 expression();
                 analyseTerminal(Tag.CLOSE_PAREN);
             }
+            default -> this.errorService.registerSyntaxError(
+                    new UnexpectedTokenListException(this.currentToken,
+                            Token.generateExpectedToken(Tag.IDENT, this.currentToken),
+                            Token.generateExpectedToken(Tag.OPEN_PAREN, this.currentToken),
+                            Token.generateExpectedToken(Tag.ENTIER, this.currentToken),
+                            Token.generateExpectedToken(Tag.CARACTERE, this.currentToken),
+                            Token.generateExpectedToken(Tag.TRUE, this.currentToken),
+                            Token.generateExpectedToken(Tag.FALSE, this.currentToken),
+                            Token.generateExpectedToken(Tag.NULL, this.currentToken),
+                            Token.generateExpectedToken(Tag.NEW, this.currentToken),
+                            Token.generateExpectedToken(Tag.CHARACTER, this.currentToken))
+            );
 
         }
         return expression;
@@ -893,6 +1241,30 @@ public final class Parser {
                 analyseTerminal(Tag.CLOSE_PAREN);
                 expression.setNextExpression(acces());
             }
+            default -> this.errorService.registerSyntaxError(
+                    new UnexpectedTokenListException(this.currentToken,
+                            Token.generateExpectedToken(Tag.SEMICOLON, this.currentToken),
+                            Token.generateExpectedToken(Tag.COMMA, this.currentToken),
+                            Token.generateExpectedToken(Tag.CLOSE_PAREN, this.currentToken),
+                            Token.generateExpectedToken(Tag.OR, this.currentToken),
+                            Token.generateExpectedToken(Tag.AND, this.currentToken),
+                            Token.generateExpectedToken(Tag.THEN, this.currentToken),
+                            Token.generateExpectedToken(Tag.NOT, this.currentToken),
+                            Token.generateExpectedToken(Tag.EQ, this.currentToken),
+                            Token.generateExpectedToken(Tag.NE, this.currentToken),
+                            Token.generateExpectedToken(Tag.LT, this.currentToken),
+                            Token.generateExpectedToken(Tag.LE, this.currentToken),
+                            Token.generateExpectedToken(Tag.GT, this.currentToken),
+                            Token.generateExpectedToken(Tag.GE, this.currentToken),
+                            Token.generateExpectedToken(Tag.PLUS, this.currentToken),
+                            Token.generateExpectedToken(Tag.MINUS, this.currentToken),
+                            Token.generateExpectedToken(Tag.MULTI, this.currentToken),
+                            Token.generateExpectedToken(Tag.DIV, this.currentToken),
+                            Token.generateExpectedToken(Tag.REM, this.currentToken),
+                            Token.generateExpectedToken(Tag.DOTDOT, this.currentToken),
+                            Token.generateExpectedToken(Tag.LOOP, this.currentToken),
+                            Token.generateExpectedToken(Tag.DOT, this.currentToken))
+            );
         }
         return expression;
     }
@@ -908,6 +1280,19 @@ public final class Parser {
                 expressions.add(expression());
                 expressions.addAll(expressionSeparator());
             }
+            default -> this.errorService.registerSyntaxError(
+                    new UnexpectedTokenListException(this.currentToken,
+                            Token.generateExpectedToken(Tag.IDENT, this.currentToken),
+                            Token.generateExpectedToken(Tag.OPEN_PAREN, this.currentToken),
+                            Token.generateExpectedToken(Tag.MINUS, this.currentToken),
+                            Token.generateExpectedToken(Tag.ENTIER, this.currentToken),
+                            Token.generateExpectedToken(Tag.CARACTERE, this.currentToken),
+                            Token.generateExpectedToken(Tag.TRUE, this.currentToken),
+                            Token.generateExpectedToken(Tag.FALSE, this.currentToken),
+                            Token.generateExpectedToken(Tag.NULL, this.currentToken),
+                            Token.generateExpectedToken(Tag.NEW, this.currentToken),
+                            Token.generateExpectedToken(Tag.CHARACTER, this.currentToken))
+            );
         }
         return expressions;
     }
@@ -925,6 +1310,11 @@ public final class Parser {
             }
             case CLOSE_PAREN -> {
             }
+            default -> this.errorService.registerSyntaxError(
+                    new UnexpectedTokenListException(this.currentToken,
+                            Token.generateExpectedToken(Tag.COMMA, this.currentToken),
+                            Token.generateExpectedToken(Tag.CLOSE_PAREN, this.currentToken))
+            );
         }
         return expressions;
     }
@@ -940,6 +1330,22 @@ public final class Parser {
             }
             case IDENT, OPEN_PAREN, MINUS, ENTIER, CARACTERE, TRUE, FALSE, NULL, NEW, CHARACTER -> expressions.add(expression());
             case ASSIGN, DOT -> expressions.addAll(multipleExpressions());
+            default -> this.errorService.registerSyntaxError(
+                    new UnexpectedTokenListException(this.currentToken,
+                            Token.generateExpectedToken(Tag.SEMICOLON, this.currentToken),
+                            Token.generateExpectedToken(Tag.IDENT, this.currentToken),
+                            Token.generateExpectedToken(Tag.OPEN_PAREN, this.currentToken),
+                            Token.generateExpectedToken(Tag.MINUS, this.currentToken),
+                            Token.generateExpectedToken(Tag.ENTIER, this.currentToken),
+                            Token.generateExpectedToken(Tag.CARACTERE, this.currentToken),
+                            Token.generateExpectedToken(Tag.TRUE, this.currentToken),
+                            Token.generateExpectedToken(Tag.FALSE, this.currentToken),
+                            Token.generateExpectedToken(Tag.NULL, this.currentToken),
+                            Token.generateExpectedToken(Tag.NEW, this.currentToken),
+                            Token.generateExpectedToken(Tag.CHARACTER, this.currentToken),
+                            Token.generateExpectedToken(Tag.ASSIGN, this.currentToken),
+                            Token.generateExpectedToken(Tag.DOT, this.currentToken))
+            );
         }
         return expressions;
     }
@@ -949,7 +1355,7 @@ public final class Parser {
      */
     @PrintMethodName
     private StatementNode statement() {
-        StatementNode statement;
+        StatementNode statement = null;
         switch (this.currentToken.tag()) {
             case IDENT -> {
                 // appel de fonction et Assign
@@ -1014,7 +1420,15 @@ public final class Parser {
                 analyseTerminal(Tag.LOOP);
                 analyseTerminal(Tag.SEMICOLON);
             }
-            default -> statement = null;
+            default -> this.errorService.registerSyntaxError(
+                    new UnexpectedTokenListException(this.currentToken,
+                            Token.generateExpectedToken(Tag.IDENT, this.currentToken),
+                            Token.generateExpectedToken(Tag.BEGIN, this.currentToken),
+                            Token.generateExpectedToken(Tag.RETURN, this.currentToken),
+                            Token.generateExpectedToken(Tag.IF, this.currentToken),
+                            Token.generateExpectedToken(Tag.FOR, this.currentToken),
+                            Token.generateExpectedToken(Tag.WHILE, this.currentToken))
+            );
         }
         return statement;
     }
@@ -1050,9 +1464,17 @@ public final class Parser {
                 ((AssignmentNode) statement).setExpression(expression());
                 analyseTerminal(Tag.SEMICOLON);
             }
+            default -> this.errorService.registerSyntaxError(
+                    new UnexpectedTokenListException(this.currentToken,
+                            Token.generateExpectedToken(Tag.SEMICOLON, this.currentToken),
+                            Token.generateExpectedToken(Tag.OPEN_PAREN, this.currentToken),
+                            Token.generateExpectedToken(Tag.ASSIGN, this.currentToken),
+                            Token.generateExpectedToken(Tag.DOT, this.currentToken))
+            );
         }
         return statement;
     }
+
     @PrintMethodName
     private VariableReferenceNode instr3() {
         VariableReferenceNode accessReferenceNode = null;
@@ -1065,9 +1487,15 @@ public final class Parser {
                 accessReferenceNode.setVariableName(analyseTerminal(Tag.IDENT).getValue());
                 accessReferenceNode.setNextExpression(instr3());
             }
+            default -> this.errorService.registerSyntaxError(
+                    new UnexpectedTokenListException(this.currentToken,
+                            Token.generateExpectedToken(Tag.ASSIGN, this.currentToken),
+                            Token.generateExpectedToken(Tag.DOT, this.currentToken))
+            );
         }
-        return accessReferenceNode ;
+        return accessReferenceNode;
     }
+
     @PrintMethodName
     private void hasassign() {
         switch (this.currentToken.tag()) {
@@ -1077,8 +1505,14 @@ public final class Parser {
                 analyseTerminal(Tag.ASSIGN);
                 expression();
             }
+            default -> this.errorService.registerSyntaxError(
+                    new UnexpectedTokenListException(this.currentToken,
+                            Token.generateExpectedToken(Tag.SEMICOLON, this.currentToken),
+                            Token.generateExpectedToken(Tag.ASSIGN, this.currentToken))
+            );
         }
     }
+
     @PrintMethodName
     private IfStatementNode elifn() {
         IfStatementNode statement = null;
@@ -1095,9 +1529,16 @@ public final class Parser {
                 statement.setThenBranch(thenBranch);
                 statement.setElseIfBranch(elifn());
             }
+            default -> this.errorService.registerSyntaxError(
+                    new UnexpectedTokenListException(this.currentToken,
+                            Token.generateExpectedToken(Tag.ELSIF, this.currentToken),
+                            Token.generateExpectedToken(Tag.END, this.currentToken),
+                            Token.generateExpectedToken(Tag.ELSE, this.currentToken))
+            );
         }
         return statement;
     }
+
     @PrintMethodName
     private BlockNode elsen() {
         BlockNode block = null;
@@ -1109,9 +1550,15 @@ public final class Parser {
                 block = new BlockNode();
                 block.addStatements(multipleStatements());
             }
+            default -> this.errorService.registerSyntaxError(
+                    new UnexpectedTokenListException(this.currentToken,
+                            Token.generateExpectedToken(Tag.ELSE, this.currentToken),
+                            Token.generateExpectedToken(Tag.END, this.currentToken))
+            );
         }
         return block;
     }
+
     @PrintMethodName
     private boolean hasreverse() {
         boolean hasReverse = false;
@@ -1122,6 +1569,20 @@ public final class Parser {
                 analyseTerminal(Tag.REVERSE);
                 hasReverse = true;
             }
+            default -> this.errorService.registerSyntaxError(
+                    new UnexpectedTokenListException(this.currentToken,
+                            Token.generateExpectedToken(Tag.REVERSE, this.currentToken),
+                            Token.generateExpectedToken(Tag.IDENT, this.currentToken),
+                            Token.generateExpectedToken(Tag.OPEN_PAREN, this.currentToken),
+                            Token.generateExpectedToken(Tag.MINUS, this.currentToken),
+                            Token.generateExpectedToken(Tag.ENTIER, this.currentToken),
+                            Token.generateExpectedToken(Tag.CARACTERE, this.currentToken),
+                            Token.generateExpectedToken(Tag.TRUE, this.currentToken),
+                            Token.generateExpectedToken(Tag.FALSE, this.currentToken),
+                            Token.generateExpectedToken(Tag.NULL, this.currentToken),
+                            Token.generateExpectedToken(Tag.NEW, this.currentToken),
+                            Token.generateExpectedToken(Tag.CHARACTER, this.currentToken))
+            );
         }
         return hasReverse;
     }
@@ -1137,9 +1598,19 @@ public final class Parser {
                 statements.add(statement());
                 statements.addAll(instrs2());
             }
+            default -> this.errorService.registerSyntaxError(
+                    new UnexpectedTokenListException(this.currentToken,
+                            Token.generateExpectedToken(Tag.IDENT, this.currentToken),
+                            Token.generateExpectedToken(Tag.BEGIN, this.currentToken),
+                            Token.generateExpectedToken(Tag.RETURN, this.currentToken),
+                            Token.generateExpectedToken(Tag.IF, this.currentToken),
+                            Token.generateExpectedToken(Tag.FOR, this.currentToken),
+                            Token.generateExpectedToken(Tag.WHILE, this.currentToken))
+            );
         }
         return statements;
     }
+
     @PrintMethodName
     private List<StatementNode> instrs2() {
         List<StatementNode> statements = new ArrayList<>();
@@ -1150,9 +1621,22 @@ public final class Parser {
             }
             case END, ELSE, ELSIF -> {
             }
+            default -> this.errorService.registerSyntaxError(
+                    new UnexpectedTokenListException(this.currentToken,
+                            Token.generateExpectedToken(Tag.IDENT, this.currentToken),
+                            Token.generateExpectedToken(Tag.BEGIN, this.currentToken),
+                            Token.generateExpectedToken(Tag.RETURN, this.currentToken),
+                            Token.generateExpectedToken(Tag.IF, this.currentToken),
+                            Token.generateExpectedToken(Tag.FOR, this.currentToken),
+                            Token.generateExpectedToken(Tag.WHILE, this.currentToken),
+                            Token.generateExpectedToken(Tag.END, this.currentToken),
+                            Token.generateExpectedToken(Tag.ELSE, this.currentToken),
+                            Token.generateExpectedToken(Tag.ELSIF, this.currentToken))
+            );
         }
         return statements;
     }
+
     @PrintMethodName
     private VariableReferenceNode acces() {
         VariableReferenceNode variableReferenceNode = null;
@@ -1165,9 +1649,34 @@ public final class Parser {
                 variableReferenceNode.setVariableName(analyseTerminal(Tag.IDENT).getValue());
                 variableReferenceNode.setNextExpression(acces());
             }
+            default -> this.errorService.registerSyntaxError(
+                    new UnexpectedTokenListException(this.currentToken,
+                            Token.generateExpectedToken(Tag.DOT, this.currentToken),
+                            Token.generateExpectedToken(Tag.SEMICOLON, this.currentToken),
+                            Token.generateExpectedToken(Tag.COMMA, this.currentToken),
+                            Token.generateExpectedToken(Tag.CLOSE_PAREN, this.currentToken),
+                            Token.generateExpectedToken(Tag.OR, this.currentToken),
+                            Token.generateExpectedToken(Tag.END, this.currentToken),
+                            Token.generateExpectedToken(Tag.THEN, this.currentToken),
+                            Token.generateExpectedToken(Tag.NOT, this.currentToken),
+                            Token.generateExpectedToken(Tag.EQ, this.currentToken),
+                            Token.generateExpectedToken(Tag.NE, this.currentToken),
+                            Token.generateExpectedToken(Tag.LT, this.currentToken),
+                            Token.generateExpectedToken(Tag.LE, this.currentToken),
+                            Token.generateExpectedToken(Tag.GT, this.currentToken),
+                            Token.generateExpectedToken(Tag.GE, this.currentToken),
+                            Token.generateExpectedToken(Tag.PLUS, this.currentToken),
+                            Token.generateExpectedToken(Tag.MINUS, this.currentToken),
+                            Token.generateExpectedToken(Tag.MULTI, this.currentToken),
+                            Token.generateExpectedToken(Tag.DIV, this.currentToken),
+                            Token.generateExpectedToken(Tag.REM, this.currentToken),
+                            Token.generateExpectedToken(Tag.DOTDOT, this.currentToken),
+                            Token.generateExpectedToken(Tag.LOOP, this.currentToken))
+            );
         }
         return variableReferenceNode;
     }
+
     @PrintMethodName
     private Token analyseTerminal(Tag tag) {
         System.out.println("\t\t↪️ " + this.currentToken);
@@ -1176,7 +1685,8 @@ public final class Parser {
             if (expectedToken.tag() == Tag.SEMICOLON) {
                 this.errorService.registerSyntaxWarning(new MissingSemicolonException(this.currentToken));
             } else {
-            this.errorService.registerSyntaxError(new UnexpectedTokenException(expectedToken, this.currentToken));}
+                this.errorService.registerSyntaxError(new UnexpectedTokenException(expectedToken, this.currentToken));
+            }
         }
         // Contient le prochain token ou <EOF, currentLine,""> si fin de fichier
         if (this.currentToken.tag() == Tag.EOF) {

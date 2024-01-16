@@ -67,6 +67,7 @@ public class CanAdaTest {
         } else {
             AnsiFormat fWarning = new AnsiFormat(Attribute.WHITE_TEXT(), Attribute.RED_BACK(), Attribute.BOLD());
             System.out.println("\n❌ " + colorize("PARSING PHASE FAILED, STOPPING", fWarning));
+            errorService.handleErrorsDisplay();
             return false;
         }
     }

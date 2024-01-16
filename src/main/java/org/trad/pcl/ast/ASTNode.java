@@ -17,7 +17,7 @@ public abstract class ASTNode {
         return toFormat.replaceAll("\n", "\n" + tab);
     }
 
-    public void setJson(boolean status) {
+    public void setIsJson(boolean status) {
         isJson = status;
     }
 

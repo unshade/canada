@@ -47,7 +47,7 @@ public final class Main {
                 System.out.println("\n✅ " + colorize("PARSING PHASE COMPLETED, GENERATING AST", fWarning));
                 System.out.println(AST);
                 if (args.length > 1 && "-g".equals(args[1])) {
-                    AST.setJson(true);
+                    AST.setIsJson(true);
                     String json = AST.toString();
                     PythonRunner.exec(json);
                 }
