@@ -2,6 +2,7 @@ package org.trad.pcl.Parser;
 
 import org.trad.pcl.Exceptions.Syntax.MissingSemicolonException;
 import org.trad.pcl.Exceptions.Syntax.UnexpectedTokenException;
+import org.trad.pcl.Exceptions.Syntax.UnexpectedTokenListException;
 import org.trad.pcl.Helpers.TagHelper;
 import org.trad.pcl.Lexer.Lexer;
 import org.trad.pcl.Lexer.Tokens.Tag;
@@ -116,6 +117,7 @@ public final class Parser {
                     typeDeclarationNode.setType(typeNode);
                     declarations.add(typeDeclarationNode);
                 }
+                // TODO
                 declarationExpression();
                 analyseTerminal(Tag.SEMICOLON);
             }
@@ -280,12 +282,21 @@ public final class Parser {
         switch (this.currentToken.tag()) {
             case ACCESS -> {
                 analyseTerminal(Tag.ACCESS);
-                analyseTerminal(Tag.IDENT);
+                type = new AccessTypeNode();
+                SimpleTypeNode simpleTypeNode = new SimpleTypeNode();
+                simpleTypeNode.setTypeName(analyseTerminal(Tag.IDENT).getValue());
+                ((AccessTypeNode) type).setBaseType(simpleTypeNode);
             }
             case IDENT -> {
                 type = new SimpleTypeNode();
-                ((SimpleTypeNode) type).setTypeName(currentToken.getValue());
-                analyseTerminal(Tag.IDENT);
+                ((SimpleTypeNode) type).setTypeName(analyseTerminal(Tag.IDENT).getValue());
+            }
+            default -> {
+                List<Token> expectedTokens = new ArrayList<>();
+                expectedTokens.add(new Token(Tag.ACCESS, this.currentToken.line(), TagHelper.getTagString(Tag.ACCESS)));
+                expectedTokens.add(new Token(Tag.IDENT, this.currentToken.line(), TagHelper.getTagString(Tag.IDENT)));
+
+                this.errorService.registerSyntaxError(new UnexpectedTokenListException(expectedTokens, this.currentToken));
             }
         }
         return type;
@@ -414,7 +425,6 @@ public final class Parser {
 
     /**
      * Grammar rule : or_expr
-     * TODO : refactor
      */
     @PrintMethodName
     private ExpressionNode LeftOrExpression() {
@@ -435,7 +445,8 @@ public final class Parser {
 
     /**
      * Grammar rule : or_expr2
-     * TODO : refactor
+     * @return BinaryExpressionNode with operator and right expression
+     * the left expression is set in LeftOrExpression
      */
     @PrintMethodName
     private BinaryExpressionNode OrExpression() {
@@ -460,7 +471,6 @@ public final class Parser {
 
     /**
      * Grammar rule : or_expr3
-     * TODO : refactor
      */
     @PrintMethodName
     private ExpressionNode RightOrExpression() {
@@ -482,13 +492,12 @@ public final class Parser {
 
     /**
      * Grammar rule : and_expr
-     * TODO : refactor
      */
     @PrintMethodName
     private ExpressionNode LeftAndExpression() {
         switch (this.currentToken.tag()) {
             case IDENT, OPEN_PAREN, MINUS, ENTIER, CARACTERE, TRUE, FALSE, NULL, NEW, CHARACTER -> {
-                ExpressionNode firstExpression = not_expr();
+                ExpressionNode firstExpression = LeftNotExpression();
                 BinaryExpressionNode secondExpression = AndExpression();
 
                 if (secondExpression != null) {
@@ -504,7 +513,8 @@ public final class Parser {
 
     /**
      * Grammar rule : and_expr2
-     * TODO : refactor
+     * @return BinaryExpressionNode with operator and right expression
+     * the left expression is set in LeftAndExpression
      */
     @PrintMethodName
     private BinaryExpressionNode AndExpression() {
@@ -514,9 +524,7 @@ public final class Parser {
             }
             case AND -> {
                 expression = new BinaryExpressionNode();
-                OperatorNode operator = new OperatorNode();
-                operator.setOperator(analyseTerminal(Tag.AND).getValue());
-                expression.setOperator(operator);
+                expression.setOperator(analyseTerminal(Tag.AND).getValue());
 
                 ExpressionNode secondExpression = RightAndExpression();
                 expression.setRight(secondExpression);
@@ -528,13 +536,12 @@ public final class Parser {
 
     /**
      * Grammar rule : and_expr3
-     * TODO : refactor
      */
     @PrintMethodName
     private ExpressionNode RightAndExpression() {
         switch (this.currentToken.tag()) {
             case IDENT, OPEN_PAREN, MINUS, ENTIER, CARACTERE, TRUE, FALSE, NULL, NEW, CHARACTER -> {
-                ExpressionNode firstExpression = not_expr();
+                ExpressionNode firstExpression = LeftNotExpression();
                 BinaryExpressionNode secondExpression = AndExpression();
 
                 if (secondExpression != null) {
@@ -547,7 +554,7 @@ public final class Parser {
             case THEN -> {
                 // TODO : then
                 analyseTerminal(Tag.THEN);
-                not_expr();
+                LeftNotExpression();
                 AndExpression();
             }
         }
@@ -556,14 +563,13 @@ public final class Parser {
 
     /**
      * Grammar rule : not_expr
-     * TODO : refactor
      */
     @PrintMethodName
-    private ExpressionNode not_expr() {
+    private ExpressionNode LeftNotExpression() {
         switch (this.currentToken.tag()) {
             case IDENT, OPEN_PAREN, MINUS, ENTIER, CARACTERE, TRUE, FALSE, NULL, NEW, CHARACTER -> {
-                ExpressionNode firstExpression = equality_expr();
-                BinaryExpressionNode secondExpression = not_expr2();
+                ExpressionNode firstExpression = LeftEqualityExpression();
+                BinaryExpressionNode secondExpression = NotExpression();
 
                 if (secondExpression != null) {
                     secondExpression.setLeft(firstExpression);
@@ -578,28 +584,19 @@ public final class Parser {
 
     /**
      * Grammar rule : not_expr2
-     * TODO : refactor
+     * @return BinaryExpressionNode with operator and right expression
+     * the left expression is set in LeftNotExpression
      */
     @PrintMethodName
-    private BinaryExpressionNode not_expr2() {
+    private BinaryExpressionNode NotExpression() {
         BinaryExpressionNode expression = null;
         switch (this.currentToken.tag()) {
             case SEMICOLON, COMMA, CLOSE_PAREN, OR, AND, THEN, DOTDOT, LOOP -> {
             }
             case NOT -> {
                 expression = new BinaryExpressionNode();
-                OperatorNode operator = new OperatorNode();
-                operator.setOperator(analyseTerminal(Tag.NOT).getValue());
-                expression.setOperator(operator);
-
-                ExpressionNode firstExpression = equality_expr();
-                BinaryExpressionNode secondExpression = not_expr2();
-                if (secondExpression != null) {
-                    secondExpression.setLeft(firstExpression);
-                    expression.setRight(secondExpression);
-                } else {
-                    expression.setRight(firstExpression);
-                }
+                expression.setOperator(analyseTerminal(Tag.NOT).getValue());
+                expression.setRight(LeftEqualityExpression(), NotExpression());
             }
         }
         return expression;
@@ -607,14 +604,14 @@ public final class Parser {
 
     /**
      * Grammar rule : equality_expr
-     * TODO : refactor
+     * @return if there is an equality expression, return BinaryExpressionNode with
      */
     @PrintMethodName
-    private ExpressionNode equality_expr() {
+    private ExpressionNode LeftEqualityExpression() {
         switch (this.currentToken.tag()) {
             case IDENT, OPEN_PAREN, MINUS, ENTIER, CARACTERE, TRUE, FALSE, NULL, NEW, CHARACTER -> {
-                ExpressionNode firstExpression = relational_expr();
-                BinaryExpressionNode secondExpression = equality_expr2();
+                ExpressionNode firstExpression = LeftRelationalExpression();
+                BinaryExpressionNode secondExpression = EqualityExpression();
 
                 if (secondExpression != null) {
                     secondExpression.setLeft(firstExpression);
@@ -629,57 +626,37 @@ public final class Parser {
 
     /**
      * Grammar rule : equality_expr2
-     * TODO : refactor
+     * @return BinaryExpressionNode with operator and right expression
+     * the left expression is set in LeftEqualityExpression
      */
     @PrintMethodName
-    private BinaryExpressionNode equality_expr2() {
+    private BinaryExpressionNode EqualityExpression() {
         BinaryExpressionNode expression = null;
         switch (this.currentToken.tag()) {
             case SEMICOLON, COMMA, CLOSE_PAREN, OR, AND, THEN, NOT, DOTDOT, LOOP -> {
             }
             case EQ -> {
                 expression = new BinaryExpressionNode();
-                OperatorNode operator = new OperatorNode();
-                operator.setOperator(analyseTerminal(Tag.EQ).getValue());
-                expression.setOperator(operator);
-
-                ExpressionNode firstExpression = relational_expr();
-                BinaryExpressionNode secondExpression = equality_expr2();
-                if (secondExpression != null) {
-                    secondExpression.setLeft(firstExpression);
-                    expression.setRight(secondExpression);
-                } else {
-                    expression.setRight(firstExpression);
-                }
+                expression.setOperator(analyseTerminal(Tag.EQ).getValue());
+                expression.setRight(LeftRelationalExpression(), EqualityExpression());
             }
             case NE -> {
                 expression = new BinaryExpressionNode();
-                OperatorNode operator = new OperatorNode();
-                operator.setOperator(analyseTerminal(Tag.NE).getValue());
-                expression.setOperator(operator);
-
-                ExpressionNode firstExpression = relational_expr();
-                BinaryExpressionNode secondExpression = equality_expr2();
-                if (secondExpression != null) {
-                    secondExpression.setLeft(firstExpression);
-                    expression.setRight(secondExpression);
-                } else {
-                    expression.setRight(firstExpression);
-                }
+                expression.setOperator(analyseTerminal(Tag.NE).getValue());
+                expression.setRight(LeftRelationalExpression(), EqualityExpression());
             }
         }
         return expression;
     }
     /**
      * Grammar rule : relational_expr
-     * TODO : refactor
      */
     @PrintMethodName
-    private ExpressionNode relational_expr() {
+    private ExpressionNode LeftRelationalExpression() {
         switch (this.currentToken.tag()) {
             case IDENT, OPEN_PAREN, MINUS, ENTIER, CARACTERE, TRUE, FALSE, NULL, NEW, CHARACTER -> {
-                ExpressionNode firstExpression = additive_expr();
-                BinaryExpressionNode secondExpression = relational_expr2();
+                ExpressionNode firstExpression = LeftAdditiveExpression();
+                BinaryExpressionNode secondExpression = RelationalExpression();
 
                 if (secondExpression != null) {
                     secondExpression.setLeft(firstExpression);
@@ -694,73 +671,34 @@ public final class Parser {
 
     /**
      * Grammar rule : relational_expr2
-     * TODO : refactor
+     * @return BinaryExpressionNode with operator and right expression
+     * the left expression is set in LeftRelationalExpression
      */
     @PrintMethodName
-    private BinaryExpressionNode relational_expr2() {
+    private BinaryExpressionNode RelationalExpression() {
         BinaryExpressionNode expression = null;
         switch (this.currentToken.tag()) {
             case SEMICOLON, COMMA, CLOSE_PAREN, OR, AND, THEN, NOT, EQ, NE, DOTDOT, LOOP -> {
             }
             case LT -> {
                 expression = new BinaryExpressionNode();
-                OperatorNode operator = new OperatorNode();
-                operator.setOperator(analyseTerminal(Tag.LT).getValue());
-                expression.setOperator(operator);
-
-                ExpressionNode firstExpression = additive_expr();
-                BinaryExpressionNode secondExpression = relational_expr2();
-                if (secondExpression != null) {
-                    secondExpression.setLeft(firstExpression);
-                    expression.setRight(secondExpression);
-                } else {
-                    expression.setRight(firstExpression);
-                }
+                expression.setOperator(analyseTerminal(Tag.LT).getValue());
+                expression.setRight(LeftAdditiveExpression(), RelationalExpression());
             }
             case LE -> {
                 expression = new BinaryExpressionNode();
-                OperatorNode operator = new OperatorNode();
-                operator.setOperator(analyseTerminal(Tag.LE).getValue());
-                expression.setOperator(operator);
-
-                ExpressionNode firstExpression = additive_expr();
-                BinaryExpressionNode secondExpression = relational_expr2();
-                if (secondExpression != null) {
-                    secondExpression.setLeft(firstExpression);
-                    expression.setRight(secondExpression);
-                } else {
-                    expression.setRight(firstExpression);
-                }
+                expression.setOperator(analyseTerminal(Tag.LE).getValue());
+                expression.setRight(LeftAdditiveExpression(), RelationalExpression());
             }
             case GT -> {
                 expression = new BinaryExpressionNode();
-                OperatorNode operator = new OperatorNode();
-                operator.setOperator(analyseTerminal(Tag.GT).getValue());
-                expression.setOperator(operator);
-
-                ExpressionNode firstExpression = additive_expr();
-                BinaryExpressionNode secondExpression = relational_expr2();
-                if (secondExpression != null) {
-                    secondExpression.setLeft(firstExpression);
-                    expression.setRight(secondExpression);
-                } else {
-                    expression.setRight(firstExpression);
-                }
+                expression.setOperator(analyseTerminal(Tag.GT).getValue());
+                expression.setRight(LeftAdditiveExpression(), RelationalExpression());
             }
             case GE -> {
                 expression = new BinaryExpressionNode();
-                OperatorNode operator = new OperatorNode();
-                operator.setOperator(analyseTerminal(Tag.GE).getValue());
-                expression.setOperator(operator);
-
-                ExpressionNode firstExpression = additive_expr();
-                BinaryExpressionNode secondExpression = relational_expr2();
-                if (secondExpression != null) {
-                    secondExpression.setLeft(firstExpression);
-                    expression.setRight(secondExpression);
-                } else {
-                    expression.setRight(firstExpression);
-                }
+                expression.setOperator(analyseTerminal(Tag.GE).getValue());
+                expression.setRight(LeftAdditiveExpression(), RelationalExpression());
             }
         }
         return expression;
@@ -768,14 +706,13 @@ public final class Parser {
 
     /**
      * Grammar rule : additive_expr
-     * TODO : refactor
      */
     @PrintMethodName
-    private ExpressionNode additive_expr() {
+    private ExpressionNode LeftAdditiveExpression() {
         switch (this.currentToken.tag()) {
             case IDENT, OPEN_PAREN, MINUS, ENTIER, CARACTERE, TRUE, FALSE, NULL, NEW, CHARACTER -> {
-                ExpressionNode firstExpression =  multiplicative_expr();
-                BinaryExpressionNode secondExpression = additive_expr2();
+                ExpressionNode firstExpression =  LeftMultiplicativeExpression();
+                BinaryExpressionNode secondExpression = AdditiveExpression();
                 if (secondExpression != null) {
                     secondExpression.setLeft(firstExpression);
                     return secondExpression;
@@ -789,43 +726,24 @@ public final class Parser {
 
     /**
      * Grammar rule : additive_expr2
-     * TODO : refactor
+     * @return BinaryExpressionNode with operator and right expression
+     * the left expression is set in LeftAdditiveExpression
      */
     @PrintMethodName
-    private BinaryExpressionNode additive_expr2() {
+    private BinaryExpressionNode AdditiveExpression() {
         BinaryExpressionNode expression = null;
         switch (this.currentToken.tag()) {
             case SEMICOLON, COMMA, CLOSE_PAREN, OR, AND, THEN, NOT, EQ, NE, LT, LE, GT, GE, DOTDOT, LOOP -> {
             }
             case PLUS -> {
                 expression = new BinaryExpressionNode();
-                OperatorNode operator = new OperatorNode();
-                operator.setOperator(analyseTerminal(Tag.PLUS).getValue());
-                expression.setOperator(operator);
-
-                ExpressionNode firstExpression = multiplicative_expr();
-                BinaryExpressionNode secondExpression = additive_expr2();
-                if (secondExpression != null) {
-                    secondExpression.setLeft(firstExpression);
-                    expression.setRight(secondExpression);
-                } else {
-                    expression.setRight(firstExpression);
-                }
+                expression.setOperator(analyseTerminal(Tag.PLUS).getValue());
+                expression.setRight(LeftMultiplicativeExpression(), AdditiveExpression());
             }
             case MINUS -> {
                 expression = new BinaryExpressionNode();
-                OperatorNode operator = new OperatorNode();
-                operator.setOperator(analyseTerminal(Tag.MINUS).getValue());
-                expression.setOperator(operator);
-
-                ExpressionNode firstExpression = multiplicative_expr();
-                BinaryExpressionNode secondExpression = additive_expr2();
-                if (secondExpression != null) {
-                    secondExpression.setLeft(firstExpression);
-                    expression.setRight(secondExpression);
-                } else {
-                    expression.setRight(firstExpression);
-                }
+                expression.setOperator(analyseTerminal(Tag.MINUS).getValue());
+                expression.setRight(LeftMultiplicativeExpression(), AdditiveExpression());
             }
         }
         return expression;
@@ -833,14 +751,13 @@ public final class Parser {
 
     /**
      * Grammar rule : multiplicative_expr
-     * TODO : refactor
      */
     @PrintMethodName
-    private ExpressionNode multiplicative_expr() {
+    private ExpressionNode LeftMultiplicativeExpression() {
         switch (this.currentToken.tag()) {
             case IDENT, OPEN_PAREN, MINUS, ENTIER, CARACTERE, TRUE, FALSE, NULL, NEW, CHARACTER -> {
                 ExpressionNode firstExpression = unaryExpression();
-                BinaryExpressionNode secondExpression = multiplicative_expr2();
+                BinaryExpressionNode secondExpression = MultiplicativeExpression();
                 if (secondExpression != null) {
                     secondExpression.setLeft(firstExpression);
                     return secondExpression;
@@ -854,58 +771,30 @@ public final class Parser {
 
     /**
      * Grammar rule : multiplicative_expr2
-     * TODO : refactor
+     * @return BinaryExpressionNode with operator and right expression
+     * the left expression is set in LeftMultiplicativeExpression
      */
     @PrintMethodName
-    private BinaryExpressionNode multiplicative_expr2() {
+    private BinaryExpressionNode MultiplicativeExpression() {
         BinaryExpressionNode expression = null;
         switch (this.currentToken.tag()) {
             case SEMICOLON, COMMA, CLOSE_PAREN, OR, AND, THEN, NOT, EQ, NE, LT, LE, GT, GE, PLUS, MINUS, DOTDOT, LOOP -> {
             }
             case MULTI -> {
                 expression = new BinaryExpressionNode();
-                OperatorNode operator = new OperatorNode();
-                operator.setOperator(analyseTerminal(Tag.MULTI).getValue());
-                expression.setOperator(operator);
-
-                ExpressionNode firstExpression = unaryExpression();
-                BinaryExpressionNode secondExpression = multiplicative_expr2();
-                if (secondExpression != null) {
-                    secondExpression.setLeft(firstExpression);
-                    expression.setRight(secondExpression);
-                } else {
-                    expression.setRight(firstExpression);
-                }
+                expression.setOperator(analyseTerminal(Tag.MULTI).getValue());
+                expression.setRight(unaryExpression(), MultiplicativeExpression());
             }
             case DIV -> {
                 expression = new BinaryExpressionNode();
-                OperatorNode operator = new OperatorNode();
-                operator.setOperator(analyseTerminal(Tag.DIV).getValue());
-                expression.setOperator(operator);
+                expression.setOperator(analyseTerminal(Tag.DIV).getValue());
+                expression.setRight(unaryExpression(), MultiplicativeExpression());
 
-                ExpressionNode firstExpression = unaryExpression();
-                BinaryExpressionNode secondExpression = multiplicative_expr2();
-                if (secondExpression != null) {
-                    secondExpression.setLeft(firstExpression);
-                    expression.setRight(secondExpression);
-                } else {
-                    expression.setRight(firstExpression);
-                }
             }
             case REM -> {
                 expression = new BinaryExpressionNode();
-                OperatorNode operator = new OperatorNode();
-                operator.setOperator(analyseTerminal(Tag.REM).getValue());
-                expression.setOperator(operator);
-
-                ExpressionNode firstExpression = unaryExpression();
-                BinaryExpressionNode secondExpression = multiplicative_expr2();
-                if (secondExpression != null) {
-                    secondExpression.setLeft(firstExpression);
-                    expression.setRight(secondExpression);
-                } else {
-                    expression.setRight(firstExpression);
-                }
+                expression.setOperator(analyseTerminal(Tag.REM).getValue());
+                expression.setRight(unaryExpression(), MultiplicativeExpression());
             }
         }
         return expression;
