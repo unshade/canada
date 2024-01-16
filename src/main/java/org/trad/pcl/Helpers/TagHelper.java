@@ -42,7 +42,7 @@ public class TagHelper {
             case COMMA -> ",";
             case APOSTROPHE -> "'";
             case ADA_TEXT_IO -> "ADA_TEXT_IO";
-            case USEADA_TEXT_IO -> "USEADA_TEXT_IO";
+            case USE -> "USE";
             case WITH -> "WITH";
             case PLUS -> "+";
             case MINUS -> "-";

@@ -43,7 +43,7 @@ public enum Tag {
     COMMA,
     APOSTROPHE,
     ADA_TEXT_IO,
-    USEADA_TEXT_IO,
+    USE,
     WITH,
     NULL,
     NEW,

@@ -43,6 +43,11 @@ public class Parser {
         return instance;
     }
 
+    public static Parser newInstance() {
+        instance = new Parser();
+        return instance;
+    }
+
     public ProgramNode parse() {
         return fichier();
     }
@@ -56,6 +61,7 @@ public class Parser {
         analyseTerminal(Tag.DOT);
         analyseTerminal(Tag.IDENT);
         analyseTerminal(Tag.SEMICOLON);
+        analyseTerminal(Tag.USE);
         analyseTerminal(Tag.IDENT);
         analyseTerminal(Tag.DOT);
         analyseTerminal(Tag.IDENT);

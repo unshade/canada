@@ -86,7 +86,7 @@ public class Lexer {
                 Map.entry(Tag.COMMA, Pattern.compile(",")),
                 Map.entry(Tag.APOSTROPHE, Pattern.compile("'")),
                 Map.entry(Tag.ADA_TEXT_IO, Pattern.compile("Ada.Text_IO")),
-                Map.entry(Tag.USEADA_TEXT_IO, Pattern.compile("useAda.Text_IO")),
+                Map.entry(Tag.USE, Pattern.compile("use")),
                 Map.entry(Tag.WITH, Pattern.compile("with")),
                 Map.entry(Tag.NULL, Pattern.compile("null")),
                 Map.entry(Tag.NEW, Pattern.compile("new")),
@@ -134,7 +134,8 @@ public class Lexer {
     }
 
     public static Lexer newInstance(File file) {
-        return new Lexer(file);
+        instance = new Lexer(file);
+        return instance;
     }
 
     /**
