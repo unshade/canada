@@ -23,7 +23,7 @@ import static com.diogonunes.jcolor.Ansi.colorize;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-public class CanAdaTest {
+public class ParseTest {
 
     private static Stream<Path> provideCanAdaFiles() throws URISyntaxException, IOException {
         return Files.walk(Path.of(Objects.requireNonNull(Main.class.getResource("/tests/typing/good")).toURI()), 1)

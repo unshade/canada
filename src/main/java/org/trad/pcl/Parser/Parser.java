@@ -1189,7 +1189,7 @@ public final class Parser {
             }
             case ENTIER -> {
                 expression = new LiteralNode();
-                ((LiteralNode) expression).setValue(Integer.parseInt(analyseTerminal(Tag.ENTIER).getValue()));
+                ((LiteralNode) expression).setValue(Long.parseLong(analyseTerminal(Tag.ENTIER).getValue()));
             }
             case CARACTERE -> {
                 expression = new LiteralNode();
