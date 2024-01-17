@@ -102,10 +102,10 @@ public class Parser {
                 for (VariableDeclarationNode typeDeclarationNode : typeNodes) {
                     typeDeclarationNode.setType(typeNode);
                     if (assignNode != null) {
-                        AssignmentNode assignmentNode = new AssignmentNode();
-                        assignmentNode.setIdentifier(typeDeclarationNode.getIdentifier());
-                        assignmentNode.setExpression(assignNode);
-                        typeDeclarationNode.setAssignment(assignmentNode);
+                        AssignmentStatementNode assignmentStatementNode = new AssignmentStatementNode();
+                        assignmentStatementNode.setIdentifier(typeDeclarationNode.getIdentifier());
+                        assignmentStatementNode.setExpression(assignNode);
+                        typeDeclarationNode.setAssignment(assignmentStatementNode);
                     }
                     declarations.add(typeDeclarationNode);
                 }
@@ -1374,7 +1374,7 @@ public class Parser {
      * Grammar rule : instr
      */
     @PrintMethodName
-    private StatementNode statement() {
+    public StatementNode statement() {
         StatementNode statement = null;
         switch (this.currentToken.tag()) {
             case IDENT -> {
@@ -1393,6 +1393,7 @@ public class Parser {
             case RETURN -> {
                 statement = new ReturnStatementNode();
                 analyseTerminal(Tag.RETURN);
+                // TODO : return statement does not can have multiple expressions
                 ((ReturnStatementNode) statement).addExpressions(hasExpression());
                 analyseTerminal(Tag.SEMICOLON);
             }
@@ -1414,7 +1415,7 @@ public class Parser {
             case FOR -> {
                 statement = new LoopStatementNode();
                 analyseTerminal(Tag.FOR);
-                analyseTerminal(Tag.IDENT);
+                ((LoopStatementNode) statement).setIdentifier(analyseTerminal(Tag.IDENT).getValue());
                 analyseTerminal(Tag.IN);
                 ((LoopStatementNode) statement).setReverse(hasreverse());
                 ((LoopStatementNode) statement).setStartExpression(expression());
@@ -1477,10 +1478,10 @@ public class Parser {
                 analyseTerminal(Tag.SEMICOLON);
             }
             case ASSIGN, DOT -> {
-                statement = new AssignmentNode();
+                statement = new AssignmentStatementNode();
                 statement.setNextIdentifier(instr3());
                 analyseTerminal(Tag.ASSIGN);
-                ((AssignmentNode) statement).setExpression(expression());
+                ((AssignmentStatementNode) statement).setExpression(expression());
                 analyseTerminal(Tag.SEMICOLON);
             }
             default -> this.errorService.registerSyntaxError(

@@ -7,4 +7,8 @@ public final class OperatorNode extends ASTNode {
         this.operator = operator;
     }
 
+    public String getOperator() {
+        return operator;
+    }
+
 }

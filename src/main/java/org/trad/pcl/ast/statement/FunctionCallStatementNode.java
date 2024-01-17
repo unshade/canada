@@ -12,4 +12,8 @@ public final class FunctionCallStatementNode extends IdentifiableStatementNode {
         this.arguments = arguments;
     }
 
+    public List<ExpressionNode> getArguments() {
+        return arguments;
+    }
+
 }

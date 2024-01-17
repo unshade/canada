@@ -1,18 +1,18 @@
 package org.trad.pcl.ast.declaration;
 
-import org.trad.pcl.ast.statement.AssignmentNode;
+import org.trad.pcl.ast.statement.AssignmentStatementNode;
 import org.trad.pcl.ast.type.TypeNode;
 
 public final class VariableDeclarationNode extends DeclarationNode {
     private TypeNode type;
 
-    private AssignmentNode assignment;
+    private AssignmentStatementNode assignment;
 
     public void setType(TypeNode type) {
         this.type = type;
     }
 
-    public void setAssignment(AssignmentNode assignment) {
+    public void setAssignment(AssignmentStatementNode assignment) {
         this.assignment = assignment;
     }
 
@@ -20,7 +20,7 @@ public final class VariableDeclarationNode extends DeclarationNode {
         return type;
     }
 
-    public AssignmentNode getAssignment() {
+    public AssignmentStatementNode getAssignment() {
         return assignment;
     }
 }

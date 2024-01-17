@@ -25,4 +25,20 @@ public final class IfStatementNode extends StatementNode {
         this.elseIfBranch = elseIfBranch;
     }
 
+    public ExpressionNode getCondition() {
+        return condition;
+    }
+
+    public BlockNode getThenBranch() {
+        return thenBranch;
+    }
+
+    public BlockNode getElseBranch() {
+        return elseBranch;
+    }
+
+    public IfStatementNode getElseIfBranch() {
+        return elseIfBranch;
+    }
+
 }

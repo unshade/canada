@@ -6,6 +6,7 @@ public final class LoopStatementNode extends StatementNode {
 
         private BlockNode body;
 
+        private String identifier;
         private boolean isReverse;
 
         private ExpressionNode startExpression;
@@ -27,6 +28,32 @@ public final class LoopStatementNode extends StatementNode {
         public void setEndExpression(ExpressionNode endExpression) {
             this.endExpression = endExpression;
         }
+
+        public BlockNode getBody() {
+            return body;
+        }
+
+        public boolean isReverse() {
+            return isReverse;
+        }
+
+        public ExpressionNode getStartExpression() {
+            return startExpression;
+        }
+
+        public ExpressionNode getEndExpression() {
+            return endExpression;
+        }
+
+        public void setIdentifier(String identifier) {
+            this.identifier = identifier;
+        }
+
+        public String getIdentifier() {
+            return identifier;
+        }
+
+
 
 
 }
