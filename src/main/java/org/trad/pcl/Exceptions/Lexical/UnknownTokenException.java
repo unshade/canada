@@ -5,6 +5,6 @@ import org.trad.pcl.Lexer.Tokens.Token;
 
 public final class UnknownTokenException extends Exception {
     public UnknownTokenException(Token token) {
-        super("Unknown token: " + token + " at line " + token.line());
+        super("Unknown token: " + token.printWithoutColor() + " at line " + token.line());
     }
 }

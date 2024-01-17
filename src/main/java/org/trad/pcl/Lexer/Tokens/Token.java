@@ -22,6 +22,10 @@ public record Token(Tag tag, int line, String lexeme) {
         return colorize("<", Attribute.YELLOW_TEXT()) + colorize(String.valueOf(this.tag), Attribute.RED_TEXT()) + ", " + colorize(String.valueOf(this.line), Attribute.BRIGHT_MAGENTA_TEXT()) + ", " + colorize(this.lexeme, Attribute.BLUE_TEXT()) + colorize(">", Attribute.YELLOW_TEXT()) + " ";
     }
 
+    public String printWithoutColor() {
+        return "<" + this.tag + ", " + this.line + ", " + this.lexeme + "> ";
+    }
+
     public String getValue() {
         return this.lexeme;
     }

@@ -1,26 +1,41 @@
 //
 
+import com.diogonunes.jcolor.AnsiFormat;
+import com.diogonunes.jcolor.Attribute;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.api.function.Executable;
+import org.junit.jupiter.params.provider.MethodSource;
+import org.trad.pcl.Constants;
+import org.trad.pcl.Exceptions.BadFileExtension;
+import org.trad.pcl.Helpers.FileHelper;
 import org.trad.pcl.Lexer.Lexer;
 import org.trad.pcl.Lexer.Tokens.Token;
+import org.trad.pcl.Main;
+import org.trad.pcl.Parser.Parser;
 import org.trad.pcl.Services.ErrorService;
+import org.trad.pcl.ast.ProgramNode;
 
 import java.io.File;
 import java.io.IOException;
+import java.net.URISyntaxException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.List;
+import java.util.Objects;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
+import static com.diogonunes.jcolor.Ansi.colorize;
 import static org.junit.jupiter.api.Assertions.*;
 
 public class LexerTest {
 
     private Path testFolder;
     private Path solutionFolder;
+
 
     @BeforeEach
     public void setUp() {
@@ -35,7 +50,7 @@ public class LexerTest {
             Lexer lexer = new Lexer(testFile);
             List<Token> tokens = lexer.getAllTokens();
             String actualResult = tokens.stream()
-                    .map(Token::toString)
+                    .map(Token::printWithoutColor)
                     .collect(Collectors.joining()).trim();
 
             String actualErrors = ErrorService.getInstance().getLexicalErrors().stream()
