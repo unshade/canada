@@ -10,5 +10,9 @@ public final class AssignmentNode extends IdentifiableStatementNode {
         this.expression = expression;
     }
 
+    public ExpressionNode getExpression() {
+        return expression;
+    }
+
 
 }

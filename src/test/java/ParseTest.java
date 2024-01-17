@@ -56,10 +56,10 @@ public class ParseTest {
             throw new BadFileExtension(Constants.REQUIRED_EXTENSION);
         }
 
-        Lexer lexer = Lexer.newInstance(file);
+        Lexer lexer = new Lexer(file);
         ErrorService.resetInstance();
         ErrorService errorService = ErrorService.getInstance();
-        Parser parser = Parser.newInstance();
+        Parser parser = new Parser(lexer);
         ProgramNode AST = parser.parse();
         if (errorService.hasNoErrors()) {
             AnsiFormat fWarning = new AnsiFormat(Attribute.WHITE_TEXT(), Attribute.GREEN_BACK(), Attribute.BOLD());

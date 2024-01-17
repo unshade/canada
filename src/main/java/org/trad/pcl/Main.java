@@ -35,12 +35,12 @@ public final class Main {
             throw new BadFileExtension(Constants.REQUIRED_EXTENSION);
         }
 
-        Lexer lexer = Lexer.getInstance(file);
+        Lexer lexer = new Lexer(file);
         ErrorService errorService = ErrorService.getInstance();
         if (args.length > 1 && "-t".equals(args[1])) {
             lexer.displayAllTokens();
         } else {
-            Parser parser = Parser.getInstance();
+            Parser parser = new Parser(lexer);
             ProgramNode AST = parser.parse();
             if (errorService.hasNoErrors()) {
                 AnsiFormat fWarning = new AnsiFormat(Attribute.WHITE_TEXT(), Attribute.GREEN_BACK(), Attribute.BOLD());

@@ -6,7 +6,12 @@ public final class TypeDeclarationNode extends DeclarationNode {
     private TypeNode type;
 
     public void setType(TypeNode type) {
+        type.setIdentifier(getIdentifier());
         this.type = type;
+    }
+
+    public TypeNode getType() {
+        return type;
     }
 
 

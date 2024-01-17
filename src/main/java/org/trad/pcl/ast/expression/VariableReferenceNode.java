@@ -1,15 +1,23 @@
 package org.trad.pcl.ast.expression;
 
 public class VariableReferenceNode extends ExpressionNode {
-    private String variableName;
+    private String identifier;
 
     private VariableReferenceNode nextExpression;
 
-    public void setVariableName(String variableName) {
-        this.variableName = variableName;
+    public void setIdentifier(String identifier) {
+        this.identifier = identifier;
     }
 
     public void setNextExpression(VariableReferenceNode nextExpression) {
         this.nextExpression = nextExpression;
+    }
+
+    public String getIdentifier() {
+        return identifier;
+    }
+
+    public VariableReferenceNode getNextExpression() {
+        return nextExpression;
     }
 }

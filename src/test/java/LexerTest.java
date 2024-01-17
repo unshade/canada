@@ -32,7 +32,7 @@ public class LexerTest {
         try {
             ErrorService.resetInstance();
 
-            Lexer lexer = Lexer.newInstance(testFile);
+            Lexer lexer = new Lexer(testFile);
             List<Token> tokens = lexer.getAllTokens();
             String actualResult = tokens.stream()
                     .map(Token::toString)

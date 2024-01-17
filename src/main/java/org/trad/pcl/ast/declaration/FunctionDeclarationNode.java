@@ -35,4 +35,16 @@ public final class FunctionDeclarationNode extends DeclarationNode {
         this.body = body;
     }
 
+    public List<ParameterNode> getParameters() {
+        return parameters;
+    }
+
+    public TypeNode getReturnType() {
+        return returnType;
+    }
+
+    public BlockNode getBody() {
+        return body;
+    }
+
 }

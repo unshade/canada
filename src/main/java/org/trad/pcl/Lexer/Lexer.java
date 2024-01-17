@@ -21,20 +21,71 @@ import java.util.regex.Pattern;
  * @author Alexis Marcel
  * @author Lucas Laurent
  */
-public final class Lexer {
+public class Lexer {
 
-
-    /**
-     * Singleton instance
-     */
-    private static Lexer instance;
     /**
      * Lexer attributes
      */
     private final PeekingReader reader;
-    private final Map<Tag, Pattern> keywords;
-    private final Map<Tag, Pattern> ruledTerminals;
-    private final Map<Tag, Pattern> operators;
+    private final Map<Tag, Pattern> keywords = Map.ofEntries(
+            Map.entry(Tag.PROCEDURE, Pattern.compile("procedure")),
+            Map.entry(Tag.IS, Pattern.compile("is")),
+            Map.entry(Tag.BEGIN, Pattern.compile("begin")),
+            Map.entry(Tag.END, Pattern.compile("end")),
+            Map.entry(Tag.SEMICOLON, Pattern.compile(";")),
+            Map.entry(Tag.TYPE, Pattern.compile("type")),
+            Map.entry(Tag.ACCESS, Pattern.compile("access")),
+            Map.entry(Tag.RECORD, Pattern.compile("record")),
+            Map.entry(Tag.COLON, Pattern.compile(":")),
+            Map.entry(Tag.FUNCTION, Pattern.compile("function")),
+            Map.entry(Tag.RETURN, Pattern.compile("return")),
+            Map.entry(Tag.IN, Pattern.compile("in")),
+            Map.entry(Tag.OUT, Pattern.compile("out")),
+            Map.entry(Tag.IF, Pattern.compile("if")),
+            Map.entry(Tag.THEN, Pattern.compile("then")),
+            Map.entry(Tag.ELSIF, Pattern.compile("elsif")),
+            Map.entry(Tag.ELSE, Pattern.compile("else")),
+            Map.entry(Tag.LOOP, Pattern.compile("loop")),
+            Map.entry(Tag.FOR, Pattern.compile("for")),
+            Map.entry(Tag.REVERSE, Pattern.compile("reverse")),
+            Map.entry(Tag.WHILE, Pattern.compile("while")),
+            Map.entry(Tag.REM, Pattern.compile("rem")),
+            Map.entry(Tag.AND, Pattern.compile("and")),
+            Map.entry(Tag.OR, Pattern.compile("or")),
+            Map.entry(Tag.DOT, Pattern.compile("\\.")),
+            Map.entry(Tag.VAL, Pattern.compile("val")),
+            Map.entry(Tag.OPEN_PAREN, Pattern.compile("\\(")),
+            Map.entry(Tag.CLOSE_PAREN, Pattern.compile("\\)")),
+            Map.entry(Tag.TRUE, Pattern.compile("true")),
+            Map.entry(Tag.FALSE, Pattern.compile("false")),
+            Map.entry(Tag.COMMA, Pattern.compile(",")),
+            Map.entry(Tag.APOSTROPHE, Pattern.compile("'")),
+            Map.entry(Tag.ADA_TEXT_IO, Pattern.compile("Ada.Text_IO")),
+            Map.entry(Tag.USE, Pattern.compile("use")),
+            Map.entry(Tag.WITH, Pattern.compile("with")),
+            Map.entry(Tag.NULL, Pattern.compile("null")),
+            Map.entry(Tag.NEW, Pattern.compile("new"))
+            //Map.entry(Tag.CHARACTER, Pattern.compile("character"))
+    );
+    private final Map<Tag, Pattern> ruledTerminals = Map.of(
+            Tag.IDENT, Pattern.compile("[A-Za-z][A-Za-z0-9_]*"),
+            Tag.ENTIER, Pattern.compile("[0-9]+"),
+            Tag.CARACTERE, Pattern.compile("'[\\x00-\\x26\\x28-\\x7F]'")
+    );
+    private final Map<Tag, Pattern> operators = Map.ofEntries(
+            Map.entry(Tag.PLUS, Pattern.compile("\\+")),
+            Map.entry(Tag.MINUS, Pattern.compile("-")),
+            Map.entry(Tag.MULTI, Pattern.compile("\\*")),
+            Map.entry(Tag.DIV, Pattern.compile("/")),
+            Map.entry(Tag.EQ, Pattern.compile("=")),
+            Map.entry(Tag.NE, Pattern.compile("/=")),
+            Map.entry(Tag.LT, Pattern.compile("<")),
+            Map.entry(Tag.LE, Pattern.compile("<=")),
+            Map.entry(Tag.GT, Pattern.compile(">")),
+            Map.entry(Tag.GE, Pattern.compile(">=")),
+            Map.entry(Tag.ASSIGN, Pattern.compile(":=")),
+            Map.entry(Tag.DOTDOT, Pattern.compile("\\.\\."))
+    );
     private final ErrorService errorService;
     StringBuilder lexeme;
     private int currentChar;
@@ -44,7 +95,7 @@ public final class Lexer {
      *
      * @param file the file to read
      */
-    private Lexer(File file) {
+    public Lexer(File file) {
 
         try {
             this.reader = new PeekingReader(new FileReader(file));
@@ -52,90 +103,8 @@ public final class Lexer {
             throw new RuntimeException(e);
         }
         this.lexeme = new StringBuilder();
-        this.keywords = Map.ofEntries(
-                Map.entry(Tag.PROCEDURE, Pattern.compile("procedure")),
-                Map.entry(Tag.IS, Pattern.compile("is")),
-                Map.entry(Tag.BEGIN, Pattern.compile("begin")),
-                Map.entry(Tag.END, Pattern.compile("end")),
-                Map.entry(Tag.SEMICOLON, Pattern.compile(";")),
-                Map.entry(Tag.TYPE, Pattern.compile("type")),
-                Map.entry(Tag.ACCESS, Pattern.compile("access")),
-                Map.entry(Tag.RECORD, Pattern.compile("record")),
-                Map.entry(Tag.COLON, Pattern.compile(":")),
-                Map.entry(Tag.FUNCTION, Pattern.compile("function")),
-                Map.entry(Tag.RETURN, Pattern.compile("return")),
-                Map.entry(Tag.IN, Pattern.compile("in")),
-                Map.entry(Tag.OUT, Pattern.compile("out")),
-                Map.entry(Tag.IF, Pattern.compile("if")),
-                Map.entry(Tag.THEN, Pattern.compile("then")),
-                Map.entry(Tag.ELSIF, Pattern.compile("elsif")),
-                Map.entry(Tag.ELSE, Pattern.compile("else")),
-                Map.entry(Tag.LOOP, Pattern.compile("loop")),
-                Map.entry(Tag.FOR, Pattern.compile("for")),
-                Map.entry(Tag.REVERSE, Pattern.compile("reverse")),
-                Map.entry(Tag.WHILE, Pattern.compile("while")),
-                Map.entry(Tag.REM, Pattern.compile("rem")),
-                Map.entry(Tag.AND, Pattern.compile("and")),
-                Map.entry(Tag.OR, Pattern.compile("or")),
-                Map.entry(Tag.DOT, Pattern.compile("\\.")),
-                Map.entry(Tag.VAL, Pattern.compile("val")),
-                Map.entry(Tag.OPEN_PAREN, Pattern.compile("\\(")),
-                Map.entry(Tag.CLOSE_PAREN, Pattern.compile("\\)")),
-                Map.entry(Tag.TRUE, Pattern.compile("true")),
-                Map.entry(Tag.FALSE, Pattern.compile("false")),
-                Map.entry(Tag.COMMA, Pattern.compile(",")),
-                Map.entry(Tag.APOSTROPHE, Pattern.compile("'")),
-                Map.entry(Tag.ADA_TEXT_IO, Pattern.compile("Ada.Text_IO")),
-                Map.entry(Tag.USE, Pattern.compile("use")),
-                Map.entry(Tag.WITH, Pattern.compile("with")),
-                Map.entry(Tag.NULL, Pattern.compile("null")),
-                Map.entry(Tag.NEW, Pattern.compile("new"))
-                //Map.entry(Tag.CHARACTER, Pattern.compile("character"))
-        );
-
-        this.operators = Map.ofEntries(
-                Map.entry(Tag.PLUS, Pattern.compile("\\+")),
-                Map.entry(Tag.MINUS, Pattern.compile("-")),
-                Map.entry(Tag.MULTI, Pattern.compile("\\*")),
-                Map.entry(Tag.DIV, Pattern.compile("/")),
-                Map.entry(Tag.EQ, Pattern.compile("=")),
-                Map.entry(Tag.NE, Pattern.compile("/=")),
-                Map.entry(Tag.LT, Pattern.compile("<")),
-                Map.entry(Tag.LE, Pattern.compile("<=")),
-                Map.entry(Tag.GT, Pattern.compile(">")),
-                Map.entry(Tag.GE, Pattern.compile(">=")),
-                Map.entry(Tag.ASSIGN, Pattern.compile(":=")),
-                Map.entry(Tag.DOTDOT, Pattern.compile("\\.\\."))
-        );
-
-        this.ruledTerminals = Map.of(
-                Tag.IDENT, Pattern.compile("[A-Za-z][A-Za-z0-9_]*"),
-                Tag.ENTIER, Pattern.compile("[0-9]+"),
-                Tag.CARACTERE, Pattern.compile("'[\\x00-\\x26\\x28-\\x7F]'")
-        );
 
         this.errorService = ErrorService.getInstance();
-    }
-
-    public static Lexer getInstance() {
-        if (!(instance == null)) {
-            return instance;
-        }
-        return null;
-    }
-
-    public static Lexer getInstance(File file) {
-
-        if (instance == null) {
-            instance = new Lexer(file);
-        }
-
-        return instance;
-    }
-
-    public static Lexer newInstance(File file) {
-        instance = new Lexer(file);
-        return instance;
     }
 
     /**

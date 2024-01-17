@@ -10,11 +10,15 @@ public class IdentifiableStatementNode extends StatementNode {
     }
 
     public void setIdentifier(String identifier) {
-        this.identifier.setVariableName(identifier);
+        this.identifier.setIdentifier(identifier);
     }
 
     public void setNextIdentifier(VariableReferenceNode nextIdentifier) {
         this.identifier.setNextExpression(nextIdentifier);
+    }
+
+    public VariableReferenceNode getIdentifier() {
+        return identifier;
     }
 
 }

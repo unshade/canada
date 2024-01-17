@@ -17,36 +17,20 @@ import org.trad.pcl.ast.expression.*;
 import org.trad.pcl.ast.statement.*;
 import org.trad.pcl.ast.type.AccessTypeNode;
 import org.trad.pcl.ast.type.RecordTypeNode;
-import org.trad.pcl.ast.type.SimpleTypeNode;
 import org.trad.pcl.ast.type.TypeNode;
 
 import java.util.ArrayList;
 import java.util.List;
 
-public final class Parser {
-
-    private static Parser instance;
+public class Parser {
     private final ErrorService errorService;
     Lexer lexer;
     private Token currentToken;
 
-    private Parser() {
-        this.lexer = Lexer.getInstance();
+    public Parser(Lexer lexer) {
+        this.lexer = lexer;
         this.errorService = ErrorService.getInstance();
         this.currentToken = lexer.nextToken();
-    }
-
-    public static Parser getInstance() {
-        if (!(instance == null)) {
-            return instance;
-        }
-        instance = new Parser();
-        return instance;
-    }
-
-    public static Parser newInstance() {
-        instance = new Parser();
-        return instance;
     }
 
     public ProgramNode parse() {
@@ -69,7 +53,7 @@ public final class Parser {
         analyseTerminal(Tag.SEMICOLON);
         analyseTerminal(Tag.PROCEDURE);
         ProcedureDeclarationNode rootProcedure = new ProcedureDeclarationNode();
-        rootProcedure.setName(analyseTerminal(Tag.IDENT).getValue());
+        rootProcedure.setIdentifier(analyseTerminal(Tag.IDENT).getValue());
         analyseTerminal(Tag.IS);
         BlockNode rootProcedureBody = new BlockNode();
         rootProcedureBody.addDeclarations(multipleDeclarations());
@@ -89,14 +73,14 @@ public final class Parser {
      * Grammar rule : decl
      */
     @PrintMethodName
-    private List<DeclarationNode> declaration() {
+    public List<DeclarationNode> declaration() {
         List<DeclarationNode> declarations = new ArrayList<>();
         switch (this.currentToken.tag()) {
             case PROCEDURE -> {
                 ProcedureDeclarationNode declaration = new ProcedureDeclarationNode();
                 declarations.add(declaration);
                 analyseTerminal(Tag.PROCEDURE);
-                declaration.setName(analyseTerminal(Tag.IDENT).getValue());
+                declaration.setIdentifier(analyseTerminal(Tag.IDENT).getValue());
                 declaration.addParameters(hasParameters());
                 analyseTerminal(Tag.IS);
                 BlockNode procedureBody = new BlockNode();
@@ -119,7 +103,7 @@ public final class Parser {
                     typeDeclarationNode.setType(typeNode);
                     if (assignNode != null) {
                         AssignmentNode assignmentNode = new AssignmentNode();
-                        assignmentNode.setIdentifier(typeDeclarationNode.getName());
+                        assignmentNode.setIdentifier(typeDeclarationNode.getIdentifier());
                         assignmentNode.setExpression(assignNode);
                         typeDeclarationNode.setAssignment(assignmentNode);
                     }
@@ -131,7 +115,7 @@ public final class Parser {
                 TypeDeclarationNode declaration = new TypeDeclarationNode();
                 declarations.add(declaration);
                 analyseTerminal(Tag.TYPE);
-                declaration.setName(analyseTerminal(Tag.IDENT).getValue());
+                declaration.setIdentifier(analyseTerminal(Tag.IDENT).getValue());
                 declaration.setType(isAccessOrRecord());
                 analyseTerminal(Tag.SEMICOLON);
             }
@@ -139,7 +123,7 @@ public final class Parser {
                 FunctionDeclarationNode declaration = new FunctionDeclarationNode();
                 declarations.add(declaration);
                 analyseTerminal(Tag.FUNCTION);
-                declaration.setName(analyseTerminal(Tag.IDENT).getValue());
+                declaration.setIdentifier(analyseTerminal(Tag.IDENT).getValue());
                 declaration.addParameters(hasParameters());
                 analyseTerminal(Tag.RETURN);
                 declaration.setReturnType(type());
@@ -176,6 +160,7 @@ public final class Parser {
                 type = AccessOrRecord();
             }
             case SEMICOLON -> {
+                type = new TypeNode();
             }
             default -> this.errorService.registerSyntaxError(
                     new UnexpectedTokenListException(this.currentToken,
@@ -197,8 +182,8 @@ public final class Parser {
             case ACCESS -> {
                 type = new AccessTypeNode();
                 analyseTerminal(Tag.ACCESS);
-                SimpleTypeNode simpleTypeNode = new SimpleTypeNode();
-                simpleTypeNode.setTypeName(analyseTerminal(Tag.IDENT).getValue());
+                TypeNode simpleTypeNode = new TypeNode();
+                simpleTypeNode.setIdentifier(analyseTerminal(Tag.IDENT).getValue());
                 ((AccessTypeNode) type).setBaseType(simpleTypeNode);
             }
             case RECORD -> {
@@ -264,7 +249,8 @@ public final class Parser {
         List<VariableDeclarationNode> declarations = new ArrayList<>();
         if (this.currentToken.tag() == Tag.IDENT) {
             VariableDeclarationNode declaration = new VariableDeclarationNode();
-            declaration.setName(analyseTerminal(Tag.IDENT).getValue());
+            declaration.setIdentifier(analyseTerminal(Tag.IDENT).getValue());
+
             declarations.add(declaration);
             declarations.addAll(identSeparator());
         } else {
@@ -359,13 +345,13 @@ public final class Parser {
             case ACCESS -> {
                 analyseTerminal(Tag.ACCESS);
                 type = new AccessTypeNode();
-                SimpleTypeNode simpleTypeNode = new SimpleTypeNode();
-                simpleTypeNode.setTypeName(analyseTerminal(Tag.IDENT).getValue());
+                TypeNode simpleTypeNode = new TypeNode();
+                simpleTypeNode.setIdentifier(analyseTerminal(Tag.IDENT).getValue());
                 ((AccessTypeNode) type).setBaseType(simpleTypeNode);
             }
             case IDENT -> {
-                type = new SimpleTypeNode();
-                ((SimpleTypeNode) type).setTypeName(analyseTerminal(Tag.IDENT).getValue());
+                type = new TypeNode();
+                ((TypeNode) type).setIdentifier(analyseTerminal(Tag.IDENT).getValue());
             }
             default -> this.errorService.registerSyntaxError(
                     new UnexpectedTokenListException(this.currentToken,
@@ -1193,7 +1179,7 @@ public final class Parser {
                 } else {
                     String ident = analyseTerminal(Tag.IDENT).getValue();
                     expression = identPrimary();
-                    ((VariableReferenceNode) expression).setVariableName(ident);
+                    ((VariableReferenceNode) expression).setIdentifier(ident);
                 }
 
             }
@@ -1274,7 +1260,7 @@ public final class Parser {
             }
             default -> {
                 expression = identPrimary();
-                ((VariableReferenceNode) expression).setVariableName(ident);
+                ((VariableReferenceNode) expression).setIdentifier(ident);
             }
         }
         return expression;
@@ -1540,7 +1526,7 @@ public final class Parser {
             case DOT -> {
                 analyseTerminal(Tag.DOT);
                 accessReferenceNode = new VariableReferenceNode();
-                accessReferenceNode.setVariableName(analyseTerminal(Tag.IDENT).getValue());
+                accessReferenceNode.setIdentifier(analyseTerminal(Tag.IDENT).getValue());
                 accessReferenceNode.setNextExpression(instr3());
             }
             case SEMICOLON -> {
@@ -1704,7 +1690,7 @@ public final class Parser {
             case DOT -> {
                 analyseTerminal(Tag.DOT);
                 variableReferenceNode = new VariableReferenceNode();
-                variableReferenceNode.setVariableName(analyseTerminal(Tag.IDENT).getValue());
+                variableReferenceNode.setIdentifier(analyseTerminal(Tag.IDENT).getValue());
                 variableReferenceNode.setNextExpression(acces());
             }
             default -> this.errorService.registerSyntaxError(
@@ -1753,6 +1739,10 @@ public final class Parser {
         Token temp = this.currentToken;
         this.currentToken = lexer.nextToken();
         return temp;
+    }
+
+    public void setCurrentToken(Token token) {
+        this.currentToken = token;
     }
 
 }

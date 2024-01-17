@@ -28,4 +28,12 @@ public final class ProcedureDeclarationNode extends DeclarationNode {
         }
     }
 
+    public List<ParameterNode> getParameters() {
+        return parameters;
+    }
+
+    public BlockNode getBody() {
+        return body;
+    }
+
 }

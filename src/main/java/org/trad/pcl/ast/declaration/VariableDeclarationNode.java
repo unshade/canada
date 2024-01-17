@@ -15,4 +15,12 @@ public final class VariableDeclarationNode extends DeclarationNode {
     public void setAssignment(AssignmentNode assignment) {
         this.assignment = assignment;
     }
+
+    public TypeNode getType() {
+        return type;
+    }
+
+    public AssignmentNode getAssignment() {
+        return assignment;
+    }
 }
