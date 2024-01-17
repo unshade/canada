@@ -28,24 +28,24 @@ public class ParseTest {
     private static Stream<Arguments> provideGoodFiles() throws URISyntaxException, IOException {
         Stream<Path> goodFiles = Files.walk(Path.of(Objects.requireNonNull(Main.class.getResource("/tests/good")).toURI()), 1)
                 .filter(Files::isRegularFile);
-        return goodFiles.map(path -> Arguments.of(path, true));
+        return goodFiles.map(path -> Arguments.of(path.getFileName().toString(),path, true));
     }
 
     private static Stream<Arguments> provideBadFiles() throws URISyntaxException, IOException {
         Stream<Path> badFiles = Files.walk(Path.of(Objects.requireNonNull(Main.class.getResource("/tests/bad")).toURI()), 1)
                 .filter(Files::isRegularFile);
-        return badFiles.map(path -> Arguments.of(path, false));
+        return badFiles.map(path -> Arguments.of(path.getFileName().toString(),path, false));
     }
 
-    @ParameterizedTest
+    @ParameterizedTest(name = "Test Good File: {0}")
     @MethodSource("provideGoodFiles")
-    public void testGoodFiles(Path filePath, boolean expected) {
+    public void testGoodFiles(String fileName, Path filePath, boolean expected) {
         testFile(filePath, expected);
     }
 
-    @ParameterizedTest
+    @ParameterizedTest(name = "Test Bad File: {0}")
     @MethodSource("provideBadFiles")
-    public void testBadFiles(Path filePath, boolean expected) {
+    public void testBadFiles(String fileName, Path filePath, boolean expected) {
         testFile(filePath, expected);
     }
 

@@ -22,15 +22,19 @@ public record Token(Tag tag, int line, String lexeme) {
         return colorize("<", Attribute.YELLOW_TEXT()) + colorize(String.valueOf(this.tag), Attribute.RED_TEXT()) + ", " + colorize(String.valueOf(this.line), Attribute.BRIGHT_MAGENTA_TEXT()) + ", " + colorize(this.lexeme, Attribute.BLUE_TEXT()) + colorize(">", Attribute.YELLOW_TEXT()) + " ";
     }
 
-    public String printWithoutColor() {
-        return "<" + this.tag + ", " + this.line + ", " + this.lexeme + "> ";
-    }
-
     public String getValue() {
         return this.lexeme;
     }
 
     public static Token generateExpectedToken(Tag tag, Token current) {
         return new Token(tag, current.line, TagHelper.getTagString(tag));
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (obj instanceof Token token) {
+            return this.tag == token.tag && this.line == token.line && this.lexeme.equals(token.lexeme);
+        }
+        return false;
     }
 }

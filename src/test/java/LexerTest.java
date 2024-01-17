@@ -1,97 +1,109 @@
-//
-
-import com.diogonunes.jcolor.AnsiFormat;
-import com.diogonunes.jcolor.Attribute;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.api.function.Executable;
 import org.junit.jupiter.params.provider.MethodSource;
-import org.trad.pcl.Constants;
-import org.trad.pcl.Exceptions.BadFileExtension;
-import org.trad.pcl.Helpers.FileHelper;
 import org.trad.pcl.Lexer.Lexer;
+import org.trad.pcl.Lexer.Tokens.Tag;
 import org.trad.pcl.Lexer.Tokens.Token;
-import org.trad.pcl.Main;
-import org.trad.pcl.Parser.Parser;
 import org.trad.pcl.Services.ErrorService;
-import org.trad.pcl.ast.ProgramNode;
 
 import java.io.File;
 import java.io.IOException;
-import java.net.URISyntaxException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.ArrayList;
 import java.util.List;
-import java.util.Objects;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import static com.diogonunes.jcolor.Ansi.colorize;
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.fail;
 
 public class LexerTest {
 
-    private Path testFolder;
-    private Path solutionFolder;
 
+    private static List<Token> readSolutionTokens(File solutionFile) throws IOException {
+        String content = Files.readString(solutionFile.toPath());
+        List<Token> tokens = new ArrayList<>();
 
-    @BeforeEach
-    public void setUp() {
-        testFolder = Paths.get("src", "main", "resources", "tests", "lexer", "tests");
-        solutionFolder = Paths.get("src", "main", "resources", "tests", "lexer", "solutions");
+        String[] tokenStrings = content.split(">\\s*<");
+        for (String tokenString : tokenStrings) {
+            tokenString = tokenString.replace("<", "").replace(">", "");
+            if (tokenString.isEmpty()) {
+                continue;
+            }
+            String[] parts = tokenString.split(",\\s", -1);
+            if (parts.length != 3) {
+                throw new IOException("Format de token invalide dans le fichier de solution : " + tokenString);
+            }
+            Tag tag = Tag.valueOf(parts[0].trim());
+            int lineNumber = Integer.parseInt(parts[1].trim());
+            String value = parts[2];
+            tokens.add(new Token(tag, lineNumber, value));
+        }
+
+        return tokens;
     }
 
-    private void performLexerTest(File testFile, File solutionFile) {
+    private void performLexerTest(File testFile, List<Token> expectedTokens) {
         try {
             ErrorService.resetInstance();
 
             Lexer lexer = new Lexer(testFile);
-            List<Token> tokens = lexer.getAllTokens();
-            String actualResult = tokens.stream()
-                    .map(Token::printWithoutColor)
-                    .collect(Collectors.joining()).trim();
+            List<Token> actualTokens = lexer.getAllTokens();
 
-            String actualErrors = ErrorService.getInstance().getLexicalErrors().stream()
-                    .map(Exception::getMessage)
-                    .collect(Collectors.joining("\n"));
+            assertEquals(expectedTokens, actualTokens);
 
-            String[] solution = Files.readString(solutionFile.toPath()).split("\n\n");
-            String expectedResult = solution[0].trim();
-            String expectedErrors;
-            if (solution.length > 1) {
-                expectedErrors = solution[1].trim();
-            } else {
-                expectedErrors = "";
-            }
-
-            assertEquals(expectedResult, actualResult);
-            assertEquals(expectedErrors, actualErrors);
-
-        } catch (IOException e) {
-            e.printStackTrace();
-            fail("IOException occurred: " + e.getMessage());
         } catch (Exception e) {
             e.printStackTrace();
             fail("Unexpected exception occurred: " + e.getMessage());
         }
     }
 
+    static Stream<TestData> testDataProvider() throws IOException {
+        Path testFolder = Paths.get("src", "main", "resources", "tests", "lexer", "tests");
+        Path solutionFolder = Paths.get("src", "main", "resources", "tests", "lexer", "solutions");
 
-    @Test
-    public void testLexer() throws IOException {
-        List<Executable> tests = Files.list(testFolder)
+        return Files.list(testFolder)
                 .filter(file -> file.toString().endsWith(".canAda"))
-                .map(testFile -> (Executable) () -> {
-                    File test = testFile.toFile();
-                    System.out.println("Testing " + test.getName());
-                    File solution = solutionFolder.resolve(test.getName().replace(".canAda", "_solution.txt")).toFile();
-                    performLexerTest(test, solution);
-                })
-                .collect(Collectors.toList());
+                .map(testFile -> {
+                    File solutionFile = solutionFolder.resolve(testFile.getFileName().toString().replace(".canAda", "_solution.txt")).toFile();
+                    try {
+                        List<Token> expectedTokens = readSolutionTokens(solutionFile);
+                        return new TestData(testFile.toFile(), expectedTokens);
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                        throw new RuntimeException("Error reading solution file: " + solutionFile, e);
+                    }
+                });
+    }
 
-        assertAll("Lexer Tests", tests);
+    @ParameterizedTest
+    @MethodSource("testDataProvider")
+    public void testLexer(TestData testData) {
+        performLexerTest(testData.getTestFile(), testData.getExpectedTokens());
+    }
+
+    private static class TestData {
+        private final File testFile;
+        private final List<Token> expectedTokens;
+
+        public TestData(File testFile, List<Token> expectedTokens) {
+            this.testFile = testFile;
+            this.expectedTokens = expectedTokens;
+        }
+
+        public File getTestFile() {
+            return testFile;
+        }
+
+        public List<Token> getExpectedTokens() {
+            return expectedTokens;
+        }
+
+        @Override
+        public String toString() {
+            return testFile.getName();
+        }
     }
 
 }
