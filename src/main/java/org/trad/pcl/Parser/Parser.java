@@ -112,7 +112,7 @@ public final class Parser {
                 //declaration.setName(this.currentToken.getValue());
                 List<VariableDeclarationNode> typeNodes = multipleIdent();
                 analyseTerminal(Tag.COLON);
-                TypeNode typeNode = type_n();
+                TypeNode typeNode = type();
 
                 ExpressionNode assignNode = assignDeclarationExpression();
                 for (VariableDeclarationNode typeDeclarationNode : typeNodes) {
@@ -142,7 +142,7 @@ public final class Parser {
                 declaration.setName(analyseTerminal(Tag.IDENT).getValue());
                 declaration.addParameters(hasParameters());
                 analyseTerminal(Tag.RETURN);
-                declaration.setReturnType(type_n());
+                declaration.setReturnType(type());
                 analyseTerminal(Tag.IS);
                 BlockNode functionBody = new BlockNode();
                 functionBody.addDeclarations(multipleDeclarations());
@@ -204,8 +204,7 @@ public final class Parser {
             case RECORD -> {
                 type = new RecordTypeNode();
                 analyseTerminal(Tag.RECORD);
-                // TODO : ((RecordTypeNode) type).addFields(champs());
-                champs();
+                ((RecordTypeNode) type).addFields(multipleFields());
                 analyseTerminal(Tag.END);
                 analyseTerminal(Tag.RECORD);
             }
@@ -296,32 +295,49 @@ public final class Parser {
         return declarations;
     }
 
+    /**
+     * Grammar rule : champ
+     */
     @PrintMethodName
-    private void champ() {
+    private List<VariableDeclarationNode> field() {
+        List<VariableDeclarationNode> declarations = new ArrayList<>();
         if (this.currentToken.tag() == Tag.IDENT) {
-            multipleIdent();
+            declarations.addAll(multipleIdent());
             analyseTerminal(Tag.COLON);
-            type_n();
+            TypeNode type = type();
+            for (VariableDeclarationNode declaration : declarations) {
+                declaration.setType(type);
+            }
             analyseTerminal(Tag.SEMICOLON);
         } else {
             this.errorService.registerSyntaxError(new UnexpectedTokenException(Token.generateExpectedToken(Tag.IDENT, this.currentToken), this.currentToken));
         }
+        return declarations;
     }
 
+    /**
+     * Grammar rule : champs
+     */
     @PrintMethodName
-    private void champs() {
+    private List<VariableDeclarationNode> multipleFields() {
+        List<VariableDeclarationNode> declarations = new ArrayList<>();
         if (this.currentToken.tag() == Tag.IDENT) {
-            champ();
-            champs2();
+            declarations.addAll(field());
+            declarations.addAll(fieldsSeparator());
         } else {
             this.errorService.registerSyntaxError(new UnexpectedTokenException(Token.generateExpectedToken(Tag.IDENT, this.currentToken), this.currentToken));
         }
+        return declarations;
     }
 
+    /**
+     * Grammar rule : champs2
+     */
     @PrintMethodName
-    private void champs2() {
+    private List<VariableDeclarationNode> fieldsSeparator() {
+        List<VariableDeclarationNode> declarations = new ArrayList<>();
         switch (this.currentToken.tag()) {
-            case IDENT -> champs();
+            case IDENT -> declarations.addAll(multipleFields());
             case END -> {
             }
             default -> this.errorService.registerSyntaxError(
@@ -330,10 +346,14 @@ public final class Parser {
                             Token.generateExpectedToken(Tag.END, this.currentToken))
             );
         }
+        return declarations;
     }
 
+    /**
+     * Grammar rule : type_n
+     */
     @PrintMethodName
-    private TypeNode type_n() {
+    private TypeNode type() {
         TypeNode type = null;
         switch (this.currentToken.tag()) {
             case ACCESS -> {
@@ -461,11 +481,10 @@ public final class Parser {
         ParameterNode parameter = null;
         if (this.currentToken.tag() == Tag.IDENT) {
             parameter = new ParameterNode();
-            parameter.setName(currentToken.getValue());
-            multipleIdent();
+            parameter.setVariables(multipleIdent());
             analyseTerminal(Tag.COLON);
-            mode();
-            parameter.setType(type_n());
+            parameter.setMode(mode());
+            parameter.setType(type());
         } else {
             this.errorService.registerSyntaxError(new UnexpectedTokenException(new Token(Tag.IDENT, this.currentToken.line(), TagHelper.getTagString(Tag.IDENT)), this.currentToken));
         }
@@ -473,13 +492,14 @@ public final class Parser {
     }
 
     @PrintMethodName
-    private void mode() {
+    private String mode() {
+        StringBuilder mode = new StringBuilder();
         switch (this.currentToken.tag()) {
             case IDENT, ACCESS -> {
             }
             case IN -> {
-                analyseTerminal(Tag.IN);
-                modeout();
+                mode.append(analyseTerminal(Tag.IN).getValue());
+                mode.append(modeout());
             }
             default -> this.errorService.registerSyntaxError(
                     new UnexpectedTokenListException(this.currentToken,
@@ -489,15 +509,17 @@ public final class Parser {
             );
 
         }
+        return mode.toString();
     }
 
     @PrintMethodName
-    private void modeout() {
+    private String modeout() {
+        String mode = null;
         switch (this.currentToken.tag()) {
             case IDENT, ACCESS -> {
             }
             case OUT -> {
-                analyseTerminal(Tag.OUT);
+                mode = analyseTerminal(Tag.OUT).getValue();
             }
             default -> this.errorService.registerSyntaxError(
                     new UnexpectedTokenListException(this.currentToken,
@@ -506,6 +528,7 @@ public final class Parser {
                             Token.generateExpectedToken(Tag.ACCESS, this.currentToken))
             );
         }
+        return mode;
     }
 
     /**
@@ -688,11 +711,8 @@ public final class Parser {
             case SEMICOLON, COMMA, CLOSE_PAREN, OR, THEN, DOTDOT, LOOP -> {
             }
             case AND -> {
-                expression = new BinaryExpressionNode();
-                expression.setOperator(analyseTerminal(Tag.AND).getValue());
-
-                ExpressionNode secondExpression = RightAndExpression();
-                expression.setRight(secondExpression);
+                analyseTerminal(Tag.AND);
+                return RightAndExpression();
 
             }
             default -> this.errorService.registerSyntaxError(
@@ -714,24 +734,19 @@ public final class Parser {
      * Grammar rule : and_expr3
      */
     @PrintMethodName
-    private ExpressionNode RightAndExpression() {
+    private BinaryExpressionNode RightAndExpression() {
+        BinaryExpressionNode expression = null;
         switch (this.currentToken.tag()) {
             case IDENT, OPEN_PAREN, MINUS, ENTIER, CARACTERE, TRUE, FALSE, NULL, NEW, CHARACTER -> {
-                ExpressionNode firstExpression = LeftNotExpression();
-                BinaryExpressionNode secondExpression = AndExpression();
-
-                if (secondExpression != null) {
-                    secondExpression.setLeft(firstExpression);
-                    return secondExpression;
-                } else {
-                    return firstExpression;
-                }
+                expression = new BinaryExpressionNode();
+                expression.setOperator("AND");
+                expression.setRight(LeftNotExpression(), AndExpression());
             }
             case THEN -> {
-                // TODO : then
                 analyseTerminal(Tag.THEN);
-                LeftNotExpression();
-                AndExpression();
+                expression = new BinaryExpressionNode();
+                expression.setOperator("AND THEN");
+                expression.setRight(LeftNotExpression(), AndExpression());
             }
             default -> this.errorService.registerSyntaxError(
                     new UnexpectedTokenListException(this.currentToken,
@@ -1212,19 +1227,21 @@ public final class Parser {
                 ((LiteralNode) expression).setValue(null);
             }
             case NEW -> {
-                // TODO : new
+                expression = new NewExpressionNode();
                 analyseTerminal(Tag.NEW);
-                analyseTerminal(Tag.IDENT);
+                ((NewExpressionNode) expression).setType(analyseTerminal(Tag.IDENT).getValue());
             }
+            /*
             case CHARACTER -> {
-                // TODO : character ' val(ENTIER)
+                expression = new CharacterValExpressionNode();
                 analyseTerminal(Tag.CHARACTER);
                 analyseTerminal(Tag.APOSTROPHE);
                 analyseTerminal(Tag.VAL);
                 analyseTerminal(Tag.OPEN_PAREN);
-                expression();
+                ((CharacterValExpressionNode) expression).setExpression(expression());
                 analyseTerminal(Tag.CLOSE_PAREN);
             }
+             */
             default -> this.errorService.registerSyntaxError(
                     new UnexpectedTokenListException(this.currentToken,
                             Token.generateExpectedToken(Tag.IDENT, this.currentToken),
@@ -1247,13 +1264,12 @@ public final class Parser {
         ExpressionNode expression = null;
         String ident = analyseTerminal(Tag.IDENT).getValue();
         switch (this.currentToken.tag()) {
-            // TODO CHARACTER ' val(ENTIER)
             case APOSTROPHE -> {
-                // don't pick the IDENT because it's the CHARACTER keyword
+                expression = new CharacterValExpressionNode();
                 analyseTerminal(Tag.APOSTROPHE);
                 analyseTerminal(Tag.VAL);
                 analyseTerminal(Tag.OPEN_PAREN);
-                expression();
+                ((CharacterValExpressionNode) expression).setExpression(expression());
                 analyseTerminal(Tag.CLOSE_PAREN);
             }
             default -> {
