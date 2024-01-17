@@ -1,162 +1,160 @@
-fichier -> withAda.Text_IO;useAda.Text_IO; procedure ident is decls begin instrs end hasident ; EOF
+fichier ::= with Ada.Text_IO ; use Ada.Text_IO ; procedure ident is decls begin instrs end hasident ; EOF
 
-decl -> type ident hasischoose ;
-decl -> identsep : type_n typexpr ;
-decl -> procedure ident hasparams is decls begin instrs end hasident ;
-decl -> function ident hasparams return type_n is decls begin instrs end hasident ;
+decl ::= type ident hasischoose ;
+decl ::= identsep : type_n typexpr ;
+decl ::= procedure ident hasparams is decls begin instrs end hasident ;
+decl ::= function ident hasparams return type_n is decls begin instrs end hasident ;
 
-hasischoose -> is accorrec
-hasischoose -> ''
+hasischoose ::= is accorrec
+hasischoose ::= ''
 
-accorrec -> access ident
-accorrec -> record champs end record
+accorrec ::= access ident
+accorrec ::= record champs end record
 
-decls -> decl decls
-decls -> ''
+decls ::= decl decls
+decls ::= ''
 
-hasident -> ident
-hasident -> ''
+hasident ::= ident
+hasident ::= ''
 
-identsep -> ident identsep2
+identsep ::= ident identsep2
 
-identsep2 -> , identsep
-identsep2 -> ''
+identsep2 ::= , identsep
+identsep2 ::= ''
 
-champ -> identsep : type_n ;
+champ ::= identsep : type_n ;
 
-champs -> champ champs2
+champs ::= champ champs2
 
-champs2 -> champs
-champs2 -> ''
+champs2 ::= champs
+champs2 ::= ''
 
-type_n -> ident
-type_n -> access ident
+type_n ::= ident
+type_n ::= access ident
 
-params -> ( paramsep )
+params ::= ( paramsep )
 
-hasparams -> params
-hasparams -> ''
+hasparams ::= params
+hasparams ::= ''
 
-paramsep -> param paramsep2
+paramsep ::= param paramsep2
 
-paramsep2 -> ; paramsep
-paramsep2 -> ''
+paramsep2 ::= ; paramsep
+paramsep2 ::= ''
 
-typexpr -> := expr
-typexpr -> ''
+typexpr ::= := expr
+typexpr ::= ''
 
-param -> identsep : mode type_n
+param ::= identsep : mode type_n
 
-mode -> in modeout
-mode -> ''
+mode ::= in modeout
+mode ::= ''
 
-modeout -> out
-modeout -> ''
+modeout ::= out
+modeout ::= ''
 
-expr -> or_expr
+expr ::= or_expr
 
-or_expr -> and_expr or_expr'
+or_expr ::= and_expr or_expr'
 
-or_expr' -> or or_expr'2
-or_expr' -> ''
+or_expr' ::= or or_expr'2
+or_expr' ::= ''
 
-or_expr'2 -> and_expr or_expr'
-or_expr'2 -> else and_expr or_expr'
+or_expr'2 ::= and_expr or_expr'
+or_expr'2 ::= else and_expr or_expr'
 
-and_expr -> not_expr and_expr'
+and_expr ::= not_expr and_expr'
 
-and_expr' -> and and_expr'2
-and_expr' -> ''
+and_expr' ::= and and_expr'2
+and_expr' ::= ''
 
-and_expr'2 -> not_expr and_expr'
-and_expr'2 -> then not_expr and_expr'
+and_expr'2 ::= not_expr and_expr'
+and_expr'2 ::= then not_expr and_expr'
 
-not_expr -> equality_expr not_expr'
+not_expr ::= not not_expr
+not_expr ::= equality_expr
 
-not_expr' -> not equality_expr not_expr'
-not_expr' -> ''
+equality_expr ::= relational_expr equality_expr'
 
-equality_expr -> relational_expr equality_expr'
+equality_expr' ::= = relational_expr equality_expr'
+equality_expr' ::= /= relational_expr equality_expr'
+equality_expr' ::= ''
 
-equality_expr' -> = relational_expr equality_expr'
-equality_expr' -> /= relational_expr equality_expr'
-equality_expr' -> ''
+relational_expr ::= additive_expr relational_expr'
 
-relational_expr -> additive_expr relational_expr'
+relational_expr' ::= < additive_expr relational_expr'
+relational_expr' ::= <= additive_expr relational_expr'
+relational_expr' ::= > additive_expr relational_expr'
+relational_expr' ::= >= additive_expr relational_expr'
+relational_expr' ::= ''
 
-relational_expr' -> < additive_expr relational_expr'
-relational_expr' -> <= additive_expr relational_expr'
-relational_expr' -> > additive_expr relational_expr'
-relational_expr' -> >= additive_expr relational_expr'
-relational_expr' -> ''
+additive_expr ::= multiplicative_expr additive_expr'
 
-additive_expr -> multiplicative_expr additive_expr'
+additive_expr' ::= + multiplicative_expr additive_expr'
+additive_expr' ::= - multiplicative_expr additive_expr'
+additive_expr' ::= ''
 
-additive_expr' -> + multiplicative_expr additive_expr'
-additive_expr' -> - multiplicative_expr additive_expr'
-additive_expr' -> ''
+multiplicative_expr ::= unary_expr multiplicative_expr'
 
-multiplicative_expr -> unary_expr multiplicative_expr'
+multiplicative_expr' ::= * unary_expr multiplicative_expr'
+multiplicative_expr' ::= / unary_expr multiplicative_expr'
+multiplicative_expr' ::= rem unary_expr multiplicative_expr'
+multiplicative_expr' ::= ''
 
-multiplicative_expr' -> * unary_expr multiplicative_expr'
-multiplicative_expr' -> / unary_expr multiplicative_expr'
-multiplicative_expr' -> rem unary_expr multiplicative_expr'
-multiplicative_expr' -> ''
+unary_expr ::= - unary_expr
+unary_expr ::= primary
 
-unary_expr -> - unary_expr
-unary_expr -> primary
+primary ::= entier
+primary ::= caractère
+primary ::= true
+primary ::= false
+primary ::= null
+primary ::= ( expr )
+primary ::= ident primary2
+primary ::= new ident
+primary ::= character ' val ( expr )
 
-primary -> entier
-primary -> caractère
-primary -> true
-primary -> false
-primary -> null
-primary -> ( expr )
-primary -> ident primary2
-primary -> new ident
-primary -> character ' val ( expr )
+primary2 ::= ( exprsep ) acces
+primary2 ::= acces
 
-primary2 -> ( exprsep ) acces
-primary2 -> acces
+exprsep ::= expr exprsep2
 
-exprsep -> expr exprsep2
+exprsep2 ::= , exprsep
+exprsep2 ::= ''
 
-exprsep2 -> , exprsep
-exprsep2 -> ''
+hasexpr ::= expr
+hasexpr ::= ''
 
-hasexpr -> expr
-hasexpr -> ''
+instr ::= ident instr2
+instr ::= return hasexpr ;
+instr ::= begin instrs end ;
+instr ::= if expr then instrs elifn elsen end if ;
+instr ::= for ident in hasreverse expr .. expr loop instrs end loop ;
+instr ::= while expr loop instrs end loop ;
 
-instr -> ident instr2
-instr -> return hasexpr ;
-instr -> begin instrs end ;
-instr -> if expr then instrs elifn elsen end if ;
-instr -> for ident in hasreverse expr .. expr loop instrs end loop ;
-instr -> while expr loop instrs end loop ;
+instr2 ::= instr3 := expr ;
+instr2 ::= ( exprsep ) instr3 hasassign ;
+instr2 ::= ;
 
-instr2 -> instr3 := expr ;
-instr2 -> ( exprsep ) instr3 hasassign ;
-instr2 -> ;
+instr3 ::= . ident instr3
+instr3 ::= ''
 
-instr3 -> . ident instr3
-instr3 -> ''
+hasassign ::= := expr
+hasassign ::= ''
 
-hasassign -> := expr
-hasassign -> ''
+elifn ::= elif expr then instrs elifn
+elifn ::= ''
 
-elifn -> elif expr then instrs elifn
-elifn -> ''
+elsen ::= else instrs
+elsen ::= ''
 
-elsen -> else instrs
-elsen -> ''
+hasreverse ::= reverse
+hasreverse ::= ''
 
-hasreverse -> reverse
-hasreverse -> ''
+instrs ::= instr instrs2
 
-instrs -> instr instrs2
+instrs2 ::= instr instrs2
+instrs2 ::= ''
 
-instrs2 -> instr instrs2
-instrs2 -> ''
-
-acces -> . ident acces
-acces -> ''
+acces ::= . ident acces
+acces ::= ''

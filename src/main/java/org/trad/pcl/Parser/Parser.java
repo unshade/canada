@@ -523,12 +523,13 @@ public class Parser {
     @PrintMethodName
     private ExpressionNode expression() {
         switch (this.currentToken.tag()) {
-            case IDENT, OPEN_PAREN, DOT, ENTIER, CARACTERE, TRUE, FALSE, NULL, NEW, CHARACTER -> {
+            case IDENT, MINUS, OPEN_PAREN, DOT, ENTIER, CARACTERE, TRUE, FALSE, NULL, NEW, CHARACTER, NOT -> {
                 return LeftOrExpression();
             }
             default -> this.errorService.registerSyntaxError(
                     new UnexpectedTokenListException(this.currentToken,
                             Token.generateExpectedToken(Tag.IDENT, this.currentToken),
+                            Token.generateExpectedToken(Tag.MINUS, this.currentToken),
                             Token.generateExpectedToken(Tag.OPEN_PAREN, this.currentToken),
                             Token.generateExpectedToken(Tag.DOT, this.currentToken),
                             Token.generateExpectedToken(Tag.ENTIER, this.currentToken),
@@ -537,7 +538,8 @@ public class Parser {
                             Token.generateExpectedToken(Tag.FALSE, this.currentToken),
                             Token.generateExpectedToken(Tag.NULL, this.currentToken),
                             Token.generateExpectedToken(Tag.NEW, this.currentToken),
-                            Token.generateExpectedToken(Tag.CHARACTER, this.currentToken))
+                            Token.generateExpectedToken(Tag.CHARACTER, this.currentToken),
+                            Token.generateExpectedToken(Tag.NOT, this.currentToken))
             );
 
         }
@@ -550,7 +552,7 @@ public class Parser {
     @PrintMethodName
     private ExpressionNode LeftOrExpression() {
         switch (this.currentToken.tag()) {
-            case IDENT, OPEN_PAREN, DOT, ENTIER, CARACTERE, TRUE, FALSE, NULL, NEW, CHARACTER -> {
+            case IDENT, MINUS, OPEN_PAREN, DOT, ENTIER, CARACTERE, TRUE, FALSE, NULL, NEW, CHARACTER, NOT -> {
                 ExpressionNode firstExpression = LeftAndExpression();
                 BinaryExpressionNode secondExpression = OrExpression();
                 if (secondExpression != null) {
@@ -563,6 +565,7 @@ public class Parser {
             default -> this.errorService.registerSyntaxError(
                     new UnexpectedTokenListException(this.currentToken,
                             Token.generateExpectedToken(Tag.IDENT, this.currentToken),
+                            Token.generateExpectedToken(Tag.MINUS, this.currentToken),
                             Token.generateExpectedToken(Tag.OPEN_PAREN, this.currentToken),
                             Token.generateExpectedToken(Tag.DOT, this.currentToken),
                             Token.generateExpectedToken(Tag.ENTIER, this.currentToken),
@@ -571,7 +574,8 @@ public class Parser {
                             Token.generateExpectedToken(Tag.FALSE, this.currentToken),
                             Token.generateExpectedToken(Tag.NULL, this.currentToken),
                             Token.generateExpectedToken(Tag.NEW, this.currentToken),
-                            Token.generateExpectedToken(Tag.CHARACTER, this.currentToken))
+                            Token.generateExpectedToken(Tag.CHARACTER, this.currentToken),
+                            Token.generateExpectedToken(Tag.NOT, this.currentToken))
             );
         }
         return null;
@@ -620,7 +624,7 @@ public class Parser {
     @PrintMethodName
     private ExpressionNode RightOrExpression() {
         switch (this.currentToken.tag()) {
-            case IDENT, OPEN_PAREN, ELSE, DOT, MINUS, ENTIER, CARACTERE, TRUE, FALSE, NULL, NEW, CHARACTER -> {
+            case IDENT, OPEN_PAREN, ELSE, DOT, MINUS, ENTIER, CARACTERE, TRUE, FALSE, NULL, NEW, CHARACTER, NOT -> {
                 ExpressionNode firstExpression = LeftAndExpression();
                 BinaryExpressionNode secondExpression = OrExpression();
 
@@ -644,7 +648,8 @@ public class Parser {
                             Token.generateExpectedToken(Tag.FALSE, this.currentToken),
                             Token.generateExpectedToken(Tag.NULL, this.currentToken),
                             Token.generateExpectedToken(Tag.NEW, this.currentToken),
-                            Token.generateExpectedToken(Tag.CHARACTER, this.currentToken))
+                            Token.generateExpectedToken(Tag.CHARACTER, this.currentToken),
+                            Token.generateExpectedToken(Tag.NOT, this.currentToken))
             );
         }
         return null;
@@ -656,8 +661,8 @@ public class Parser {
     @PrintMethodName
     private ExpressionNode LeftAndExpression() {
         switch (this.currentToken.tag()) {
-            case IDENT, OPEN_PAREN, MINUS, ENTIER, CARACTERE, TRUE, FALSE, NULL, NEW, CHARACTER -> {
-                ExpressionNode firstExpression = LeftNotExpression();
+            case IDENT, OPEN_PAREN, MINUS, ENTIER, CARACTERE, TRUE, FALSE, NULL, NEW, CHARACTER, NOT -> {
+                ExpressionNode firstExpression = NotExpression();
                 BinaryExpressionNode secondExpression = AndExpression();
 
                 if (secondExpression != null) {
@@ -678,7 +683,8 @@ public class Parser {
                             Token.generateExpectedToken(Tag.FALSE, this.currentToken),
                             Token.generateExpectedToken(Tag.NULL, this.currentToken),
                             Token.generateExpectedToken(Tag.NEW, this.currentToken),
-                            Token.generateExpectedToken(Tag.CHARACTER, this.currentToken))
+                            Token.generateExpectedToken(Tag.CHARACTER, this.currentToken),
+                            Token.generateExpectedToken(Tag.NOT, this.currentToken))
             );
         }
         return null;
@@ -723,16 +729,16 @@ public class Parser {
     private BinaryExpressionNode RightAndExpression() {
         BinaryExpressionNode expression = null;
         switch (this.currentToken.tag()) {
-            case IDENT, OPEN_PAREN, MINUS, ENTIER, CARACTERE, TRUE, FALSE, NULL, NEW, CHARACTER -> {
+            case IDENT, OPEN_PAREN, MINUS, ENTIER, CARACTERE, TRUE, FALSE, NULL, NEW, CHARACTER, NOT -> {
                 expression = new BinaryExpressionNode();
                 expression.setOperator("AND");
-                expression.setRight(LeftNotExpression(), AndExpression());
+                expression.setRight(NotExpression(), AndExpression());
             }
             case THEN -> {
                 analyseTerminal(Tag.THEN);
                 expression = new BinaryExpressionNode();
                 expression.setOperator("AND THEN");
-                expression.setRight(LeftNotExpression(), AndExpression());
+                expression.setRight(NotExpression(), AndExpression());
             }
             default -> this.errorService.registerSyntaxError(
                     new UnexpectedTokenListException(this.currentToken,
@@ -746,7 +752,8 @@ public class Parser {
                             Token.generateExpectedToken(Tag.NULL, this.currentToken),
                             Token.generateExpectedToken(Tag.NEW, this.currentToken),
                             Token.generateExpectedToken(Tag.CHARACTER, this.currentToken),
-                            Token.generateExpectedToken(Tag.THEN, this.currentToken))
+                            Token.generateExpectedToken(Tag.THEN, this.currentToken),
+                            Token.generateExpectedToken(Tag.NOT, this.currentToken))
             );
         }
         return null;
@@ -756,18 +763,18 @@ public class Parser {
      * Grammar rule : not_expr
      */
     @PrintMethodName
-    private ExpressionNode LeftNotExpression() {
+    private ExpressionNode NotExpression() {
+        ExpressionNode expression = null;
         switch (this.currentToken.tag()) {
             case IDENT, OPEN_PAREN, MINUS, ENTIER, CARACTERE, TRUE, FALSE, NULL, NEW, CHARACTER -> {
-                ExpressionNode firstExpression = LeftEqualityExpression();
-                BinaryExpressionNode secondExpression = NotExpression();
-
-                if (secondExpression != null) {
-                    secondExpression.setLeft(firstExpression);
-                    return secondExpression;
-                } else {
-                    return firstExpression;
-                }
+                expression = LeftEqualityExpression();
+            }
+            case NOT -> {
+                expression = new UnaryExpressionNode();
+                OperatorNode operator = new OperatorNode();
+                operator.setOperator(analyseTerminal(Tag.NOT).getValue());
+                ((UnaryExpressionNode) expression).setOperator(operator);
+                ((UnaryExpressionNode) expression).setOperand(primary());
             }
             default -> this.errorService.registerSyntaxError(
                     new UnexpectedTokenListException(this.currentToken,
@@ -780,40 +787,8 @@ public class Parser {
                             Token.generateExpectedToken(Tag.FALSE, this.currentToken),
                             Token.generateExpectedToken(Tag.NULL, this.currentToken),
                             Token.generateExpectedToken(Tag.NEW, this.currentToken),
-                            Token.generateExpectedToken(Tag.CHARACTER, this.currentToken))
-            );
-        }
-        return null;
-    }
-
-    /**
-     * Grammar rule : not_expr2
-     *
-     * @return BinaryExpressionNode with operator and right expression
-     * the left expression is set in LeftNotExpression
-     */
-    @PrintMethodName
-    private BinaryExpressionNode NotExpression() {
-        BinaryExpressionNode expression = null;
-        switch (this.currentToken.tag()) {
-            case SEMICOLON, COMMA, CLOSE_PAREN, OR, AND, THEN, DOTDOT, LOOP -> {
-            }
-            case NOT -> {
-                expression = new BinaryExpressionNode();
-                expression.setOperator(analyseTerminal(Tag.NOT).getValue());
-                expression.setRight(LeftEqualityExpression(), NotExpression());
-            }
-            default -> this.errorService.registerSyntaxError(
-                    new UnexpectedTokenListException(this.currentToken,
-                            Token.generateExpectedToken(Tag.NOT, this.currentToken),
-                            Token.generateExpectedToken(Tag.SEMICOLON, this.currentToken),
-                            Token.generateExpectedToken(Tag.COMMA, this.currentToken),
-                            Token.generateExpectedToken(Tag.CLOSE_PAREN, this.currentToken),
-                            Token.generateExpectedToken(Tag.OR, this.currentToken),
-                            Token.generateExpectedToken(Tag.AND, this.currentToken),
-                            Token.generateExpectedToken(Tag.THEN, this.currentToken),
-                            Token.generateExpectedToken(Tag.DOTDOT, this.currentToken),
-                            Token.generateExpectedToken(Tag.LOOP, this.currentToken))
+                            Token.generateExpectedToken(Tag.CHARACTER, this.currentToken),
+                            Token.generateExpectedToken(Tag.NOT, this.currentToken))
             );
         }
         return expression;
@@ -1056,7 +1031,7 @@ public class Parser {
     private ExpressionNode LeftMultiplicativeExpression() {
         switch (this.currentToken.tag()) {
             case IDENT, OPEN_PAREN, MINUS, ENTIER, CARACTERE, TRUE, FALSE, NULL, NEW, CHARACTER -> {
-                ExpressionNode firstExpression = unaryExpression();
+                ExpressionNode firstExpression = minusExpression();
                 BinaryExpressionNode secondExpression = MultiplicativeExpression();
                 if (secondExpression != null) {
                     secondExpression.setLeft(firstExpression);
@@ -1097,18 +1072,18 @@ public class Parser {
             case MULTI -> {
                 expression = new BinaryExpressionNode();
                 expression.setOperator(analyseTerminal(Tag.MULTI).getValue());
-                expression.setRight(unaryExpression(), MultiplicativeExpression());
+                expression.setRight(minusExpression(), MultiplicativeExpression());
             }
             case DIV -> {
                 expression = new BinaryExpressionNode();
                 expression.setOperator(analyseTerminal(Tag.DIV).getValue());
-                expression.setRight(unaryExpression(), MultiplicativeExpression());
+                expression.setRight(minusExpression(), MultiplicativeExpression());
 
             }
             case REM -> {
                 expression = new BinaryExpressionNode();
                 expression.setOperator(analyseTerminal(Tag.REM).getValue());
-                expression.setRight(unaryExpression(), MultiplicativeExpression());
+                expression.setRight(minusExpression(), MultiplicativeExpression());
             }
             default -> this.errorService.registerSyntaxError(
                     new UnexpectedTokenListException(this.currentToken,
@@ -1141,7 +1116,7 @@ public class Parser {
      * Grammar rule : unary_expr
      */
     @PrintMethodName
-    private ExpressionNode unaryExpression() {
+    private ExpressionNode minusExpression() {
         ExpressionNode expression = null;
         switch (this.currentToken.tag()) {
             case MINUS -> {
@@ -1319,7 +1294,7 @@ public class Parser {
     private List<ExpressionNode> multipleExpressions() {
         List<ExpressionNode> expressions = new ArrayList<>();
         switch (this.currentToken.tag()) {
-            case IDENT, OPEN_PAREN, MINUS, ENTIER, CARACTERE, TRUE, FALSE, NULL, NEW, CHARACTER -> {
+            case IDENT, OPEN_PAREN, MINUS, ENTIER, CARACTERE, TRUE, FALSE, NULL, NEW, CHARACTER, NOT -> {
                 expressions.add(expression());
                 expressions.addAll(expressionSeparator());
             }
@@ -1334,7 +1309,8 @@ public class Parser {
                             Token.generateExpectedToken(Tag.FALSE, this.currentToken),
                             Token.generateExpectedToken(Tag.NULL, this.currentToken),
                             Token.generateExpectedToken(Tag.NEW, this.currentToken),
-                            Token.generateExpectedToken(Tag.CHARACTER, this.currentToken))
+                            Token.generateExpectedToken(Tag.CHARACTER, this.currentToken),
+                            Token.generateExpectedToken(Tag.NOT, this.currentToken))
             );
         }
         return expressions;
@@ -1371,7 +1347,7 @@ public class Parser {
         switch (this.currentToken.tag()) {
             case SEMICOLON -> {
             }
-            case IDENT, OPEN_PAREN, MINUS, ENTIER, CARACTERE, TRUE, FALSE, NULL, NEW, CHARACTER -> expressions.add(expression());
+            case IDENT, OPEN_PAREN, MINUS, ENTIER, CARACTERE, TRUE, FALSE, NULL, NEW, CHARACTER, NOT -> expressions.add(expression());
             case ASSIGN, DOT -> expressions.addAll(multipleExpressions());
             default -> this.errorService.registerSyntaxError(
                     new UnexpectedTokenListException(this.currentToken,
@@ -1387,7 +1363,8 @@ public class Parser {
                             Token.generateExpectedToken(Tag.NEW, this.currentToken),
                             Token.generateExpectedToken(Tag.CHARACTER, this.currentToken),
                             Token.generateExpectedToken(Tag.ASSIGN, this.currentToken),
-                            Token.generateExpectedToken(Tag.DOT, this.currentToken))
+                            Token.generateExpectedToken(Tag.DOT, this.currentToken),
+                            Token.generateExpectedToken(Tag.NOT, this.currentToken))
             );
         }
         return expressions;
@@ -1608,7 +1585,7 @@ public class Parser {
     private boolean hasreverse() {
         boolean hasReverse = false;
         switch (this.currentToken.tag()) {
-            case IDENT, OPEN_PAREN, MINUS, ENTIER, CARACTERE, TRUE, FALSE, NULL, NEW, CHARACTER -> {
+            case IDENT, OPEN_PAREN, MINUS, ENTIER, CARACTERE, TRUE, FALSE, NULL, NEW, CHARACTER, NOT -> {
             }
             case REVERSE -> {
                 analyseTerminal(Tag.REVERSE);
@@ -1626,7 +1603,8 @@ public class Parser {
                             Token.generateExpectedToken(Tag.FALSE, this.currentToken),
                             Token.generateExpectedToken(Tag.NULL, this.currentToken),
                             Token.generateExpectedToken(Tag.NEW, this.currentToken),
-                            Token.generateExpectedToken(Tag.CHARACTER, this.currentToken))
+                            Token.generateExpectedToken(Tag.CHARACTER, this.currentToken),
+                            Token.generateExpectedToken(Tag.NOT, this.currentToken))
             );
         }
         return hasReverse;
