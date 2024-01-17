@@ -56,6 +56,7 @@ public class Lexer {
             Map.entry(Tag.VAL, Pattern.compile("val")),
             Map.entry(Tag.OPEN_PAREN, Pattern.compile("\\(")),
             Map.entry(Tag.CLOSE_PAREN, Pattern.compile("\\)")),
+            Map.entry(Tag.NOT, Pattern.compile("not")),
             Map.entry(Tag.TRUE, Pattern.compile("true")),
             Map.entry(Tag.FALSE, Pattern.compile("false")),
             Map.entry(Tag.COMMA, Pattern.compile(",")),
