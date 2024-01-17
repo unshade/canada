@@ -12,12 +12,12 @@ public final class ReturnStatementNode extends StatementNode {
         this.expressions = new ArrayList<>();
     }
 
-    public void addExpression(ExpressionNode expression) {
-        this.expressions.add(expression);
-    }
-
     public void addExpressions(List<ExpressionNode> expressions) {
         this.expressions.addAll(expressions);
+    }
+
+    public List<ExpressionNode> getExpressions() {
+        return expressions;
     }
 
 }

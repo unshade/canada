@@ -35,4 +35,8 @@ public final class BlockNode extends StatementNode {
         }
     }
 
+    public List<StatementNode> getStatements() {
+        return statements;
+    }
+
 }

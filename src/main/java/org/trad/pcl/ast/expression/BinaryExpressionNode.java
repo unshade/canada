@@ -35,4 +35,16 @@ public final class BinaryExpressionNode extends ExpressionNode {
         this.operator.setOperator(operator);
     }
 
+    public ExpressionNode getLeft() {
+        return left;
+    }
+
+    public ExpressionNode getRight() {
+        return right;
+    }
+
+    public OperatorNode getOperatorNode() {
+        return operator;
+    }
+
 }
