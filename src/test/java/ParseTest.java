@@ -1,6 +1,7 @@
 import com.diogonunes.jcolor.AnsiFormat;
 import com.diogonunes.jcolor.Attribute;
 import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.trad.pcl.Constants;
 import org.trad.pcl.Exceptions.BadFileExtension;
@@ -21,41 +22,51 @@ import java.util.stream.Stream;
 
 import static com.diogonunes.jcolor.Ansi.colorize;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class ParseTest {
 
-    private static Stream<Path> provideCanAdaFiles() throws URISyntaxException, IOException {
-        return Files.walk(Path.of(Objects.requireNonNull(Main.class.getResource("/tests/typing/good")).toURI()), 1)
+    private static Stream<Arguments> provideGoodFiles() throws URISyntaxException, IOException {
+        Stream<Path> goodFiles = Files.walk(Path.of(Objects.requireNonNull(Main.class.getResource("/tests/good")).toURI()), 1)
                 .filter(Files::isRegularFile);
+        return goodFiles.map(path -> Arguments.of(path, true));
+    }
+
+    private static Stream<Arguments> provideBadFiles() throws URISyntaxException, IOException {
+        Stream<Path> badFiles = Files.walk(Path.of(Objects.requireNonNull(Main.class.getResource("/tests/bad")).toURI()), 1)
+                .filter(Files::isRegularFile);
+        return badFiles.map(path -> Arguments.of(path, false));
     }
 
     @ParameterizedTest
-    @MethodSource("provideCanAdaFiles")
-    public void testCanAdaFile(Path filePath) {
+    @MethodSource("provideGoodFiles")
+    public void testGoodFiles(Path filePath, boolean expected) {
+        testFile(filePath, expected);
+    }
+
+    @ParameterizedTest
+    @MethodSource("provideBadFiles")
+    public void testBadFiles(Path filePath, boolean expected) {
+        testFile(filePath, expected);
+    }
+
+    private void testFile(Path filePath, boolean expected) {
         try {
             System.out.println("Testing file: " + filePath);
-            File file = filePath.toFile();
+            File file = new File(filePath.toString());
             if (!file.exists() || !file.canRead()) {
                 throw new IOException("File does not exist or cannot be read");
             }
-            assertTrue(run("/tests/typing/good/" + file.getName()));
+
+            if (!FileHelper.getFileExtension(file).equalsIgnoreCase(Constants.REQUIRED_EXTENSION)) {
+                throw new BadFileExtension(Constants.REQUIRED_EXTENSION);
+            }
+            assertEquals(run(file), expected);
         } catch (BadFileExtension | IOException e) {
             e.printStackTrace();
         }
     }
 
-    public boolean run(String argPath) throws BadFileExtension, IOException {
-        System.out.println("Testing file: " + argPath);
-        File file = new File(Objects.requireNonNull(Main.class.getResource(argPath)).getFile());
-        if (!file.exists() || !file.canRead()) {
-            throw new IOException("File does not exist or cannot be read");
-        }
-
-        if (!FileHelper.getFileExtension(file).equalsIgnoreCase(Constants.REQUIRED_EXTENSION)) {
-            throw new BadFileExtension(Constants.REQUIRED_EXTENSION);
-        }
-
+    public boolean run(File file) throws BadFileExtension, IOException {
         Lexer lexer = new Lexer(file);
         ErrorService.resetInstance();
         ErrorService errorService = ErrorService.getInstance();
