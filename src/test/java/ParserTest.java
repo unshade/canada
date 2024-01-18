@@ -23,16 +23,16 @@ import java.util.stream.Stream;
 import static com.diogonunes.jcolor.Ansi.colorize;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-public class ParseTest {
+public class ParserTest {
 
     private static Stream<Arguments> provideGoodFiles() throws URISyntaxException, IOException {
-        Stream<Path> goodFiles = Files.walk(Path.of(Objects.requireNonNull(Main.class.getResource("/tests/good")).toURI()), 1)
+        Stream<Path> goodFiles = Files.walk(Path.of(Objects.requireNonNull(Main.class.getResource("/tests/Parser/good")).toURI()), 1)
                 .filter(Files::isRegularFile);
         return goodFiles.map(path -> Arguments.of(path.getFileName().toString(),path, true));
     }
 
     private static Stream<Arguments> provideBadFiles() throws URISyntaxException, IOException {
-        Stream<Path> badFiles = Files.walk(Path.of(Objects.requireNonNull(Main.class.getResource("/tests/bad")).toURI()), 1)
+        Stream<Path> badFiles = Files.walk(Path.of(Objects.requireNonNull(Main.class.getResource("/tests/Parser/bad")).toURI()), 1)
                 .filter(Files::isRegularFile);
         return badFiles.map(path -> Arguments.of(path.getFileName().toString(),path, false));
     }
