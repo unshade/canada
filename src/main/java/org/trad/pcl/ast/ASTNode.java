@@ -74,10 +74,10 @@ public abstract class ASTNode {
         superClassFields.forEach(field -> {
             field.setAccessible(true);
             try {
-                if (field.get(this) instanceof String) {
+                if (!field.getName().equals("depth") && !field.getName().equals("isJson")) {
                     fields.add(field);
                 }
-            } catch (IllegalAccessException e) {
+            } catch (Exception e) {
                 throw new RuntimeException(e);
             }
         });

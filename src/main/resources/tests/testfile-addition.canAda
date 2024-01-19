@@ -6,5 +6,4 @@ procedure Main is
 begin
     Sum := A + B;
     Sum := 2 + A * B;
-    Sum := 3 - 2 + 7;
 end Main;

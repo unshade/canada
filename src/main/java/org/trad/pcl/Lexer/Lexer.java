@@ -243,7 +243,7 @@ public class Lexer {
      */
     public void displayAllTokens() {
         List<Token> tokens = this.getAllTokens();
-        tokens.forEach(System.out::print);
+        tokens.forEach(System.out::println);
     }
 
     public List<Token> getAllTokens() {

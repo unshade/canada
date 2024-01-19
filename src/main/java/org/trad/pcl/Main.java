@@ -24,8 +24,9 @@ public final class Main {
             return;
         }
 
-        // String argPath = args[0];
-        String argPath = "/test.canAda";
+        String argPath = args[0];
+        System.out.println("Parsing file: " + argPath);
+        //String argPath = "/test.canAda";
         File file = new File(Objects.requireNonNull(Main.class.getResource(argPath)).getFile());
         if (!file.exists() || !file.canRead()) {
             throw new IOException("File does not exist or cannot be read");
