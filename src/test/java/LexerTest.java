@@ -12,7 +12,6 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -44,21 +43,6 @@ public class LexerTest {
         return tokens;
     }
 
-    private void performLexerTest(File testFile, List<Token> expectedTokens) {
-        try {
-            ErrorService.resetInstance();
-
-            Lexer lexer = new Lexer(testFile);
-            List<Token> actualTokens = lexer.getAllTokens();
-
-            assertEquals(expectedTokens, actualTokens);
-
-        } catch (Exception e) {
-            e.printStackTrace();
-            fail("Unexpected exception occurred: " + e.getMessage());
-        }
-    }
-
     static Stream<TestData> testDataProvider() throws IOException {
         Path testFolder = Paths.get("src", "main", "resources", "tests", "lexer", "tests");
         Path solutionFolder = Paths.get("src", "main", "resources", "tests", "lexer", "solutions");
@@ -75,6 +59,21 @@ public class LexerTest {
                         throw new RuntimeException("Error reading solution file: " + solutionFile, e);
                     }
                 });
+    }
+
+    private void performLexerTest(File testFile, List<Token> expectedTokens) {
+        try {
+            ErrorService.resetInstance();
+
+            Lexer lexer = new Lexer(testFile);
+            List<Token> actualTokens = lexer.getAllTokens();
+
+            assertEquals(expectedTokens, actualTokens);
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            fail("Unexpected exception occurred: " + e.getMessage());
+        }
     }
 
     @ParameterizedTest
