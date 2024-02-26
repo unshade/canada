@@ -1,9 +1,11 @@
 package org.trad.pcl.ast.statement;
 
 
+import org.trad.pcl.ast.ASTNode;
 import org.trad.pcl.ast.expression.ExpressionNode;
+import org.trad.pcl.semantic.ASTNodeVisitor;
 
-public final class IfStatementNode extends StatementNode {
+public final class IfStatementNode extends ASTNode implements StatementNode {
     private ExpressionNode condition;
     private BlockNode thenBranch;
     private BlockNode elseBranch;
@@ -41,4 +43,8 @@ public final class IfStatementNode extends StatementNode {
         return elseIfBranch;
     }
 
+    @Override
+    public void accept(ASTNodeVisitor visitor) {
+        visitor.visit(this);
+    }
 }

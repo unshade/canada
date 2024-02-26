@@ -1,6 +1,7 @@
 package org.trad.pcl.ast;
 
 import com.diogonunes.jcolor.Attribute;
+import org.trad.pcl.semantic.ASTNodeVisitor;
 
 import static com.diogonunes.jcolor.Ansi.colorize;
 
@@ -8,7 +9,7 @@ import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.List;
 
-public abstract class ASTNode {
+public abstract class ASTNode implements VisitorElement{
 
     private static boolean isJson = false;
 

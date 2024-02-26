@@ -9,6 +9,7 @@ import org.trad.pcl.Lexer.Tokens.Tag;
 import org.trad.pcl.Lexer.Tokens.Token;
 import org.trad.pcl.Services.ErrorService;
 import org.trad.pcl.annotation.PrintMethodName;
+import org.trad.pcl.ast.statement.BlockNode;
 import org.trad.pcl.ast.OperatorNode;
 import org.trad.pcl.ast.ParameterNode;
 import org.trad.pcl.ast.ProgramNode;
@@ -55,11 +56,11 @@ public class Parser {
         ProcedureDeclarationNode rootProcedure = new ProcedureDeclarationNode();
         rootProcedure.setIdentifier(analyseTerminal(Tag.IDENT).getValue());
         analyseTerminal(Tag.IS);
-        BlockNode rootProcedureBody = new BlockNode();
-        rootProcedureBody.addDeclarations(multipleDeclarations());
+        BlockNode block = new BlockNode();
+        block.addDeclarations(multipleDeclarations());
         analyseTerminal(Tag.BEGIN);
-        rootProcedureBody.addStatements(multipleStatements());
-        rootProcedure.setBody(rootProcedureBody);
+        block.addStatements(multipleStatements());
+        rootProcedure.setBody(block);
         abstractSyntaxTreeRoot.setRootProcedure(rootProcedure);
         analyseTerminal(Tag.END);
         hasident();
@@ -83,11 +84,11 @@ public class Parser {
                 declaration.setIdentifier(analyseTerminal(Tag.IDENT).getValue());
                 declaration.addParameters(hasParameters());
                 analyseTerminal(Tag.IS);
-                BlockNode procedureBody = new BlockNode();
-                procedureBody.addDeclarations(multipleDeclarations());
+                BlockNode block = new BlockNode();
+                block.addDeclarations(multipleDeclarations());
                 analyseTerminal(Tag.BEGIN);
-                procedureBody.addStatements(multipleStatements());
-                declaration.setBody(procedureBody);
+                block.addStatements(multipleStatements());
+                declaration.setBody(block);
                 analyseTerminal(Tag.END);
                 hasident();
                 analyseTerminal(Tag.SEMICOLON);
@@ -115,8 +116,10 @@ public class Parser {
                 TypeDeclarationNode declaration = new TypeDeclarationNode();
                 declarations.add(declaration);
                 analyseTerminal(Tag.TYPE);
-                declaration.setIdentifier(analyseTerminal(Tag.IDENT).getValue());
-                declaration.setType(isAccessOrRecord());
+                String ident = analyseTerminal(Tag.IDENT).getValue();
+                TypeNode type = isAccessOrRecord();
+                type.setIdentifier(ident);
+                declaration.setType(type);
                 analyseTerminal(Tag.SEMICOLON);
             }
             case FUNCTION -> {
@@ -128,11 +131,11 @@ public class Parser {
                 analyseTerminal(Tag.RETURN);
                 declaration.setReturnType(type());
                 analyseTerminal(Tag.IS);
-                BlockNode functionBody = new BlockNode();
-                functionBody.addDeclarations(multipleDeclarations());
+                BlockNode block = new BlockNode();
+                block.addDeclarations(multipleDeclarations());
                 analyseTerminal(Tag.BEGIN);
-                functionBody.addStatements(multipleStatements());
-                declaration.setBody(functionBody);
+                block.addStatements(multipleStatements());
+                declaration.setBody(block);
                 analyseTerminal(Tag.END);
                 hasident();
                 analyseTerminal(Tag.SEMICOLON);
@@ -406,7 +409,7 @@ public class Parser {
     private List<ParameterNode> multipleParameters() {
         List<ParameterNode> parameters = new ArrayList<>();
         if (this.currentToken.tag() == Tag.IDENT) {
-            parameters.add(parameter());
+            parameters.addAll(parameter());
             parameters.addAll(paramSeparator());
         } else {
             this.errorService.registerSyntaxError(new UnexpectedTokenException(Token.generateExpectedToken(Tag.IDENT, this.currentToken), this.currentToken));
@@ -463,18 +466,26 @@ public class Parser {
      * Grammar rule : param
      */
     @PrintMethodName
-    private ParameterNode parameter() {
-        ParameterNode parameter = null;
+    private List<ParameterNode> parameter() {
+        List<ParameterNode> parameters = new ArrayList<>();
         if (this.currentToken.tag() == Tag.IDENT) {
-            parameter = new ParameterNode();
-            parameter.setVariables(multipleIdent());
+
+            for (VariableDeclarationNode variable : multipleIdent()) {
+                ParameterNode parameter = new ParameterNode();
+                parameter.setVariable(variable);
+                parameters.add(parameter);
+            }
             analyseTerminal(Tag.COLON);
-            parameter.setMode(mode());
-            parameter.setType(type());
+            String mode = mode();
+            TypeNode type = type();
+            for (ParameterNode parameter : parameters) {
+                parameter.setMode(mode);
+                parameter.setType(type);
+            }
         } else {
             this.errorService.registerSyntaxError(new UnexpectedTokenException(new Token(Tag.IDENT, this.currentToken.line(), TagHelper.getTagString(Tag.IDENT)), this.currentToken));
         }
-        return parameter;
+        return parameters;
     }
 
     @PrintMethodName
@@ -1381,7 +1392,7 @@ public class Parser {
                 // appel de fonction et Assign
                 String ident = analyseTerminal(Tag.IDENT).getValue();
                 statement = identifiableStatement();
-                ((IdentifiableStatementNode) statement).setIdentifier(ident);
+                ((VariableReferenceNode) statement).setIdentifier(ident);
             }
             case BEGIN -> {
                 statement = new BlockNode();
@@ -1458,19 +1469,19 @@ public class Parser {
      * Grammar rule : instr2
      */
     @PrintMethodName
-    private IdentifiableStatementNode identifiableStatement() {
-        IdentifiableStatementNode statement = null;
+    private VariableReferenceNode identifiableStatement() {
+        VariableReferenceNode statement = null;
         switch (this.currentToken.tag()) {
 
             case SEMICOLON -> {
-                statement = new FunctionCallStatementNode();
+                statement = new FunctionCallNode();
                 analyseTerminal(Tag.SEMICOLON);
             }
 
             case OPEN_PAREN -> {
-                statement = new FunctionCallStatementNode();
+                statement = new FunctionCallNode();
                 analyseTerminal(Tag.OPEN_PAREN);
-                ((FunctionCallStatementNode) statement).setArguments(multipleExpressions());
+                ((FunctionCallNode) statement).setArguments(multipleExpressions());
                 analyseTerminal(Tag.CLOSE_PAREN);
                 // TODO
                 instr3();
@@ -1479,7 +1490,7 @@ public class Parser {
             }
             case ASSIGN, DOT -> {
                 statement = new AssignmentStatementNode();
-                statement.setNextIdentifier(instr3());
+                statement.setNextExpression(instr3());
                 analyseTerminal(Tag.ASSIGN);
                 ((AssignmentStatementNode) statement).setExpression(expression());
                 analyseTerminal(Tag.SEMICOLON);

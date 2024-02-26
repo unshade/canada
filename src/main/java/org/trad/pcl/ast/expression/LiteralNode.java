@@ -1,6 +1,9 @@
 package org.trad.pcl.ast.expression;
 
-public final class LiteralNode extends ExpressionNode {
+import org.trad.pcl.ast.ASTNode;
+import org.trad.pcl.semantic.ASTNodeVisitor;
+
+public final class LiteralNode extends ASTNode implements ExpressionNode {
     private Object value;
 
     public void setValue(Object value) {
@@ -9,5 +12,10 @@ public final class LiteralNode extends ExpressionNode {
 
     public Object getValue() {
         return value;
+    }
+
+    @Override
+    public void accept(ASTNodeVisitor visitor) {
+        visitor.visit(this);
     }
 }

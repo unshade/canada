@@ -1,11 +1,13 @@
 package org.trad.pcl.ast.statement;
 
+import org.trad.pcl.ast.ASTNode;
 import org.trad.pcl.ast.expression.ExpressionNode;
+import org.trad.pcl.semantic.ASTNodeVisitor;
 
 import java.util.ArrayList;
 import java.util.List;
 
-public final class ReturnStatementNode extends StatementNode {
+public final class ReturnStatementNode extends ASTNode implements StatementNode {
     private List<ExpressionNode> expressions;
 
     public ReturnStatementNode() {
@@ -20,4 +22,8 @@ public final class ReturnStatementNode extends StatementNode {
         return expressions;
     }
 
+    @Override
+    public void accept(ASTNodeVisitor visitor) {
+        visitor.visit(this);
+    }
 }

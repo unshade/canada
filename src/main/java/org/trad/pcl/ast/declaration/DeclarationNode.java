@@ -1,16 +1,10 @@
 package org.trad.pcl.ast.declaration;
 
 import org.trad.pcl.ast.ASTNode;
+import org.trad.pcl.ast.VisitorElement;
+import org.trad.pcl.semantic.SymbolTable;
+import org.trad.pcl.semantic.symbol.Symbol;
 
-public class DeclarationNode extends ASTNode {
-    // Classe de base pour les déclarations
-    protected String identifier;
+public interface DeclarationNode extends VisitorElement {
 
-    public void setIdentifier(String identifier) {
-        this.identifier = identifier;
-    }
-
-    public String getIdentifier() {
-        return identifier;
-    }
 }

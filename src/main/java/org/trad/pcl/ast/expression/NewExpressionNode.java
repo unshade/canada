@@ -1,6 +1,9 @@
 package org.trad.pcl.ast.expression;
 
-public class NewExpressionNode extends ExpressionNode {
+import org.trad.pcl.ast.ASTNode;
+import org.trad.pcl.semantic.ASTNodeVisitor;
+
+public class NewExpressionNode extends ASTNode implements ExpressionNode {
     private String type;
 
     public void setType(String type) {
@@ -8,4 +11,8 @@ public class NewExpressionNode extends ExpressionNode {
     }
 
 
+    @Override
+    public void accept(ASTNodeVisitor visitor) {
+        visitor.visit(this);
+    }
 }

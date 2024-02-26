@@ -1,6 +1,9 @@
 package org.trad.pcl.ast.expression;
 
-public class CharacterValExpressionNode extends ExpressionNode {
+import org.trad.pcl.ast.ASTNode;
+import org.trad.pcl.semantic.ASTNodeVisitor;
+
+public class CharacterValExpressionNode extends ASTNode implements ExpressionNode {
     private ExpressionNode expression;
 
     public void setExpression(ExpressionNode expression) {
@@ -8,4 +11,8 @@ public class CharacterValExpressionNode extends ExpressionNode {
     }
 
 
+    @Override
+    public void accept(ASTNodeVisitor visitor) {
+        visitor.visit(this);
+    }
 }

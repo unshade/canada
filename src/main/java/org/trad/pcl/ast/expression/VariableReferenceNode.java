@@ -1,6 +1,10 @@
 package org.trad.pcl.ast.expression;
 
-public class VariableReferenceNode extends ExpressionNode {
+import org.trad.pcl.ast.ASTNode;
+import org.trad.pcl.ast.statement.StatementNode;
+import org.trad.pcl.semantic.ASTNodeVisitor;
+
+public class VariableReferenceNode extends ASTNode implements ExpressionNode, StatementNode {
     private String identifier;
 
     private VariableReferenceNode nextExpression;
@@ -19,5 +23,10 @@ public class VariableReferenceNode extends ExpressionNode {
 
     public VariableReferenceNode getNextExpression() {
         return nextExpression;
+    }
+
+    @Override
+    public void accept(ASTNodeVisitor visitor) {
+        visitor.visit(this);
     }
 }

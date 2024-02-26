@@ -1,5 +1,7 @@
 package org.trad.pcl.ast;
 
+import org.trad.pcl.semantic.ASTNodeVisitor;
+
 public final class OperatorNode extends ASTNode {
     private String operator;
 
@@ -11,4 +13,8 @@ public final class OperatorNode extends ASTNode {
         return operator;
     }
 
+    @Override
+    public void accept(ASTNodeVisitor visitor) {
+
+    }
 }

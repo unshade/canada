@@ -1,8 +1,10 @@
 package org.trad.pcl.ast.statement;
 
+import org.trad.pcl.ast.ASTNode;
 import org.trad.pcl.ast.expression.ExpressionNode;
+import org.trad.pcl.semantic.ASTNodeVisitor;
 
-public final class LoopStatementNode extends StatementNode {
+public final class LoopStatementNode extends ASTNode implements StatementNode {
 
         private BlockNode body;
 
@@ -54,6 +56,8 @@ public final class LoopStatementNode extends StatementNode {
         }
 
 
-
-
+    @Override
+    public void accept(ASTNodeVisitor visitor) {
+        visitor.visit(this);
+    }
 }

@@ -9,6 +9,7 @@ import org.trad.pcl.Parser.Parser;
 import org.trad.pcl.Services.ErrorService;
 import org.trad.pcl.Services.PythonRunner;
 import org.trad.pcl.ast.ProgramNode;
+import org.trad.pcl.semantic.SemanticAnalysisVisitor;
 
 import java.io.File;
 import java.io.IOException;
@@ -42,6 +43,7 @@ public final class Main {
             lexer.displayAllTokens();
         } else {
             Parser parser = new Parser(lexer);
+            System.out.println("🔍 " + colorize("STARTING PARSING PHASE", new AnsiFormat(Attribute.WHITE_TEXT(), Attribute.BLUE_BACK(), Attribute.BOLD())));
             ProgramNode AST = parser.parse();
             if (errorService.hasNoErrors()) {
                 AnsiFormat fWarning = new AnsiFormat(Attribute.WHITE_TEXT(), Attribute.GREEN_BACK(), Attribute.BOLD());
@@ -52,6 +54,9 @@ public final class Main {
                     String json = AST.toString();
                     PythonRunner.exec(json);
                 }
+                System.out.println("🔍 " + colorize("STARTING SEMANTIC ANALYSIS PHASE", new AnsiFormat(Attribute.WHITE_TEXT(), Attribute.BLUE_BACK(), Attribute.BOLD())));
+                SemanticAnalysisVisitor semanticChecker = new SemanticAnalysisVisitor();
+                AST.accept(semanticChecker);
             } else {
                 AnsiFormat fWarning = new AnsiFormat(Attribute.WHITE_TEXT(), Attribute.RED_BACK(), Attribute.BOLD());
                 System.out.println("\n❌ " + colorize("PARSING PHASE FAILED, STOPPING", fWarning));
