@@ -890,7 +890,6 @@ public class Parser {
             case IDENT, OPEN_PAREN, MINUS, ENTIER, CARACTERE, TRUE, FALSE, NULL, NEW, CHARACTER -> {
                 ExpressionNode firstExpression = LeftAdditiveExpression();
                 BinaryExpressionNode secondExpression = RelationalExpression();
-
                 if (secondExpression != null) {
                     secondExpression.setLeft(firstExpression);
                     return secondExpression;
@@ -966,7 +965,7 @@ public class Parser {
                 ExpressionNode firstExpression = LeftMultiplicativeExpression();
                 BinaryExpressionNode secondExpression = AdditiveExpression();
                 if (secondExpression != null) {
-                    secondExpression.setLeft(firstExpression);
+                    secondExpression.setMostLeft(firstExpression);
                     return secondExpression;
                 } else {
                     return firstExpression;
@@ -1004,12 +1003,27 @@ public class Parser {
             case PLUS -> {
                 expression = new BinaryExpressionNode();
                 expression.setOperator(analyseTerminal(Tag.PLUS).getValue());
-                expression.setRight(LeftMultiplicativeExpression(), AdditiveExpression());
+                ExpressionNode left = LeftMultiplicativeExpression();
+                BinaryExpressionNode right = AdditiveExpression();
+                if (right != null) {
+                    right.setMostLeft(left);
+                    expression.setRight(right);
+                } else {
+                    expression.setRight(left);
+                }
             }
             case MINUS -> {
                 expression = new BinaryExpressionNode();
                 expression.setOperator(analyseTerminal(Tag.MINUS).getValue());
-                expression.setRight(LeftMultiplicativeExpression(), AdditiveExpression());
+                ExpressionNode left = LeftMultiplicativeExpression();
+                BinaryExpressionNode right = AdditiveExpression();
+                if (right != null) {
+                    right.setMostLeft(left);
+                    expression.setRight(right);
+                    expression.definePriority("-", "+");
+                } else {
+                    expression.setRight(left);
+                }
             }
             default -> this.errorService.registerSyntaxError(
                     new UnexpectedTokenListException(this.currentToken,
@@ -1029,7 +1043,8 @@ public class Parser {
                             Token.generateExpectedToken(Tag.GT, this.currentToken),
                             Token.generateExpectedToken(Tag.GE, this.currentToken),
                             Token.generateExpectedToken(Tag.DOTDOT, this.currentToken),
-                            Token.generateExpectedToken(Tag.LOOP, this.currentToken))
+                            Token.generateExpectedToken(Tag.LOOP, this.currentToken)
+                    )
             );
         }
         return expression;
@@ -1045,7 +1060,7 @@ public class Parser {
                 ExpressionNode firstExpression = minusExpression();
                 BinaryExpressionNode secondExpression = MultiplicativeExpression();
                 if (secondExpression != null) {
-                    secondExpression.setLeft(firstExpression);
+                    secondExpression.setMostLeft(firstExpression);
                     return secondExpression;
                 } else {
                     return firstExpression;
@@ -1088,8 +1103,15 @@ public class Parser {
             case DIV -> {
                 expression = new BinaryExpressionNode();
                 expression.setOperator(analyseTerminal(Tag.DIV).getValue());
-                expression.setRight(minusExpression(), MultiplicativeExpression());
-
+                ExpressionNode leftNode = minusExpression();
+                BinaryExpressionNode rightTree = MultiplicativeExpression();
+                if (rightTree != null) {
+                    rightTree.setMostLeft(leftNode);
+                    expression.setRight(rightTree);
+                    expression.definePriority("/", "*");
+                } else {
+                    expression.setRight(leftNode);
+                }
             }
             case REM -> {
                 expression = new BinaryExpressionNode();
