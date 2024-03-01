@@ -56,7 +56,7 @@ public class SemanticAnalysisVisitor implements ASTNodeVisitor {
 
         // Traverse the parameters
         for (ParameterNode parameter : node.getParameters()) {
-            scopeStack.peek().addSymbol(parameter.toSymbol());
+            parameter.accept(this);
         }
 
         // Traverse the body
