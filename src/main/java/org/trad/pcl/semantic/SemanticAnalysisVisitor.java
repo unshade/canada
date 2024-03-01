@@ -9,6 +9,7 @@ import org.trad.pcl.ast.ParameterNode;
 import org.trad.pcl.ast.declaration.*;
 import org.trad.pcl.ast.statement.*;
 import org.trad.pcl.ast.type.TypeNode;
+import org.trad.pcl.semantic.symbol.Function;
 import org.trad.pcl.semantic.symbol.Symbol;
 
 import java.util.Stack;
@@ -113,7 +114,17 @@ public class SemanticAnalysisVisitor implements ASTNodeVisitor {
     @Override
     public void visit(FunctionCallNode node) {
 
+
         Symbol function = findSymbolInScopes(node.getIdentifier());
+
+        System.out.println("FunctionCallNode : " + node.getIdentifier() + " " + function);
+
+        Function functionSymbol = (Function) function;
+
+        if (node.getArguments().size() != functionSymbol.getParameters().size()) {
+            System.out.printf("The number of arguments does not match the number of parameters\n");
+            errorService.registerSemanticError(new UndefinedVariableException("The number of arguments does not match the number of parameters"));
+        }
 
     }
 

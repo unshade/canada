@@ -10,7 +10,9 @@ public class Symbol {
     }
 
     public static Symbol builtinFunction(String identifier) {
-        return new Symbol(identifier, 0);
+        Function f = new Function(identifier, 0);
+        f.addParameter("integer");
+        return f;
     }
 
     public static Symbol builtinVariable(String identifier) {
@@ -25,5 +27,11 @@ public class Symbol {
         return new String[] {identifier, Integer.toString(shift)};
     }
 
-
+    @Override
+    public String toString() {
+        return "Symbol{" +
+                "identifier='" + identifier + '\'' +
+                ", shift=" + shift +
+                '}';
+    }
 }
