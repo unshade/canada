@@ -104,13 +104,9 @@ public class SemanticAnalysisVisitor implements ASTNodeVisitor {
     public void visit(BlockNode node) {
 
         // Traverse the declarations
-        for (DeclarationNode variable : node.getDeclarations()) {
-            variable.accept(this);
-        }
+        node.getDeclarations().forEach(declarationNode -> declarationNode.accept(this));
         // Traverse the statements
-        for (StatementNode statement : node.getStatements()) {
-            statement.accept(this);
-        }
+        node.getStatements().forEach(statementNode -> statementNode.accept(this));
     }
 
     @Override
@@ -157,17 +153,18 @@ public class SemanticAnalysisVisitor implements ASTNodeVisitor {
 
     @Override
     public void visit(LoopStatementNode node) {
-
+        node.getStartExpression().accept(this);
+        node.getEndExpression().accept(this);
+        node.getBody().accept(this);
     }
 
     @Override
     public void visit(ReturnStatementNode node) {
-
+        node.getExpressions().forEach(expressionNode -> expressionNode.accept(this));
     }
 
     @Override
     public void visit(WhileStatementNode node) {
-
     }
 
     @Override
