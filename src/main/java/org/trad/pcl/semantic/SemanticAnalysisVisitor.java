@@ -1,28 +1,33 @@
 package org.trad.pcl.semantic;
 
+import com.diogonunes.jcolor.Attribute;
 import org.trad.pcl.Exceptions.Semantic.UndefinedVariableException;
+import org.trad.pcl.Helpers.StringFormatHelper;
 import org.trad.pcl.Services.ErrorService;
-import org.trad.pcl.ast.ProgramNode;
-import org.trad.pcl.ast.expression.*;
-import org.trad.pcl.ast.statement.BlockNode;
 import org.trad.pcl.ast.ParameterNode;
+import org.trad.pcl.ast.ProgramNode;
 import org.trad.pcl.ast.declaration.*;
+import org.trad.pcl.ast.expression.*;
 import org.trad.pcl.ast.statement.*;
 import org.trad.pcl.ast.type.TypeNode;
 import org.trad.pcl.semantic.symbol.Function;
 import org.trad.pcl.semantic.symbol.Symbol;
+import static com.diogonunes.jcolor.Ansi.colorize;
 
+import java.util.Map;
+import java.util.Set;
 import java.util.Stack;
 
 public class SemanticAnalysisVisitor implements ASTNodeVisitor {
-    private Stack<SymbolTable> scopeStack = new Stack<>();
-
     private final ErrorService errorService;
+    private final Stack<SymbolTable> scopeStack = new Stack<>();
 
     public SemanticAnalysisVisitor() {
         this.errorService = ErrorService.getInstance();
         // Global scope
         scopeStack.push(new SymbolTable());
+
+        // Build-in features
         scopeStack.peek().addSymbol(Symbol.builtinFunction("put"));
         scopeStack.peek().addSymbol(Symbol.builtinVariable("integer"));
     }
@@ -39,11 +44,9 @@ public class SemanticAnalysisVisitor implements ASTNodeVisitor {
             parameter.accept(this);
         }
 
-        // Traverse the body
         node.getBody().accept(this);
+        StringFormatHelper.printTDS(scopeStack.peek(), "FUNCTION", node.getIdentifier());
 
-        System.out.println("TDS pour la fonction : " + node.getIdentifier());
-        System.out.println(scopeStack.peek());
         // Exit the scope
         exitScope();
     }
@@ -63,8 +66,8 @@ public class SemanticAnalysisVisitor implements ASTNodeVisitor {
         // Traverse the body
         node.getBody().accept(this);
 
-        System.out.println("TDS pour la procédure : " + node.getIdentifier());
-        System.out.println(scopeStack.peek());
+        StringFormatHelper.printTDS(scopeStack.peek(), "PROCEDURE", node.getIdentifier());
+
         // Exit the scope
         exitScope();
 
@@ -92,7 +95,6 @@ public class SemanticAnalysisVisitor implements ASTNodeVisitor {
 
     @Override
     public void visit(AssignmentStatementNode node) {
-        System.out.println("AssignmentStatementNode : " + node.getIdentifier() + " " + node.getExpression() + " " + findSymbolInScopes(node.getIdentifier()));
         Symbol variable = findSymbolInScopes(node.getIdentifier());
         node.getExpression().accept(this);
 
@@ -114,21 +116,18 @@ public class SemanticAnalysisVisitor implements ASTNodeVisitor {
     @Override
     public void visit(FunctionCallNode node) {
 
-
-        Symbol function = findSymbolInScopes(node.getIdentifier());
-
-        if (function == null) {
-            errorService.registerSemanticError(new UndefinedVariableException("Function " + node.getIdentifier() + " is not defined"));
+        // Check if the function is defined + get the function symbol
+        Function functionSymbol;
+        if ((functionSymbol = (Function) findSymbolInScopes(node.getIdentifier())) == null) {
             return;
         }
 
-        System.out.println("FunctionCallNode : " + node.getIdentifier() + " " + function);
-
-        Function functionSymbol = (Function) function;
-
+        // Check if the number of arguments match the number of declared parameters
         if (node.getArguments().size() != functionSymbol.getParameters().size()) {
-            errorService.registerSemanticError(new UndefinedVariableException("The number of arguments does not match the number of parameters (expected " + functionSymbol.getParameters().size() + " but got " + node.getArguments().size() + ")" + " for function " + node.getIdentifier()));
+            errorService.registerSemanticError(new Exception("The number of arguments does not match the number of parameters (expected " + functionSymbol.getParameters().size() + " but got " + node.getArguments().size() + ")" + " for function " + node.getIdentifier()));
         }
+
+        // TODO Check if the types of the arguments match the types of the parameters
 
     }
 
@@ -173,10 +172,8 @@ public class SemanticAnalysisVisitor implements ASTNodeVisitor {
 
     @Override
     public void visit(BinaryExpressionNode node) {
-
         node.getLeft().accept(this);
         node.getRight().accept(this);
-
     }
 
     @Override

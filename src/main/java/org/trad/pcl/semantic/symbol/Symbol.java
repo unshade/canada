@@ -1,4 +1,7 @@
 package org.trad.pcl.semantic.symbol;
+import com.diogonunes.jcolor.Attribute;
+
+import static com.diogonunes.jcolor.Ansi.colorize;
 
 public class Symbol {
     private String identifier;
@@ -29,9 +32,9 @@ public class Symbol {
 
     @Override
     public String toString() {
-        return "Symbol{" +
-                "identifier='" + identifier + '\'' +
-                ", shift=" + shift +
-                '}';
+        return "Symbol { " +
+                "identifier = '" + colorize(identifier, Attribute.YELLOW_TEXT()) + '\'' +
+                ", shift = " + shift +
+                " }";
     }
 }

@@ -25,6 +25,10 @@ public class SymbolTable {
        return symbols.get(identifier);
     }
 
+    public HashMap<String, Symbol> getSymbols() {
+        return symbols;
+    }
+
     @Override
     public String toString() {
         List<String[]> liste = new ArrayList<>();
