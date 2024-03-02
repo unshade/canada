@@ -92,7 +92,7 @@ public class SemanticAnalysisVisitor implements ASTNodeVisitor {
 
     @Override
     public void visit(AssignmentStatementNode node) {
-
+        System.out.println("AssignmentStatementNode : " + node.getIdentifier() + " " + node.getExpression() + " " + findSymbolInScopes(node.getIdentifier()));
         Symbol variable = findSymbolInScopes(node.getIdentifier());
         node.getExpression().accept(this);
 
@@ -117,13 +117,17 @@ public class SemanticAnalysisVisitor implements ASTNodeVisitor {
 
         Symbol function = findSymbolInScopes(node.getIdentifier());
 
+        if (function == null) {
+            errorService.registerSemanticError(new UndefinedVariableException("Function " + node.getIdentifier() + " is not defined"));
+            return;
+        }
+
         System.out.println("FunctionCallNode : " + node.getIdentifier() + " " + function);
 
         Function functionSymbol = (Function) function;
 
         if (node.getArguments().size() != functionSymbol.getParameters().size()) {
-            System.out.printf("The number of arguments does not match the number of parameters\n");
-            errorService.registerSemanticError(new UndefinedVariableException("The number of arguments does not match the number of parameters"));
+            errorService.registerSemanticError(new UndefinedVariableException("The number of arguments does not match the number of parameters (expected " + functionSymbol.getParameters().size() + " but got " + node.getArguments().size() + ")" + " for function " + node.getIdentifier()));
         }
 
     }
@@ -182,7 +186,6 @@ public class SemanticAnalysisVisitor implements ASTNodeVisitor {
 
     @Override
     public void visit(LiteralNode node) {
-
     }
 
     @Override

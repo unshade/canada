@@ -20,7 +20,7 @@ choix : integer ;
 begin
     choix := 2;
     if choix = 1
-        then valeur := perimetreRectangle(2, 3) ;
+        then valeur := perimetreRectangle(2, 3, 4, 5, 9, 6) ;
             put(valeur) ;
         elsif choix = 2
             then valeur := aireRectangale(2, 3) ;
