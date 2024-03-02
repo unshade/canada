@@ -85,8 +85,7 @@ public final class FunctionDeclarationNode extends ASTNode implements Declaratio
         return f;
     }
 
-    @Override
-    public String toString() {
+    public String stringify() {
         return "FunctionDeclarationNode{" +
                 "parameters=" + parameters +
                 ", identifier='" + identifier + '\'' +
