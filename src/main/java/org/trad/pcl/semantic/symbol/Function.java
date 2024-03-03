@@ -5,7 +5,7 @@ import java.util.List;
 
 public class Function extends Symbol {
 
-    private List<String> indexedParametersTypes;
+    private final List<String> indexedParametersTypes;
     private String returnType;
     public Function(String identifier, int shift) {
         super(identifier, shift);

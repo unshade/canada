@@ -29,7 +29,14 @@ public final class ParameterNode extends ASTNode {
     }
 
     public Symbol toSymbol() {
-        return new Parameter(variable.getIdentifier(), 0);
+        int shift;
+        if (variable.getType().getIdentifier().equals("integer") || variable.getType().getIdentifier().equals("character")) {
+            shift = 4;
+        } else {
+            // TODO case of a structure, hardcode to 8 for now
+            shift = 8;
+        }
+        return new Parameter(variable.getIdentifier(), shift);
     }
 
     public void accept(ASTNodeVisitor visitor) {

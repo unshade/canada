@@ -13,7 +13,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 public final class FunctionDeclarationNode extends ASTNode implements DeclarationNode{
-    private List<ParameterNode> parameters;
+    private final List<ParameterNode> parameters;
 
     private String identifier;
     private TypeNode returnType;

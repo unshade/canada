@@ -39,7 +39,14 @@ public final class VariableDeclarationNode extends ASTNode implements Declaratio
     }
 
     public Symbol toSymbol() {
-        return new Symbol(this.identifier, 0);
+        int shift;
+        if (type.getIdentifier().equals("integer") || type.getIdentifier().equals("character")) {
+            shift = 4;
+        } else {
+            // TODO case of a structure, hardcode to 8 for now
+            shift = 8;
+        }
+        return new Symbol(this.identifier, shift);
     }
 
     public void initTDS(SymbolTable tdsBefore) {
