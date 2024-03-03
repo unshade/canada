@@ -6,6 +6,7 @@ import org.trad.pcl.ast.type.TypeNode;
 import org.trad.pcl.semantic.ASTNodeVisitor;
 import org.trad.pcl.semantic.SymbolTable;
 import org.trad.pcl.semantic.symbol.Symbol;
+import org.trad.pcl.semantic.symbol.Variable;
 
 public final class VariableDeclarationNode extends ASTNode implements DeclarationNode {
     private TypeNode type;
@@ -46,7 +47,9 @@ public final class VariableDeclarationNode extends ASTNode implements Declaratio
             // TODO case of a structure, hardcode to 8 for now
             shift = 8;
         }
-        return new Symbol(this.identifier, shift);
+        Variable variable = new Variable(this.identifier, shift);
+        variable.setType(type.getIdentifier());
+        return variable;
     }
 
     public void initTDS(SymbolTable tdsBefore) {

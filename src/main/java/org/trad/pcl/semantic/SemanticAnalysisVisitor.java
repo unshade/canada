@@ -15,6 +15,7 @@ import org.trad.pcl.ast.statement.*;
 import org.trad.pcl.ast.type.TypeNode;
 import org.trad.pcl.semantic.symbol.Function;
 import org.trad.pcl.semantic.symbol.Symbol;
+import org.trad.pcl.semantic.symbol.Variable;
 
 import java.util.Stack;
 
@@ -23,6 +24,7 @@ import static com.diogonunes.jcolor.Ansi.colorize;
 public class SemanticAnalysisVisitor implements ASTNodeVisitor {
     private final ErrorService errorService;
     private final Stack<SymbolTable> scopeStack = new Stack<>();
+    private String currentFunctionReturnType;
 
     public SemanticAnalysisVisitor() {
         this.errorService = ErrorService.getInstance();
@@ -36,6 +38,7 @@ public class SemanticAnalysisVisitor implements ASTNodeVisitor {
 
     @Override
     public void visit(FunctionDeclarationNode node) {
+        this.currentFunctionReturnType = node.getReturnType().getIdentifier();
         // Add the function to the current scope
         scopeStack.peek().addSymbol(node.toSymbol());
         // Create a new scope
@@ -146,7 +149,7 @@ public class SemanticAnalysisVisitor implements ASTNodeVisitor {
                         }
                         case "Character" -> {
                             if (!calledFunctionDeclaration.getIndexedParametersTypes().get(node.getArguments().indexOf(argument)).equals("character")) {
-                                errorService.registerSemanticError(new Exception("The type of the argument does not match the type of the parameter (expected " + calledFunctionDeclaration.getIndexedParametersTypes().get(node.getArguments().indexOf(argument)) + " but got " + objectValueInstance + ")" + " for function " + node.getIdentifier()));
+                                errorService.registerSemanticError(new Exception("The type of the argument does not match the type of the parameter (expected " + colorize(calledFunctionDeclaration.getIndexedParametersTypes().get(node.getArguments().indexOf(argument)), Attribute.MAGENTA_TEXT()) + " but got " + colorize(objectValueInstance, Attribute.MAGENTA_TEXT()) + ")" + " for function " + colorize(node.getIdentifier(), Attribute.BLUE_TEXT())));
                             }
                         }
                         default -> {
@@ -194,11 +197,23 @@ public class SemanticAnalysisVisitor implements ASTNodeVisitor {
 
     @Override
     public void visit(ReturnStatementNode node) {
-        node.getExpressions().forEach(expressionNode -> expressionNode.accept(this));
+        if (node.getExpressions().size() == 1) {
+            node.getExpressions().get(0).accept(this);
+            VariableReferenceNode variableReferenceNode = (VariableReferenceNode) node.getExpressions().get(0);
+            Variable variable = (Variable) findSymbolInScopes(variableReferenceNode.getIdentifier());
+            String returnVariableType = variable.getType();
+            if (!returnVariableType.equals(currentFunctionReturnType)) {
+                errorService.registerSemanticError(new Exception("The return type does not match the function return type (expected " + colorize(currentFunctionReturnType, Attribute.MAGENTA_TEXT()) + " but got " + colorize(returnVariableType, Attribute.MAGENTA_TEXT()) + ")"));
+            }
+        } else {
+            node.getExpressions().forEach(expressionNode -> expressionNode.accept(this));
+        }
     }
 
     @Override
     public void visit(WhileStatementNode node) {
+        node.getCondition().accept(this);
+        node.getBody().accept(this);
     }
 
     @Override
@@ -209,7 +224,6 @@ public class SemanticAnalysisVisitor implements ASTNodeVisitor {
 
     @Override
     public void visit(CharacterValExpressionNode node) {
-
     }
 
     @Override

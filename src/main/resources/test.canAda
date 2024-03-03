@@ -8,7 +8,7 @@ return aire ;
 end aireRectangle ;
 
 function returnChar(larg : integer; long : integer) return character is
-aire: character;
+aire: integer;
 begin
     aire2 := larg * long ;
 return aire ;

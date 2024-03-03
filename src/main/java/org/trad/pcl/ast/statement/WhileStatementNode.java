@@ -20,6 +20,13 @@ public final class WhileStatementNode extends ASTNode implements StatementNode {
             this.condition = condition;
         }
 
+    public BlockNode getBody() {
+        return body;
+    }
+
+    public ExpressionNode getCondition() {
+        return condition;
+    }
 
     @Override
     public void accept(ASTNodeVisitor visitor) {
