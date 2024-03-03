@@ -52,7 +52,9 @@ public abstract class ASTNode implements VisitorElement{
                 if (attributeValue == null) {
                     attributeValue = colorize("null", Attribute.BRIGHT_MAGENTA_TEXT());
                 }
-                res.append("\t").append("\"").append(colorize(field.getName(), Attribute.RED_TEXT())).append("\"").append(" : ").append(attributeValue);
+                if (attributeValue instanceof Character) {
+                    colorize("'" + attributeValue + "'", Attribute.GREEN_TEXT());
+                } else res.append("\t").append("\"").append(colorize(field.getName(), Attribute.RED_TEXT())).append("\"").append(" : ").append(attributeValue);
                 if (i < lastIndex || !isJson) {
                     res.append(",");
                 }
