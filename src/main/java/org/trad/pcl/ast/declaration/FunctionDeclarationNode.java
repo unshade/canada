@@ -8,7 +8,6 @@ import org.trad.pcl.ast.type.TypeNode;
 import org.trad.pcl.semantic.ASTNodeVisitor;
 import org.trad.pcl.semantic.symbol.Function;
 import org.trad.pcl.semantic.symbol.Symbol;
-import org.trad.pcl.semantic.symbol.Type;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -79,6 +78,7 @@ public final class FunctionDeclarationNode extends ASTNode implements Declaratio
 
     public Symbol toSymbol() {
         Function f = new Function(this.identifier, 0);
+        f.setReturnType(this.returnType.getIdentifier());
         for (ParameterNode parameter : parameters) {
             f.addParameter(parameter.getVariable().getType().getIdentifier());
         }

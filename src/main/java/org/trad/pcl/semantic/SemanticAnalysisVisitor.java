@@ -6,17 +6,19 @@ import org.trad.pcl.Helpers.StringFormatHelper;
 import org.trad.pcl.Services.ErrorService;
 import org.trad.pcl.ast.ParameterNode;
 import org.trad.pcl.ast.ProgramNode;
-import org.trad.pcl.ast.declaration.*;
+import org.trad.pcl.ast.declaration.FunctionDeclarationNode;
+import org.trad.pcl.ast.declaration.ProcedureDeclarationNode;
+import org.trad.pcl.ast.declaration.TypeDeclarationNode;
+import org.trad.pcl.ast.declaration.VariableDeclarationNode;
 import org.trad.pcl.ast.expression.*;
 import org.trad.pcl.ast.statement.*;
 import org.trad.pcl.ast.type.TypeNode;
 import org.trad.pcl.semantic.symbol.Function;
 import org.trad.pcl.semantic.symbol.Symbol;
-import static com.diogonunes.jcolor.Ansi.colorize;
 
-import java.util.Map;
-import java.util.Set;
 import java.util.Stack;
+
+import static com.diogonunes.jcolor.Ansi.colorize;
 
 public class SemanticAnalysisVisitor implements ASTNodeVisitor {
     private final ErrorService errorService;
@@ -113,17 +115,49 @@ public class SemanticAnalysisVisitor implements ASTNodeVisitor {
     public void visit(FunctionCallNode node) {
 
         // Check if the function is defined + get the function symbol
-        Function functionSymbol;
-        if ((functionSymbol = (Function) findSymbolInScopes(node.getIdentifier())) == null) {
+        Function calledFunctionDeclaration;
+        if ((calledFunctionDeclaration = (Function) findSymbolInScopes(node.getIdentifier())) == null) {
             return;
         }
 
         // Check if the number of arguments match the number of declared parameters
-        if (node.getArguments().size() != functionSymbol.getParameters().size()) {
-            errorService.registerSemanticError(new Exception("The number of arguments does not match the number of parameters (expected " + functionSymbol.getParameters().size() + " but got " + node.getArguments().size() + ")" + " for function " + node.getIdentifier()));
+        if (node.getArguments().size() != calledFunctionDeclaration.getIndexedParametersTypes().size()) {
+            errorService.registerSemanticError(new Exception("The number of arguments does not match the number of parameters (expected " + calledFunctionDeclaration.getIndexedParametersTypes().size() + " but got " + node.getArguments().size() + ")" + " for function " + node.getIdentifier()));
         }
 
-        // TODO Check if the types of the arguments match the types of the parameters
+        for (ExpressionNode argument : node.getArguments()) {
+            argument.accept(this);
+            switch (argument.getClass().getSimpleName()) {
+                case "FunctionCallNode" -> {
+                    Function argumentFunction = (Function) findSymbolInScopes(((FunctionCallNode) argument).getIdentifier());
+
+                    if (!argumentFunction.getReturnType().equals(calledFunctionDeclaration.getIndexedParametersTypes().get(node.getArguments().indexOf(argument)))) {
+                        errorService.registerSemanticError(new Exception("The type of the argument does not match the type of the function " + colorize(argumentFunction.getIdentifier(), Attribute.BLUE_TEXT()) + " return type (expected " + calledFunctionDeclaration.getIndexedParametersTypes().get(node.getArguments().indexOf(argument)) + " but got " + argumentFunction.getReturnType() + ")" + " for function " + colorize(node.getIdentifier(), Attribute.BLUE_TEXT())));
+                    }
+                }
+                case "LiteralNode" -> {
+                    LiteralNode literal = (LiteralNode) argument;
+                    String objectValueInstance = literal.getValue().getClass().getSimpleName();
+                    switch (objectValueInstance) {
+                        case "Integer" -> {
+                            if (!calledFunctionDeclaration.getIndexedParametersTypes().get(node.getArguments().indexOf(argument)).equals("integer")) {
+                                errorService.registerSemanticError(new Exception("The type of the argument does not match the type of the parameter (expected " + calledFunctionDeclaration.getIndexedParametersTypes().get(node.getArguments().indexOf(argument)) + " but got " + objectValueInstance + ")" + " for function " + node.getIdentifier()));
+                            }
+                        }
+                        case "Character" -> {
+                            if (!calledFunctionDeclaration.getIndexedParametersTypes().get(node.getArguments().indexOf(argument)).equals("character")) {
+                                errorService.registerSemanticError(new Exception("The type of the argument does not match the type of the parameter (expected " + calledFunctionDeclaration.getIndexedParametersTypes().get(node.getArguments().indexOf(argument)) + " but got " + objectValueInstance + ")" + " for function " + node.getIdentifier()));
+                            }
+                        }
+                        default -> {
+                            // TODO unknown type
+                        }
+                    }
+                }
+                case "VariableReferenceNode" -> {
+                }
+            }
+        }
 
     }
 

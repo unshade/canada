@@ -1,31 +1,39 @@
 package org.trad.pcl.semantic.symbol;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 public class Function extends Symbol {
 
-    private List<String> parameters;
+    private List<String> indexedParametersTypes;
+    private String returnType;
     public Function(String identifier, int shift) {
         super(identifier, shift);
-        this.parameters = new ArrayList<>();
+        this.indexedParametersTypes = new ArrayList<>();
+        this.returnType = null;
     }
 
 
     public void addParameter(String parameterType) {
-        parameters.add(parameterType);
+        indexedParametersTypes.add(parameterType);
     }
 
-    public List<String> getParameters() {
-        return parameters;
+    public List<String> getIndexedParametersTypes() {
+        return indexedParametersTypes;
+    }
+
+    public void setReturnType(String returnType) {
+        this.returnType = returnType;
+    }
+
+    public String getReturnType() {
+        return returnType;
     }
 
     @Override
     public String toString() {
         return "Function{" +
-                "parameters=" + parameters +
+                "parameters=" + indexedParametersTypes +
                 '}';
     }
 }
