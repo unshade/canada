@@ -116,7 +116,7 @@ public class SemanticAnalysisVisitor implements ASTNodeVisitor {
                     return;
                 }
                 if (!function.getReturnType().equals(variable.getType())) {
-                    errorService.registerSemanticError(new Exception("The type of the expression does not match the type of the variable (expected " + colorize(variable.getType(), Attribute.MAGENTA_TEXT()) + " but got " + colorize(function.getReturnType(), Attribute.MAGENTA_TEXT()) + ")"));
+                    errorService.registerSemanticError(new Exception("The type of the function return does not match the type of the variable " + colorize(variable.getIdentifier(), Attribute.YELLOW_TEXT()) + " (expected " + colorize(variable.getType(), Attribute.MAGENTA_TEXT()) + " but got " + colorize(function.getReturnType(), Attribute.MAGENTA_TEXT()) + ")"));
                 }
             }
             case "LiteralNode" -> {
@@ -128,8 +128,9 @@ public class SemanticAnalysisVisitor implements ASTNodeVisitor {
                 System.out.println(objectValueInstance);
                 switch (objectValueInstance) {
                     case "Integer" -> {
+                        String literalValue = literal.getValue().toString();
                         if (!variable.getType().equals("integer")) {
-                            errorService.registerSemanticError(new Exception("The type of the expression does not match the type of the variable (expected " + colorize(variable.getType(), Attribute.MAGENTA_TEXT()) + " but got " + colorize(objectValueInstance, Attribute.MAGENTA_TEXT()) + ")"));
+                            errorService.registerSemanticError(new Exception("The type of the literal " + colorize(literalValue, Attribute.GREEN_TEXT())+ " does not match the type of the variable (expected " + colorize(variable.getType(), Attribute.MAGENTA_TEXT()) + " but got " + colorize(objectValueInstance, Attribute.MAGENTA_TEXT()) + ")"));
                         }
                     }
                     case "Character" -> {
