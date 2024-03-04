@@ -1375,13 +1375,12 @@ public class Parser {
      * Grammar rule : hasexpr
      */
     @PrintMethodName
-    private List<ExpressionNode> hasExpression() {
-        List<ExpressionNode> expressions = new ArrayList<>();
+    private ExpressionNode hasExpression() {
+        ExpressionNode expression = null;
         switch (this.currentToken.tag()) {
             case SEMICOLON -> {
             }
-            case IDENT, OPEN_PAREN, MINUS, ENTIER, CARACTERE, TRUE, FALSE, NULL, NEW, CHARACTER, NOT -> expressions.add(expression());
-            case ASSIGN, DOT -> expressions.addAll(multipleExpressions());
+            case IDENT, OPEN_PAREN, MINUS, ENTIER, CARACTERE, TRUE, FALSE, NULL, NEW, CHARACTER, NOT -> expression = expression();
             default -> this.errorService.registerSyntaxError(
                     new UnexpectedTokenListException(this.currentToken,
                             Token.generateExpectedToken(Tag.SEMICOLON, this.currentToken),
@@ -1400,7 +1399,7 @@ public class Parser {
                             Token.generateExpectedToken(Tag.NOT, this.currentToken))
             );
         }
-        return expressions;
+        return expression;
     }
 
     /**
@@ -1426,8 +1425,7 @@ public class Parser {
             case RETURN -> {
                 statement = new ReturnStatementNode();
                 analyseTerminal(Tag.RETURN);
-                // TODO : return statement does not can have multiple expressions
-                ((ReturnStatementNode) statement).addExpressions(hasExpression());
+                ((ReturnStatementNode) statement).addExpression(hasExpression());
                 analyseTerminal(Tag.SEMICOLON);
             }
             case IF -> {

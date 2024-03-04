@@ -8,18 +8,18 @@ import java.util.ArrayList;
 import java.util.List;
 
 public final class ReturnStatementNode extends ASTNode implements StatementNode {
-    private final List<ExpressionNode> expressions;
+    private ExpressionNode expression;
 
     public ReturnStatementNode() {
-        this.expressions = new ArrayList<>();
+        this.expression = null;
     }
 
-    public void addExpressions(List<ExpressionNode> expressions) {
-        this.expressions.addAll(expressions);
+    public void addExpression(ExpressionNode expression) {
+        this.expression = expression;
     }
 
-    public List<ExpressionNode> getExpressions() {
-        return expressions;
+    public ExpressionNode getExpression() {
+        return expression;
     }
 
     @Override
