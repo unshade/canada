@@ -100,8 +100,56 @@ public class SemanticAnalysisVisitor implements ASTNodeVisitor {
 
     @Override
     public void visit(AssignmentStatementNode node) {
-        Symbol variable = findSymbolInScopes(node.getIdentifier());
+
+        Variable variable = (Variable) findSymbolInScopes(node.getIdentifier());
+        if (variable == null) {
+            return;
+        }
+        System.out.println(variable.getIdentifier() + " " + variable.getType() );
         node.getExpression().accept(this);
+
+        // check if expression type is the same as variable type
+        switch (node.getExpression().getClass().getSimpleName()) {
+            case "FunctionCallNode" -> {
+                Function function = (Function) findSymbolInScopes(((FunctionCallNode) node.getExpression()).getIdentifier());
+                if (function == null) {
+                    return;
+                }
+                if (!function.getReturnType().equals(variable.getType())) {
+                    errorService.registerSemanticError(new Exception("The type of the expression does not match the type of the variable (expected " + colorize(variable.getType(), Attribute.MAGENTA_TEXT()) + " but got " + colorize(function.getReturnType(), Attribute.MAGENTA_TEXT()) + ")"));
+                }
+            }
+            case "LiteralNode" -> {
+                LiteralNode literal = (LiteralNode) node.getExpression();
+                String objectValueInstance = literal.getValue().getClass().getSimpleName();
+                if (objectValueInstance.equals("Long")) {
+                    objectValueInstance = "Integer";
+                }
+                System.out.println(objectValueInstance);
+                switch (objectValueInstance) {
+                    case "Integer" -> {
+                        if (!variable.getType().equals("integer")) {
+                            errorService.registerSemanticError(new Exception("The type of the expression does not match the type of the variable (expected " + colorize(variable.getType(), Attribute.MAGENTA_TEXT()) + " but got " + colorize(objectValueInstance, Attribute.MAGENTA_TEXT()) + ")"));
+                        }
+                    }
+                    case "Character" -> {
+                        if (!variable.getType().equals("character")) {
+                            errorService.registerSemanticError(new Exception("The type of the expression does not match the type of the variable (expected " + colorize(variable.getType(), Attribute.MAGENTA_TEXT()) + " but got " + colorize(objectValueInstance, Attribute.MAGENTA_TEXT()) + ")"));
+                        }
+                    }
+                    default -> {
+                        // TODO unknown type
+                    }
+                }
+            }
+            case "VariableReferenceNode" -> {
+                VariableReferenceNode variableReferenceNode = (VariableReferenceNode) node.getExpression();
+                Variable variableExpression = (Variable) findSymbolInScopes(variableReferenceNode.getIdentifier());
+                if (!variableExpression.getType().equals(variable.getType())) {
+                    errorService.registerSemanticError(new Exception("The type of the expression does not match the type of the variable (expected " + colorize(variable.getType(), Attribute.MAGENTA_TEXT()) + " but got " + colorize(variableExpression.getType(), Attribute.MAGENTA_TEXT()) + ")"));
+                }
+            }
+        }
 
     }
 
