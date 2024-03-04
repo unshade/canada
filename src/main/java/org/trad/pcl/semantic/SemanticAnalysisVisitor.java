@@ -246,16 +246,12 @@ public class SemanticAnalysisVisitor implements ASTNodeVisitor {
 
     @Override
     public void visit(ReturnStatementNode node) {
-        if (node.getExpressions().size() == 1) {
-            node.getExpressions().get(0).accept(this);
-            VariableReferenceNode variableReferenceNode = (VariableReferenceNode) node.getExpressions().get(0);
-            Variable variable = (Variable) findSymbolInScopes(variableReferenceNode.getIdentifier());
-            String returnVariableType = variable.getType();
-            if (!returnVariableType.equals(currentFunctionReturnType)) {
-                errorService.registerSemanticError(new Exception("The return type does not match the function return type (expected " + colorize(currentFunctionReturnType, Attribute.MAGENTA_TEXT()) + " but got " + colorize(returnVariableType, Attribute.MAGENTA_TEXT()) + ")"));
-            }
-        } else {
-            node.getExpressions().forEach(expressionNode -> expressionNode.accept(this));
+        node.getExpression().accept(this);
+        VariableReferenceNode variableReferenceNode = (VariableReferenceNode) node.getExpression();
+        Variable variable = (Variable) findSymbolInScopes(variableReferenceNode.getIdentifier());
+        String returnVariableType = variable.getType();
+        if (!returnVariableType.equals(currentFunctionReturnType)) {
+            errorService.registerSemanticError(new Exception("The return type does not match the function return type (expected " + colorize(currentFunctionReturnType, Attribute.MAGENTA_TEXT()) + " but got " + colorize(returnVariableType, Attribute.MAGENTA_TEXT()) + ")"));
         }
     }
 
