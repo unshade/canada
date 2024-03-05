@@ -23,7 +23,7 @@ import static com.diogonunes.jcolor.Ansi.colorize;
 
 public class SemanticAnalysisVisitor implements ASTNodeVisitor {
     private final ErrorService errorService;
-    private final Stack<SymbolTable> scopeStack = new Stack<>();
+    private static final Stack<SymbolTable> scopeStack = new Stack<>();
     private String currentFunctionReturnType;
 
     public SemanticAnalysisVisitor() {
@@ -33,7 +33,9 @@ public class SemanticAnalysisVisitor implements ASTNodeVisitor {
 
         // Build-in features
         scopeStack.peek().addSymbol(Symbol.builtinFunction("put"));
+        // TODO pourquoi ?
         scopeStack.peek().addSymbol(Symbol.builtinVariable("integer"));
+        scopeStack.peek().addSymbol(Symbol.builtinVariable("character"));
     }
 
     @Override
@@ -165,51 +167,10 @@ public class SemanticAnalysisVisitor implements ASTNodeVisitor {
 
     @Override
     public void visit(FunctionCallNode node) {
-
-        // Check if the function is defined + get the function symbol
-        Function calledFunctionDeclaration;
-        if ((calledFunctionDeclaration = (Function) findSymbolInScopes(node.getIdentifier())) == null) {
-            return;
-        }
-
-        // Check if the number of arguments match the number of declared parameters
-        if (node.getArguments().size() != calledFunctionDeclaration.getIndexedParametersTypes().size()) {
-            errorService.registerSemanticError(new Exception("The number of arguments does not match the number of parameters (expected " + calledFunctionDeclaration.getIndexedParametersTypes().size() + " but got " + node.getArguments().size() + ")" + " for function " + node.getIdentifier()));
-        }
-
-        for (ExpressionNode argument : node.getArguments()) {
-            argument.accept(this);
-            switch (argument.getClass().getSimpleName()) {
-                case "FunctionCallNode" -> {
-                    Function argumentFunction = (Function) findSymbolInScopes(((FunctionCallNode) argument).getIdentifier());
-
-                    if (!argumentFunction.getReturnType().equals(calledFunctionDeclaration.getIndexedParametersTypes().get(node.getArguments().indexOf(argument)))) {
-                        errorService.registerSemanticError(new Exception("The type of the argument does not match the type of the function " + colorize(argumentFunction.getIdentifier(), Attribute.BLUE_TEXT()) + " return type (expected " + calledFunctionDeclaration.getIndexedParametersTypes().get(node.getArguments().indexOf(argument)) + " but got " + argumentFunction.getReturnType() + ")" + " for function " + colorize(node.getIdentifier(), Attribute.BLUE_TEXT())));
-                    }
-                }
-                case "LiteralNode" -> {
-                    LiteralNode literal = (LiteralNode) argument;
-                    String objectValueInstance = literal.getValue().getClass().getSimpleName();
-                    switch (objectValueInstance) {
-                        case "Integer" -> {
-                            if (!calledFunctionDeclaration.getIndexedParametersTypes().get(node.getArguments().indexOf(argument)).equals("integer")) {
-                                errorService.registerSemanticError(new Exception("The type of the argument does not match the type of the parameter (expected " + calledFunctionDeclaration.getIndexedParametersTypes().get(node.getArguments().indexOf(argument)) + " but got " + objectValueInstance + ")" + " for function " + node.getIdentifier()));
-                            }
-                        }
-                        case "Character" -> {
-                            if (!calledFunctionDeclaration.getIndexedParametersTypes().get(node.getArguments().indexOf(argument)).equals("character")) {
-                                errorService.registerSemanticError(new Exception("The type of the argument does not match the type of the parameter (expected " + colorize(calledFunctionDeclaration.getIndexedParametersTypes().get(node.getArguments().indexOf(argument)), Attribute.MAGENTA_TEXT()) + " but got " + colorize(objectValueInstance, Attribute.MAGENTA_TEXT()) + ")" + " for function " + colorize(node.getIdentifier(), Attribute.BLUE_TEXT())));
-                            }
-                        }
-                        default -> {
-                            // TODO unknown type
-                        }
-                    }
-                }
-                case "VariableReferenceNode" -> {
-                }
-            }
-        }
+        // Check if the function is defined
+        node.getArguments().forEach(expressionNode -> expressionNode.accept(this));
+        node.checkParametersSize();
+        node.checkParametersTypes();
 
     }
 
@@ -313,14 +274,19 @@ public class SemanticAnalysisVisitor implements ASTNodeVisitor {
         }
     }
 
-    public Symbol findSymbolInScopes(String identifier) {
+    public static Symbol findSymbolInScopes(String identifier) {
+
         for (int i = scopeStack.size() - 1; i >= 0; i--) {
             Symbol s = scopeStack.get(i).findSymbol(identifier);
             if (s != null) {
+                if (identifier.equals("character") || identifier.equals("integer")) {
+                    System.out.println("ICI : " + s);
+                }
                 return s;
             }
         }
-        errorService.registerSemanticError(new UndefinedVariableException(identifier));
+
+        ErrorService.getInstance().registerSemanticError(new UndefinedVariableException(identifier));
         return null;
     }
 

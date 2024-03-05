@@ -20,4 +20,9 @@ public final class UnaryExpressionNode extends ASTNode implements ExpressionNode
     public void accept(ASTNodeVisitor visitor) {
         visitor.visit(this);
     }
+
+    @Override
+    public String getType() {
+        return "unknown";
+    }
 }

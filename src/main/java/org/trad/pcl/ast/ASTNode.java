@@ -1,7 +1,6 @@
 package org.trad.pcl.ast;
 
 import com.diogonunes.jcolor.Attribute;
-import org.trad.pcl.semantic.ASTNodeVisitor;
 
 import static com.diogonunes.jcolor.Ansi.colorize;
 
@@ -27,8 +26,6 @@ public abstract class ASTNode implements VisitorElement{
     }
 
     private static int depth = 0;
-
-
     @Override
     public String toString() {
         depth++;

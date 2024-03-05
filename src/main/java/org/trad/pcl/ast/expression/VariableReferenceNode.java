@@ -29,4 +29,9 @@ public class VariableReferenceNode extends ASTNode implements ExpressionNode, St
     public void accept(ASTNodeVisitor visitor) {
         visitor.visit(this);
     }
+
+    @Override
+    public String getType() {
+        return "unknown";
+    }
 }
