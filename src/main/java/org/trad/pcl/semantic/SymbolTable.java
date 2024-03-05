@@ -7,6 +7,7 @@ import java.util.HashMap;
 import java.util.List;
 
 public class SymbolTable {
+
     private final HashMap<String, Symbol> symbols;
 
     public SymbolTable() {

@@ -171,29 +171,21 @@ public class SemanticAnalysisVisitor implements ASTNodeVisitor {
         node.getArguments().forEach(expressionNode -> expressionNode.accept(this));
         node.checkParametersSize();
         node.checkParametersTypes();
-
     }
 
     @Override
     public void visit(IfStatementNode node) {
 
-        // Traverse the condition
         node.getCondition().accept(this);
 
-        // Create a new scope for the then block
-        scopeStack.push(new SymbolTable());
         node.getThenBranch().accept(this);
-        exitScope();
 
         if (node.getElseIfBranch() != null) {
             node.getElseIfBranch().accept(this);
         }
 
-        // Create a new scope for the else block
         if (node.getElseBranch() != null) {
-            scopeStack.push(new SymbolTable());
             node.getElseBranch().accept(this);
-            exitScope();
         }
 
     }
@@ -265,13 +257,9 @@ public class SemanticAnalysisVisitor implements ASTNodeVisitor {
 
     @Override
     public void visit(ParameterNode node) {
-        // Ajoutez le paramètre à la TDS courante
-        try {
-            scopeStack.peek().addSymbol(node.toSymbol());
-            //node.getVariable().accept(this);
-        } catch (Exception e) {
-            System.err.println(e.getMessage());
-        }
+
+        scopeStack.peek().addSymbol(node.toSymbol());
+        node.getType().accept(this);
     }
 
     public static Symbol findSymbolInScopes(String identifier) {

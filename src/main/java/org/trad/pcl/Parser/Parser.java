@@ -95,20 +95,22 @@ public class Parser {
             }
             case IDENT -> {
                 //declaration.setName(this.currentToken.getValue());
-                List<VariableDeclarationNode> typeNodes = multipleIdent();
+                List<String> idents = multipleIdent();
                 analyseTerminal(Tag.COLON);
                 TypeNode typeNode = type();
 
                 ExpressionNode assignNode = assignDeclarationExpression();
-                for (VariableDeclarationNode typeDeclarationNode : typeNodes) {
-                    typeDeclarationNode.setType(typeNode);
+                for (String ident : idents) {
+                    VariableDeclarationNode variableDeclarationNode = new VariableDeclarationNode();
+                    variableDeclarationNode.setIdentifier(ident);
+                    variableDeclarationNode.setType(typeNode);
                     if (assignNode != null) {
                         AssignmentStatementNode assignmentStatementNode = new AssignmentStatementNode();
-                        assignmentStatementNode.setIdentifier(typeDeclarationNode.getIdentifier());
+                        assignmentStatementNode.setIdentifier(variableDeclarationNode.getIdentifier());
                         assignmentStatementNode.setExpression(assignNode);
-                        typeDeclarationNode.setAssignment(assignmentStatementNode);
+                        variableDeclarationNode.setAssignment(assignmentStatementNode);
                     }
-                    declarations.add(typeDeclarationNode);
+                    declarations.add(variableDeclarationNode);
                 }
                 analyseTerminal(Tag.SEMICOLON);
             }
@@ -248,26 +250,23 @@ public class Parser {
      * Grammar rule : identsep
      */
     @PrintMethodName
-    private List<VariableDeclarationNode> multipleIdent() {
-        List<VariableDeclarationNode> declarations = new ArrayList<>();
+    private List<String> multipleIdent() {
+        List<String> identifiers = new ArrayList<>();
         if (this.currentToken.tag() == Tag.IDENT) {
-            VariableDeclarationNode declaration = new VariableDeclarationNode();
-            declaration.setIdentifier(analyseTerminal(Tag.IDENT).getValue());
-
-            declarations.add(declaration);
-            declarations.addAll(identSeparator());
+            identifiers.add(analyseTerminal(Tag.IDENT).getValue());
+            identifiers.addAll(identSeparator());
         } else {
             this.errorService.registerSyntaxError(new UnexpectedTokenException(Token.generateExpectedToken(Tag.IDENT, this.currentToken), this.currentToken));
         }
-        return declarations;
+        return identifiers;
     }
 
     /**
      * Grammar rule : identsep2
      */
     @PrintMethodName
-    private List<VariableDeclarationNode> identSeparator() {
-        List<VariableDeclarationNode> declarations = new ArrayList<>();
+    private List<String> identSeparator() {
+        List<String> declarations = new ArrayList<>();
         switch (this.currentToken.tag()) {
             case COLON -> {
             }
@@ -291,11 +290,14 @@ public class Parser {
     private List<VariableDeclarationNode> field() {
         List<VariableDeclarationNode> declarations = new ArrayList<>();
         if (this.currentToken.tag() == Tag.IDENT) {
-            declarations.addAll(multipleIdent());
+            List<String> idents =  multipleIdent();
             analyseTerminal(Tag.COLON);
             TypeNode type = type();
-            for (VariableDeclarationNode declaration : declarations) {
+            for (String ident : idents) {
+                VariableDeclarationNode declaration = new VariableDeclarationNode();
+                declaration.setIdentifier(ident);
                 declaration.setType(type);
+                declarations.add(declaration);
             }
             analyseTerminal(Tag.SEMICOLON);
         } else {
@@ -469,18 +471,16 @@ public class Parser {
     private List<ParameterNode> parameter() {
         List<ParameterNode> parameters = new ArrayList<>();
         if (this.currentToken.tag() == Tag.IDENT) {
-
-            for (VariableDeclarationNode variable : multipleIdent()) {
-                ParameterNode parameter = new ParameterNode();
-                parameter.setVariable(variable);
-                parameters.add(parameter);
-            }
+            List<String> idents = multipleIdent();
             analyseTerminal(Tag.COLON);
             String mode = mode();
             TypeNode type = type();
-            for (ParameterNode parameter : parameters) {
+            for (String ident : idents) {
+                ParameterNode parameter = new ParameterNode();
+                parameter.setIdentifier(ident);
                 parameter.setMode(mode);
                 parameter.setType(type);
+                parameters.add(parameter);
             }
         } else {
             this.errorService.registerSyntaxError(new UnexpectedTokenException(new Token(Tag.IDENT, this.currentToken.line(), TagHelper.getTagString(Tag.IDENT)), this.currentToken));
