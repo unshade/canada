@@ -17,6 +17,7 @@ giga: character;
 begin
     aire2 := larg * long ;
     giga := aireRectangle(2, 3) ;
+    aire := giga ;
 return aire ;
 end returnChar ;
 
