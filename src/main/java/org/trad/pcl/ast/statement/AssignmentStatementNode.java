@@ -1,7 +1,9 @@
 package org.trad.pcl.ast.statement;
 
 
+import org.trad.pcl.Helpers.ParameterMode;
 import org.trad.pcl.Services.ErrorService;
+import org.trad.pcl.ast.ParameterNode;
 import org.trad.pcl.ast.expression.ExpressionNode;
 import org.trad.pcl.ast.expression.VariableReferenceNode;
 import org.trad.pcl.semantic.ASTNodeVisitor;
@@ -35,7 +37,8 @@ public final class AssignmentStatementNode extends VariableReferenceNode {
         switch (reference.getClass().getSimpleName()) {
             case "Parameter" -> {
                 Parameter parameter = (Parameter) reference;
-                if (parameter.getMode().equals("in")) {
+                // Check if the mode of the parameter is in
+                if (parameter.getMode().equals(ParameterMode.IN)) {
                     ErrorService.getInstance().registerSemanticError(new Exception("The mode of the parameter " + parameter.getIdentifier() + " is in, it cannot be assigned"));
                 } else if (parameter.getType().equals(expression.getType())) {
                     ErrorService.getInstance().registerSemanticError(new Exception("The type of the expression does not match the type of the parameter (expected " + parameter.getType() + " but got " + expression.getType() + ")"));

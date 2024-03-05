@@ -1,5 +1,6 @@
 package org.trad.pcl.ast;
 
+import org.trad.pcl.Helpers.ParameterMode;
 import org.trad.pcl.ast.declaration.VariableDeclarationNode;
 import org.trad.pcl.ast.type.TypeNode;
 import org.trad.pcl.semantic.ASTNodeVisitor;
@@ -7,14 +8,15 @@ import org.trad.pcl.semantic.symbol.Parameter;
 import org.trad.pcl.semantic.symbol.Symbol;
 
 import java.util.List;
+import java.util.Objects;
 
 public final class ParameterNode extends ASTNode {
     private TypeNode type;
     private String identifier;
-    private String mode;
+    private ParameterMode mode;
 
-    public void setMode(String mode) {
-        this.mode = mode;
+    public void setMode(ParameterMode mode) {
+        this.mode = Objects.requireNonNullElse(mode, ParameterMode.IN);
     }
 
     public void setIdentifier(String identifier) {

@@ -3,6 +3,7 @@ package org.trad.pcl.Parser;
 import org.trad.pcl.Exceptions.Syntax.MissingSemicolonException;
 import org.trad.pcl.Exceptions.Syntax.UnexpectedTokenException;
 import org.trad.pcl.Exceptions.Syntax.UnexpectedTokenListException;
+import org.trad.pcl.Helpers.ParameterMode;
 import org.trad.pcl.Helpers.TagHelper;
 import org.trad.pcl.Lexer.Lexer;
 import org.trad.pcl.Lexer.Tokens.Tag;
@@ -473,7 +474,7 @@ public class Parser {
         if (this.currentToken.tag() == Tag.IDENT) {
             List<String> idents = multipleIdent();
             analyseTerminal(Tag.COLON);
-            String mode = mode();
+            ParameterMode mode = mode();
             TypeNode type = type();
             for (String ident : idents) {
                 ParameterNode parameter = new ParameterNode();
@@ -489,14 +490,14 @@ public class Parser {
     }
 
     @PrintMethodName
-    private String mode() {
-        StringBuilder mode = new StringBuilder();
+    private ParameterMode mode() {
+        ParameterMode mode = null;
         switch (this.currentToken.tag()) {
             case IDENT, ACCESS -> {
             }
             case IN -> {
-                mode.append(analyseTerminal(Tag.IN).getValue());
-                mode.append(modeout());
+                analyseTerminal(Tag.IN);
+                mode = modeout();
             }
             default -> this.errorService.registerSyntaxError(
                     new UnexpectedTokenListException(this.currentToken,
@@ -506,17 +507,18 @@ public class Parser {
             );
 
         }
-        return mode.toString();
+        return mode;
     }
 
     @PrintMethodName
-    private String modeout() {
-        String mode = null;
+    private ParameterMode modeout() {
+        ParameterMode mode = null;
         switch (this.currentToken.tag()) {
             case IDENT, ACCESS -> {
             }
             case OUT -> {
-                mode = analyseTerminal(Tag.OUT).getValue();
+                analyseTerminal(Tag.OUT);
+                mode = ParameterMode.INOUT;
             }
             default -> this.errorService.registerSyntaxError(
                     new UnexpectedTokenListException(this.currentToken,

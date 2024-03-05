@@ -1,8 +1,10 @@
 package org.trad.pcl.semantic.symbol;
 
+import org.trad.pcl.Helpers.ParameterMode;
+
 public class Parameter extends Symbol{
 
-    private String mode;
+    private ParameterMode mode;
 
     private String type;
 
@@ -10,16 +12,11 @@ public class Parameter extends Symbol{
         super(identifier, shift);
     }
 
-    public void setMode(String mode) {
-
-        if (mode == null || mode.isEmpty()) {
-            this.mode = "in";
-        } else {
-            this.mode = mode;
-        }
+    public void setMode(ParameterMode mode) {
+        this.mode = mode;
     }
 
-    public String getMode() {
+    public ParameterMode getMode() {
         return mode;
     }
 
