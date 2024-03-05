@@ -11,7 +11,12 @@ public class Parameter extends Symbol{
     }
 
     public void setMode(String mode) {
-        this.mode = mode;
+
+        if (mode == null || mode.isEmpty()) {
+            this.mode = "in";
+        } else {
+            this.mode = mode;
+        }
     }
 
     public String getMode() {

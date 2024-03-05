@@ -4,7 +4,7 @@ function aireRectangle(larg : integer; long : integer) return integer is
 aire: integer;
 giga: character;
 begin
-    aire2 := larg * long ;
+    long := larg * long ;
     aire2 := 'c' ;
     aire := 'c' ;
     giga := 2 ;
