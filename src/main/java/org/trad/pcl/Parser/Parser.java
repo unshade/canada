@@ -636,8 +636,9 @@ public class Parser {
      */
     @PrintMethodName
     private ExpressionNode RightOrExpression() {
+        BinaryExpressionNode expression = null;
         switch (this.currentToken.tag()) {
-            case IDENT, OPEN_PAREN, ELSE, DOT, MINUS, ENTIER, CARACTERE, TRUE, FALSE, NULL, NEW, CHARACTER, NOT -> {
+            case IDENT, OPEN_PAREN, DOT, MINUS, ENTIER, CARACTERE, TRUE, FALSE, NULL, NEW, CHARACTER, NOT -> {
                 ExpressionNode firstExpression = LeftAndExpression();
                 BinaryExpressionNode secondExpression = OrExpression();
 
@@ -647,6 +648,13 @@ public class Parser {
                 } else {
                     return firstExpression;
                 }
+            }
+            case ELSE -> {
+                analyseTerminal(Tag.ELSE);
+                expression = new BinaryExpressionNode();
+                expression.setOperator("OR ELSE");
+                expression.setRight(LeftAndExpression(), OrExpression());
+                return expression;
             }
             default -> this.errorService.registerSyntaxError(
                     new UnexpectedTokenListException(this.currentToken,
@@ -1225,7 +1233,7 @@ public class Parser {
             case NEW -> {
                 expression = new NewExpressionNode();
                 analyseTerminal(Tag.NEW);
-                ((NewExpressionNode) expression).setType(analyseTerminal(Tag.IDENT).getValue());
+                ((NewExpressionNode) expression).setIdentifier(analyseTerminal(Tag.IDENT).getValue());
             }
             /*
             case CHARACTER -> {
