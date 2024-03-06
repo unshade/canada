@@ -83,7 +83,8 @@ public class SemanticAnalysisVisitor implements ASTNodeVisitor {
 
     @Override
     public void visit(TypeDeclarationNode node) {
-
+        // Ajoutez le type à la TDS courante
+        scopeStack.peek().addSymbol(node.toSymbol());
     }
 
 
@@ -221,6 +222,12 @@ public class SemanticAnalysisVisitor implements ASTNodeVisitor {
 
     @Override
     public void visit(CharacterValExpressionNode node) {
+        // Check if the expression is valid
+        node.getExpression().accept(this);
+        // Check if the expression is an integer
+        if (!node.getExpression().getType().equals("integer")) {
+            errorService.registerSemanticError(new Exception("The expression is not a integer"));
+        }
     }
 
     @Override
@@ -235,12 +242,13 @@ public class SemanticAnalysisVisitor implements ASTNodeVisitor {
 
     @Override
     public void visit(NewExpressionNode node) {
-
+        // Check if the type is defined
+        Symbol s = findSymbolInScopes(node.getIdentifier());
     }
 
     @Override
     public void visit(UnaryExpressionNode node) {
-
+        node.getOperand().accept(this);
     }
 
     @Override
