@@ -1,5 +1,7 @@
 package org.trad.pcl.semantic;
 
+import org.trad.pcl.Exceptions.Semantic.DuplicateSymbolException;
+import org.trad.pcl.Services.ErrorService;
 import org.trad.pcl.semantic.symbol.Symbol;
 
 import java.util.ArrayList;
@@ -9,14 +11,16 @@ import java.util.List;
 public class SymbolTable {
 
     private final HashMap<String, Symbol> symbols;
+    private final ErrorService errorService;
 
     public SymbolTable() {
         this.symbols = new HashMap<>();
+        this.errorService = ErrorService.getInstance();
     }
 
     public void addSymbol(Symbol symbol) {
         if (symbols.containsKey(symbol.getIdentifier())) {
-            throw new RuntimeException("Symbol " + symbol.getIdentifier() + " already exists in the table");
+            errorService.registerSemanticError(new DuplicateSymbolException(symbol.getIdentifier()));
         } else {
             symbols.put(symbol.getIdentifier(), symbol);
         }
