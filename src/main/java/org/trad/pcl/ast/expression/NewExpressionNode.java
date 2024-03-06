@@ -4,12 +4,15 @@ import org.trad.pcl.ast.ASTNode;
 import org.trad.pcl.semantic.ASTNodeVisitor;
 
 public class NewExpressionNode extends ASTNode implements ExpressionNode {
-    private String type;
+    private String identifier;
 
-    public void setType(String type) {
-        this.type = type;
+    public void setIdentifier(String type) {
+        this.identifier = type;
     }
 
+    public String getIdentifier() {
+        return identifier;
+    }
 
     @Override
     public void accept(ASTNodeVisitor visitor) {
