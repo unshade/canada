@@ -10,6 +10,9 @@ public class CharacterValExpressionNode extends ASTNode implements ExpressionNod
         this.expression = expression;
     }
 
+    public ExpressionNode getExpression() {
+        return expression;
+    }
 
     @Override
     public void accept(ASTNodeVisitor visitor) {
@@ -18,6 +21,6 @@ public class CharacterValExpressionNode extends ASTNode implements ExpressionNod
 
     @Override
     public String getType() {
-        return "unknown";
+        return expression.getType();
     }
 }
