@@ -16,6 +16,10 @@ public final class UnaryExpressionNode extends ASTNode implements ExpressionNode
         this.operator = operator;
     }
 
+    public ExpressionNode getOperand() {
+        return operand;
+    }
+
     @Override
     public void accept(ASTNodeVisitor visitor) {
         visitor.visit(this);
