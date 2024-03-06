@@ -10,7 +10,6 @@ public final class BinaryExpressionNode extends ASTNode implements ExpressionNod
     private ExpressionNode right;
 
 
-
     public void setLeft(ExpressionNode left) {
         this.left = left;
     }
@@ -81,7 +80,7 @@ public final class BinaryExpressionNode extends ASTNode implements ExpressionNod
 
     public void definePriority(String MostPriorityOperator, String LeastPriorityOperator) {
         BinaryExpressionNode copy = this;
-        while (copy.getOperatorNode().getOperator().equals(MostPriorityOperator) && ( ((BinaryExpressionNode) copy.getRight()).getOperatorNode().getOperator().equals(LeastPriorityOperator) || ((BinaryExpressionNode) copy.getRight()).getOperatorNode().getOperator().equals(MostPriorityOperator) ) ) {
+        while (copy.getOperatorNode().getOperator().equals(MostPriorityOperator) && (((BinaryExpressionNode) copy.getRight()).getOperatorNode().getOperator().equals(LeastPriorityOperator) || ((BinaryExpressionNode) copy.getRight()).getOperatorNode().getOperator().equals(MostPriorityOperator))) {
             copy.rotateLeft();
             copy = (BinaryExpressionNode) copy.getLeft();
             if (copy == null || copy.getRight() instanceof LiteralNode) {
@@ -97,6 +96,14 @@ public final class BinaryExpressionNode extends ASTNode implements ExpressionNod
 
     @Override
     public String getType() {
-        return "unknown";
+        // Si l'opérateur est un opérateur logique, le type est un booléen
+        if (operator.getOperator().equals("AND") || operator.getOperator().equals("AND ELSE") || operator.getOperator().equals("or")) {
+            return "boolean";
+        }
+        // Si l'opérateur est un opérateur arithmétique, le type est un entier
+        if (operator.getOperator().equals("+") || operator.getOperator().equals("-") || operator.getOperator().equals("*") || operator.getOperator().equals("/")) {
+            return "integer";
+        }
+        return "integer";
     }
 }
