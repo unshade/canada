@@ -13,7 +13,6 @@ public class Function extends Symbol {
         this.returnType = null;
     }
 
-
     public void addParameter(String parameterType) {
         indexedParametersTypes.add(parameterType);
     }

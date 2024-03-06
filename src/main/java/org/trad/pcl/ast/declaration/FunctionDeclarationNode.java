@@ -80,7 +80,7 @@ public final class FunctionDeclarationNode extends ASTNode implements Declaratio
         Function f = new Function(this.identifier, 0);
         f.setReturnType(this.returnType.getIdentifier());
         for (ParameterNode parameter : parameters) {
-            f.addParameter(parameter.getVariable().getType().getIdentifier());
+            f.addParameter(parameter.getType().getIdentifier());
         }
         return f;
     }

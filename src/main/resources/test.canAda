@@ -1,10 +1,11 @@
 with Ada.Text_IO; use Ada.Text_IO;
 procedure unDebut is
-function aireRectangle(larg : integer; long : integer) return integer is
+function aireRectangle(larg : in integer; long : in out integer) return integer is
 aire: integer;
 giga: character;
 begin
-    aire2 := larg * long ;
+    long := larg * long ;
+    larg := 3 ;
     aire2 := 'c' ;
     aire := 'c' ;
     giga := 2 ;

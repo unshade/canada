@@ -1,6 +1,7 @@
 package org.trad.pcl.semantic;
 
 import com.diogonunes.jcolor.Attribute;
+import org.trad.pcl.Exceptions.Semantic.InvalidReturnTypeException;
 import org.trad.pcl.Exceptions.Semantic.UndefinedVariableException;
 import org.trad.pcl.Helpers.StringFormatHelper;
 import org.trad.pcl.Services.ErrorService;
@@ -88,16 +89,13 @@ public class SemanticAnalysisVisitor implements ASTNodeVisitor {
 
     @Override
     public void visit(VariableDeclarationNode node) {
-        // Ajoutez la variable à la TDS courante
-        try {
-            node.getType().accept(this);
-            scopeStack.peek().addSymbol(node.toSymbol());
-            if (node.getAssignment() != null) {
-                node.getAssignment().accept(this);
-            }
-        } catch (Exception e) {
-            System.err.println(e.getMessage());
+
+        node.getType().accept(this);
+        scopeStack.peek().addSymbol(node.toSymbol());
+        if (node.getAssignment() != null) {
+            node.getAssignment().accept(this);
         }
+
     }
 
     @Override
@@ -171,29 +169,21 @@ public class SemanticAnalysisVisitor implements ASTNodeVisitor {
         node.getArguments().forEach(expressionNode -> expressionNode.accept(this));
         node.checkParametersSize();
         node.checkParametersTypes();
-
     }
 
     @Override
     public void visit(IfStatementNode node) {
 
-        // Traverse the condition
         node.getCondition().accept(this);
 
-        // Create a new scope for the then block
-        scopeStack.push(new SymbolTable());
         node.getThenBranch().accept(this);
-        exitScope();
 
         if (node.getElseIfBranch() != null) {
             node.getElseIfBranch().accept(this);
         }
 
-        // Create a new scope for the else block
         if (node.getElseBranch() != null) {
-            scopeStack.push(new SymbolTable());
             node.getElseBranch().accept(this);
-            exitScope();
         }
 
     }
@@ -208,11 +198,12 @@ public class SemanticAnalysisVisitor implements ASTNodeVisitor {
     @Override
     public void visit(ReturnStatementNode node) {
         node.getExpression().accept(this);
+        // TODO : it's not always a variable reference ex : return 5+5;
         VariableReferenceNode variableReferenceNode = (VariableReferenceNode) node.getExpression();
         Variable variable = (Variable) findSymbolInScopes(variableReferenceNode.getIdentifier());
         String returnVariableType = variable.getType();
         if (!returnVariableType.equals(currentFunctionReturnType)) {
-            errorService.registerSemanticError(new Exception("The return type does not match the function return type (expected " + colorize(currentFunctionReturnType, Attribute.MAGENTA_TEXT()) + " but got " + colorize(returnVariableType, Attribute.MAGENTA_TEXT()) + ")"));
+            errorService.registerSemanticError(new InvalidReturnTypeException(currentFunctionReturnType, returnVariableType));
         }
     }
 
@@ -265,13 +256,9 @@ public class SemanticAnalysisVisitor implements ASTNodeVisitor {
 
     @Override
     public void visit(ParameterNode node) {
-        // Ajoutez le paramètre à la TDS courante
-        try {
-            scopeStack.peek().addSymbol(node.toSymbol());
-            //node.getVariable().accept(this);
-        } catch (Exception e) {
-            System.err.println(e.getMessage());
-        }
+
+        scopeStack.peek().addSymbol(node.toSymbol());
+        node.getType().accept(this);
     }
 
     public static Symbol findSymbolInScopes(String identifier) {

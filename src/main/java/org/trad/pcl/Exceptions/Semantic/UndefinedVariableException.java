@@ -8,6 +8,6 @@ import static com.diogonunes.jcolor.Ansi.colorize;
 public class UndefinedVariableException extends Exception {
 
     public UndefinedVariableException(String var) {
-        super("Semantic error: undefined variable " + colorize(var, Attribute.YELLOW_TEXT()));
+        super("The identifier " + colorize(var, Attribute.YELLOW_TEXT()) + " has not been declared");
     }
 }
