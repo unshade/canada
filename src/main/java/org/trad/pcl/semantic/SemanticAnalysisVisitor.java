@@ -29,10 +29,10 @@ public class SemanticAnalysisVisitor implements ASTNodeVisitor {
         scopeStack.push(new SymbolTable());
 
         // Build-in features
-        scopeStack.peek().addSymbol(Symbol.builtinFunction("put"));
+        scopeStack.peek().addSymbol(Symbol.builtinFunction("put"), 0);
         // TODO pourquoi ?
-        scopeStack.peek().addSymbol(Symbol.builtinVariable("integer"));
-        scopeStack.peek().addSymbol(Symbol.builtinVariable("character"));
+        scopeStack.peek().addSymbol(Symbol.builtinVariable("integer"), 0);
+        scopeStack.peek().addSymbol(Symbol.builtinVariable("character"), 0);
     }
 
     public static Symbol findSymbolInScopes(String identifier) {
@@ -51,8 +51,8 @@ public class SemanticAnalysisVisitor implements ASTNodeVisitor {
     @Override
     public void visit(FunctionDeclarationNode node) {
         this.currentFunctionReturnType = node.getReturnType().getIdentifier();
-        // Add the function to the current scope
-        scopeStack.peek().addSymbol(node.toSymbol());
+        // Add the function to the current scope with current shift
+        scopeStack.peek().addSymbol(node.toSymbol(), 0);
         // Create a new scope
         scopeStack.push(new SymbolTable());
 
@@ -71,7 +71,7 @@ public class SemanticAnalysisVisitor implements ASTNodeVisitor {
     @Override
     public void visit(ProcedureDeclarationNode node) {
         // Add the procedure to the current scope
-        scopeStack.peek().addSymbol(node.toSymbol());
+        scopeStack.peek().addSymbol(node.toSymbol(), 0);
         // Create a new scope
         scopeStack.push(new SymbolTable());
 
@@ -92,15 +92,17 @@ public class SemanticAnalysisVisitor implements ASTNodeVisitor {
 
     @Override
     public void visit(TypeDeclarationNode node) {
+        // On récupère la TDS courante
+        SymbolTable currentScope = scopeStack.peek();
         // Ajoutez le type à la TDS courante
-        scopeStack.peek().addSymbol(node.toSymbol());
+        currentScope.addSymbol(node.toSymbol(), 4);
     }
 
     @Override
     public void visit(VariableDeclarationNode node) {
 
         node.getType().accept(this);
-        scopeStack.peek().addSymbol(node.toSymbol());
+        scopeStack.peek().addSymbol(node.toSymbol(), 4);
         if (node.getAssignment() != null) {
             node.getAssignment().accept(this);
         }
@@ -273,7 +275,7 @@ public class SemanticAnalysisVisitor implements ASTNodeVisitor {
     @Override
     public void visit(ParameterNode node) {
 
-        scopeStack.peek().addSymbol(node.toSymbol());
+        scopeStack.peek().addSymbol(node.toSymbol(), 4);
         node.getType().accept(this);
     }
 

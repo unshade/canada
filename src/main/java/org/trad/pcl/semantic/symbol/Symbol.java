@@ -4,11 +4,19 @@ import com.diogonunes.jcolor.Attribute;
 import static com.diogonunes.jcolor.Ansi.colorize;
 
 public class Symbol {
-    private String identifier;
+    private final String identifier;
     private int shift;
 
     public Symbol(String identifier, int shift) {
         this.identifier = identifier;
+        this.shift = shift;
+    }
+
+    public int getShift() {
+        return shift;
+    }
+
+    public void setShift(int shift) {
         this.shift = shift;
     }
 

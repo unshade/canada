@@ -13,15 +13,20 @@ public class SymbolTable {
     private final HashMap<String, Symbol> symbols;
     private final ErrorService errorService;
 
+    private int currentShift;
+
     public SymbolTable() {
         this.symbols = new HashMap<>();
         this.errorService = ErrorService.getInstance();
+        this.currentShift = 0;
     }
 
-    public void addSymbol(Symbol symbol) {
+    public void addSymbol(Symbol symbol, int shift) {
         if (symbols.containsKey(symbol.getIdentifier())) {
             errorService.registerSemanticError(new DuplicateSymbolException(symbol.getIdentifier()));
         } else {
+            currentShift += shift;
+            symbol.setShift(currentShift);
             symbols.put(symbol.getIdentifier(), symbol);
         }
     }
@@ -38,9 +43,7 @@ public class SymbolTable {
     public String toString() {
         List<String[]> liste = new ArrayList<>();
 
-        this.symbols.forEach((k, v) -> {
-            liste.add(v.toStringArray());
-        });
+        this.symbols.forEach((k, v) -> liste.add(v.toStringArray()));
 
         // Détermination du nombre maximum de colonnes
         int maxColumns = 0;
