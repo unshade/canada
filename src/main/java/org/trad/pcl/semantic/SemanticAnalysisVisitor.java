@@ -1,6 +1,5 @@
 package org.trad.pcl.semantic;
 
-import com.diogonunes.jcolor.Attribute;
 import org.trad.pcl.Exceptions.Semantic.InvalidReturnTypeException;
 import org.trad.pcl.Exceptions.Semantic.UndefinedVariableException;
 import org.trad.pcl.Helpers.StringFormatHelper;
@@ -14,17 +13,14 @@ import org.trad.pcl.ast.declaration.VariableDeclarationNode;
 import org.trad.pcl.ast.expression.*;
 import org.trad.pcl.ast.statement.*;
 import org.trad.pcl.ast.type.TypeNode;
-import org.trad.pcl.semantic.symbol.Function;
 import org.trad.pcl.semantic.symbol.Symbol;
 import org.trad.pcl.semantic.symbol.Variable;
 
 import java.util.Stack;
 
-import static com.diogonunes.jcolor.Ansi.colorize;
-
 public class SemanticAnalysisVisitor implements ASTNodeVisitor {
-    private final ErrorService errorService;
     private static final Stack<SymbolTable> scopeStack = new Stack<>();
+    private final ErrorService errorService;
     private String currentFunctionReturnType;
 
     public SemanticAnalysisVisitor() {
@@ -37,6 +33,19 @@ public class SemanticAnalysisVisitor implements ASTNodeVisitor {
         // TODO pourquoi ?
         scopeStack.peek().addSymbol(Symbol.builtinVariable("integer"));
         scopeStack.peek().addSymbol(Symbol.builtinVariable("character"));
+    }
+
+    public static Symbol findSymbolInScopes(String identifier) {
+
+        for (int i = scopeStack.size() - 1; i >= 0; i--) {
+            Symbol s = scopeStack.get(i).findSymbol(identifier);
+            if (s != null) {
+                return s;
+            }
+        }
+
+        ErrorService.getInstance().registerSemanticError(new UndefinedVariableException(identifier));
+        return null;
     }
 
     @Override
@@ -86,7 +95,6 @@ public class SemanticAnalysisVisitor implements ASTNodeVisitor {
         // Ajoutez le type à la TDS courante
         scopeStack.peek().addSymbol(node.toSymbol());
     }
-
 
     @Override
     public void visit(VariableDeclarationNode node) {
@@ -267,19 +275,6 @@ public class SemanticAnalysisVisitor implements ASTNodeVisitor {
 
         scopeStack.peek().addSymbol(node.toSymbol());
         node.getType().accept(this);
-    }
-
-    public static Symbol findSymbolInScopes(String identifier) {
-
-        for (int i = scopeStack.size() - 1; i >= 0; i--) {
-            Symbol s = scopeStack.get(i).findSymbol(identifier);
-            if (s != null) {
-                return s;
-            }
-        }
-
-        ErrorService.getInstance().registerSemanticError(new UndefinedVariableException(identifier));
-        return null;
     }
 
     //sortir de la portée
