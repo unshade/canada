@@ -32,28 +32,30 @@ public final class FunctionCallNode extends VariableReferenceNode {
         return correspondingDeclaration.getReturnType();
     }
 
-    public void checkParametersSize() {
+    public void checkParametersSize() throws Exception {
         Function correspondingDeclaration = (Function) SemanticAnalysisVisitor.findSymbolInScopes(this.getIdentifier());
         if (correspondingDeclaration == null) {
-            return;
+            throw new Exception();
         }
         // Check if the number of arguments match the number of declared parameters
         if (this.getArguments().size() != correspondingDeclaration.getIndexedParametersTypes().size()) {
             ErrorService.getInstance().registerSemanticError(new IncorrectNumberOfArgumentsException(this.getIdentifier(), correspondingDeclaration.getIndexedParametersTypes().size(), this.getArguments().size()));
+            throw new Exception();
         }
     }
 
-    public void checkParametersTypes() {
+    public void checkParametersTypes() throws Exception {
         // Check if the types of the arguments match the types of the declared parameters
         Function correspondingDeclaration = (Function) SemanticAnalysisVisitor.findSymbolInScopes(this.getIdentifier());
         if (correspondingDeclaration == null) {
-            return;
+            throw new Exception();
         }
         for (int i = 0; i < this.getArguments().size(); i++) {
             String argumentType = this.getArguments().get(i).getType().toLowerCase(Locale.ROOT);
             String parameterType = correspondingDeclaration.getIndexedParametersTypes().get(i).toLowerCase(Locale.ROOT);
             if (!argumentType.equals(parameterType)) {
                 ErrorService.getInstance().registerSemanticError(new ArgumentTypeMismatchException(correspondingDeclaration.getIndexedParametersTypes().get(i), argumentType));
+                throw new Exception();
             }
         }
     }
