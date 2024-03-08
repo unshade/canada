@@ -177,9 +177,12 @@ public class SemanticAnalysisVisitor implements ASTNodeVisitor {
     @Override
     public void visit(FunctionCallNode node) {
         // Check if the function is defined
-        node.getArguments().forEach(expressionNode -> expressionNode.accept(this));
-        node.checkParametersSize();
-        node.checkParametersTypes();
+        try {
+            node.getArguments().forEach(expressionNode -> expressionNode.accept(this));
+            node.checkParametersSize();
+            node.checkParametersTypes();
+        } catch (Exception ignored) {
+        }
     }
 
     @Override
