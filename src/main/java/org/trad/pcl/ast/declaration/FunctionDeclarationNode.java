@@ -1,9 +1,13 @@
 package org.trad.pcl.ast.declaration;
 
 
+import org.trad.pcl.Exceptions.Semantic.MissingReturnStatementException;
+import org.trad.pcl.Services.ErrorService;
 import org.trad.pcl.ast.ASTNode;
 import org.trad.pcl.ast.ParameterNode;
 import org.trad.pcl.ast.statement.BlockNode;
+import org.trad.pcl.ast.statement.ReturnStatementNode;
+import org.trad.pcl.ast.statement.StatementNode;
 import org.trad.pcl.ast.type.TypeNode;
 import org.trad.pcl.semantic.ASTNodeVisitor;
 import org.trad.pcl.semantic.symbol.Function;
@@ -39,6 +43,15 @@ public final class FunctionDeclarationNode extends ASTNode implements Declaratio
         for (ParameterNode parameter : parameters) {
             addParameter(parameter);
         }
+    }
+
+    public void checkHasReturn() {
+        for (StatementNode statement : body.getStatements()) {
+            if (statement instanceof ReturnStatementNode) {
+                return;
+            }
+        }
+        ErrorService.getInstance().registerSemanticError(new MissingReturnStatementException(this.identifier));
     }
 
 
@@ -95,7 +108,7 @@ public final class FunctionDeclarationNode extends ASTNode implements Declaratio
     }
 
     @Override
-    public void accept(ASTNodeVisitor visitor) {
+    public void accept(ASTNodeVisitor visitor) throws Exception {
         visitor.visit(this);
     }
 }

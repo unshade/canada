@@ -30,6 +30,7 @@ public class Symbol {
         return new Symbol(identifier, 0);
     }
 
+
     public String getIdentifier() {
         return identifier;
     }
@@ -40,9 +41,8 @@ public class Symbol {
 
     @Override
     public String toString() {
-        return "Symbol { " +
+        return
                 "identifier = '" + colorize(identifier, Attribute.YELLOW_TEXT()) + '\'' +
-                ", shift = " + shift +
-                " }";
+                ", shift = " + colorize(Integer.toString(shift), Attribute.RED_TEXT());
     }
 }

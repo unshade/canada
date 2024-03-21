@@ -70,7 +70,7 @@ public final class ProcedureDeclarationNode extends ASTNode implements Declarati
 
 
     @Override
-    public void accept(ASTNodeVisitor visitor) {
+    public void accept(ASTNodeVisitor visitor) throws Exception {
         visitor.visit(this);
     }
 }

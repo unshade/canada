@@ -3,8 +3,10 @@ package org.trad.pcl.Parser;
 import org.trad.pcl.Exceptions.Syntax.MissingSemicolonException;
 import org.trad.pcl.Exceptions.Syntax.UnexpectedTokenException;
 import org.trad.pcl.Exceptions.Syntax.UnexpectedTokenListException;
+import org.trad.pcl.Helpers.OperatorEnum;
 import org.trad.pcl.Helpers.ParameterMode;
 import org.trad.pcl.Helpers.TagHelper;
+import org.trad.pcl.Helpers.TypeEnum;
 import org.trad.pcl.Lexer.Lexer;
 import org.trad.pcl.Lexer.Tokens.Tag;
 import org.trad.pcl.Lexer.Tokens.Token;
@@ -91,6 +93,7 @@ public class Parser {
                 block.addStatements(multipleStatements());
                 declaration.setBody(block);
                 analyseTerminal(Tag.END);
+                // TODO
                 hasident();
                 analyseTerminal(Tag.SEMICOLON);
             }
@@ -140,6 +143,7 @@ public class Parser {
                 block.addStatements(multipleStatements());
                 declaration.setBody(block);
                 analyseTerminal(Tag.END);
+                // TODO
                 hasident();
                 analyseTerminal(Tag.SEMICOLON);
             }
@@ -610,7 +614,8 @@ public class Parser {
                 expression = new BinaryExpressionNode();
 
                 OperatorNode operator = new OperatorNode();
-                operator.setOperator(analyseTerminal(Tag.OR).getValue());
+                analyseTerminal(Tag.OR);
+                operator.setOperator(OperatorEnum.OR);
                 expression.setOperator(operator);
 
                 ExpressionNode secondExpression = RightOrExpression();
@@ -652,7 +657,7 @@ public class Parser {
             case ELSE -> {
                 analyseTerminal(Tag.ELSE);
                 expression = new BinaryExpressionNode();
-                expression.setOperator("OR ELSE");
+                expression.setOperator(OperatorEnum.ORELSE);
                 expression.setRight(LeftAndExpression(), OrExpression());
                 return expression;
             }
@@ -752,13 +757,13 @@ public class Parser {
         switch (this.currentToken.tag()) {
             case IDENT, OPEN_PAREN, MINUS, ENTIER, CARACTERE, TRUE, FALSE, NULL, NEW, CHARACTER, NOT -> {
                 expression = new BinaryExpressionNode();
-                expression.setOperator("AND");
+                expression.setOperator(OperatorEnum.AND);
                 expression.setRight(NotExpression(), AndExpression());
             }
             case THEN -> {
                 analyseTerminal(Tag.THEN);
                 expression = new BinaryExpressionNode();
-                expression.setOperator("AND THEN");
+                expression.setOperator(OperatorEnum.ANDTHEN);
                 expression.setRight(NotExpression(), AndExpression());
             }
             default -> this.errorService.registerSyntaxError(
@@ -793,7 +798,8 @@ public class Parser {
             case NOT -> {
                 expression = new UnaryExpressionNode();
                 OperatorNode operator = new OperatorNode();
-                operator.setOperator(analyseTerminal(Tag.NOT).getValue());
+                analyseTerminal(Tag.NOT);
+                operator.setOperator(OperatorEnum.NOT);
                 ((UnaryExpressionNode) expression).setOperator(operator);
                 ((UnaryExpressionNode) expression).setOperand(primary());
             }
@@ -865,12 +871,14 @@ public class Parser {
             }
             case EQ -> {
                 expression = new BinaryExpressionNode();
-                expression.setOperator(analyseTerminal(Tag.EQ).getValue());
+                analyseTerminal(Tag.EQ);
+                expression.setOperator(OperatorEnum.EQUALS);
                 expression.setRight(LeftRelationalExpression(), EqualityExpression());
             }
             case NE -> {
                 expression = new BinaryExpressionNode();
-                expression.setOperator(analyseTerminal(Tag.NE).getValue());
+                analyseTerminal(Tag.NE);
+                expression.setOperator(OperatorEnum.NOT_EQUALS);
                 expression.setRight(LeftRelationalExpression(), EqualityExpression());
             }
             default -> this.errorService.registerSyntaxError(
@@ -925,22 +933,26 @@ public class Parser {
             }
             case LT -> {
                 expression = new BinaryExpressionNode();
-                expression.setOperator(analyseTerminal(Tag.LT).getValue());
+                analyseTerminal(Tag.LT);
+                expression.setOperator(OperatorEnum.LESS_THAN);
                 expression.setRight(LeftAdditiveExpression(), RelationalExpression());
             }
             case LE -> {
                 expression = new BinaryExpressionNode();
-                expression.setOperator(analyseTerminal(Tag.LE).getValue());
+                analyseTerminal(Tag.LE);
+                expression.setOperator(OperatorEnum.LESS_THAN_OR_EQUAL);
                 expression.setRight(LeftAdditiveExpression(), RelationalExpression());
             }
             case GT -> {
                 expression = new BinaryExpressionNode();
-                expression.setOperator(analyseTerminal(Tag.GT).getValue());
+                analyseTerminal(Tag.GT);
+                expression.setOperator(OperatorEnum.GREATER_THAN);
                 expression.setRight(LeftAdditiveExpression(), RelationalExpression());
             }
             case GE -> {
                 expression = new BinaryExpressionNode();
-                expression.setOperator(analyseTerminal(Tag.GE).getValue());
+                analyseTerminal(Tag.GE);
+                expression.setOperator(OperatorEnum.GREATER_THAN_OR_EQUAL);
                 expression.setRight(LeftAdditiveExpression(), RelationalExpression());
             }
             default -> this.errorService.registerSyntaxError(
@@ -1012,9 +1024,11 @@ public class Parser {
             }
             case PLUS -> {
                 expression = new BinaryExpressionNode();
-                expression.setOperator(analyseTerminal(Tag.PLUS).getValue());
+                analyseTerminal(Tag.PLUS);
+                expression.setOperator(OperatorEnum.ADD);
                 ExpressionNode left = LeftMultiplicativeExpression();
                 BinaryExpressionNode right = AdditiveExpression();
+                System.out.println("right : " + right);
                 if (right != null) {
                     right.setMostLeft(left);
                     expression.setRight(right);
@@ -1024,7 +1038,8 @@ public class Parser {
             }
             case MINUS -> {
                 expression = new BinaryExpressionNode();
-                expression.setOperator(analyseTerminal(Tag.MINUS).getValue());
+                analyseTerminal(Tag.MINUS);
+                expression.setOperator(OperatorEnum.SUB);
                 ExpressionNode left = LeftMultiplicativeExpression();
                 BinaryExpressionNode right = AdditiveExpression();
                 if (right != null) {
@@ -1107,12 +1122,14 @@ public class Parser {
             }
             case MULTI -> {
                 expression = new BinaryExpressionNode();
-                expression.setOperator(analyseTerminal(Tag.MULTI).getValue());
+                analyseTerminal(Tag.MULTI);
+                expression.setOperator(OperatorEnum.MULTIPLY);
                 expression.setRight(minusExpression(), MultiplicativeExpression());
             }
             case DIV -> {
                 expression = new BinaryExpressionNode();
-                expression.setOperator(analyseTerminal(Tag.DIV).getValue());
+                analyseTerminal(Tag.DIV);
+                expression.setOperator(OperatorEnum.DIVIDE);
                 ExpressionNode leftNode = minusExpression();
                 BinaryExpressionNode rightTree = MultiplicativeExpression();
                 if (rightTree != null) {
@@ -1125,7 +1142,8 @@ public class Parser {
             }
             case REM -> {
                 expression = new BinaryExpressionNode();
-                expression.setOperator(analyseTerminal(Tag.REM).getValue());
+                analyseTerminal(Tag.REM);
+                expression.setOperator(OperatorEnum.MODULO);
                 expression.setRight(minusExpression(), MultiplicativeExpression());
             }
             default -> this.errorService.registerSyntaxError(
@@ -1165,7 +1183,8 @@ public class Parser {
             case MINUS -> {
                 expression = new UnaryExpressionNode();
                 OperatorNode operator = new OperatorNode();
-                operator.setOperator(analyseTerminal(Tag.MINUS).getValue());
+                analyseTerminal(Tag.MINUS);
+                operator.setOperator(OperatorEnum.SUB);
                 ((UnaryExpressionNode) expression).setOperator(operator);
                 ((UnaryExpressionNode) expression).setOperand(primary());
             }

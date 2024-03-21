@@ -1,5 +1,6 @@
 package org.trad.pcl.ast.expression;
 
+import org.trad.pcl.Helpers.TypeEnum;
 import org.trad.pcl.ast.ASTNode;
 import org.trad.pcl.semantic.ASTNodeVisitor;
 
@@ -21,6 +22,6 @@ public class NewExpressionNode extends ASTNode implements ExpressionNode {
 
     @Override
     public String getType() {
-        return "unknown";
+        return TypeEnum.UNKNOWN.toString();
     }
 }

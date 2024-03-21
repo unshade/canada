@@ -1,12 +1,14 @@
 package org.trad.pcl.semantic.symbol;
 
 import org.trad.pcl.Helpers.ParameterMode;
+import org.trad.pcl.Helpers.TypeEnum;
+import org.trad.pcl.Services.ErrorService;
+import org.trad.pcl.semantic.SemanticAnalysisVisitor;
 
-public class Parameter extends Symbol{
+public class Parameter extends Variable{
 
     private ParameterMode mode;
 
-    private String type;
 
     public Parameter(String identifier, int shift) {
         super(identifier, shift);
@@ -20,11 +22,4 @@ public class Parameter extends Symbol{
         return mode;
     }
 
-    public void setType(String type) {
-        this.type = type;
-    }
-
-    public String getType() {
-        return type;
-    }
 }

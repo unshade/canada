@@ -39,7 +39,7 @@ public final class VariableDeclarationNode extends ASTNode implements Declaratio
         return identifier;
     }
 
-    public Symbol toSymbol() {
+    public Variable toSymbol() {
         int shift;
         if (type.getIdentifier().equals("integer") || type.getIdentifier().equals("character")) {
             shift = 4;
@@ -62,7 +62,7 @@ public final class VariableDeclarationNode extends ASTNode implements Declaratio
 
 
     @Override
-    public void accept(ASTNodeVisitor visitor) {
+    public void accept(ASTNodeVisitor visitor) throws Exception {
         visitor.visit(this);
     }
 }

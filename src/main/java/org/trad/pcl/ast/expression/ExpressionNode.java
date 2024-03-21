@@ -1,5 +1,6 @@
 package org.trad.pcl.ast.expression;
 
+import org.trad.pcl.Helpers.TypeEnum;
 import org.trad.pcl.ast.VisitorElement;
 import org.trad.pcl.semantic.SymbolTable;
 

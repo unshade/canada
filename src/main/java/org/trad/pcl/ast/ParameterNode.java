@@ -45,7 +45,7 @@ public final class ParameterNode extends ASTNode {
         return parem;
     }
 
-    public void accept(ASTNodeVisitor visitor) {
+    public void accept(ASTNodeVisitor visitor) throws Exception {
         visitor.visit(this);
     }
 

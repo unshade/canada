@@ -1,0 +1,17 @@
+with Ada.Text_IO; use Ada.Text_IO;
+procedure unDebut is
+choix : integer ;
+a : integer ;
+b : bk ;
+
+type point is record
+x : integer ;
+y : integer ;
+end record;
+
+c : point ;
+
+begin
+choix := a + c.x.z ;
+choix := a + c.c ;
+end;

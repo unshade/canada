@@ -3,6 +3,7 @@ package org.trad.pcl.ast.statement;
 
 import org.trad.pcl.Exceptions.Semantic.InParameterModificationException;
 import org.trad.pcl.Exceptions.Semantic.TypeMismatchException;
+import org.trad.pcl.Exceptions.Semantic.UndefinedVariableException;
 import org.trad.pcl.Helpers.ParameterMode;
 import org.trad.pcl.Services.ErrorService;
 import org.trad.pcl.ast.ParameterNode;
@@ -27,33 +28,26 @@ public final class AssignmentStatementNode extends VariableReferenceNode {
     }
 
     @Override
-    public void accept(ASTNodeVisitor visitor) {
+    public void accept(ASTNodeVisitor visitor) throws Exception {
         visitor.visit(this);
     }
 
     public void checkIfAssignable() {
-        Symbol reference = SemanticAnalysisVisitor.findSymbolInScopes(this.getIdentifier());
+        Variable reference = (Variable) SemanticAnalysisVisitor.findSymbolInScopes(this.getIdentifier());
         if (reference == null) {
+            //ErrorService.getInstance().registerSemanticError(new UndefinedVariableException(this.getIdentifier()));
             return;
         }
-        switch (reference.getClass().getSimpleName()) {
-            case "Parameter" -> {
-                Parameter parameter = (Parameter) reference;
-                // Check if the mode of the parameter is in
-                if (parameter.getMode().equals(ParameterMode.IN)) {
-                    ErrorService.getInstance().registerSemanticError(new InParameterModificationException(parameter.getIdentifier()));
-                } else if (parameter.getType().equals(expression.getType())) {
-                    ErrorService.getInstance().registerSemanticError(new TypeMismatchException(parameter.getType(), expression.getType()));
-                }
-            }
-            case "Variable" -> {
-                Variable variable = (Variable) reference;
-                if (variable.getType().equals(expression.getType())) {
-                    ErrorService.getInstance().registerSemanticError(new TypeMismatchException(variable.getType(), expression.getType()));
-                }
+        if (reference instanceof Parameter) {
+            if (((Parameter) reference).getMode().equals(ParameterMode.IN)) {
+                ErrorService.getInstance().registerSemanticError(new InParameterModificationException(this.getIdentifier()));
+                return;
             }
         }
 
+        if (!reference.getType().equals(expression.getType())) {
+            ErrorService.getInstance().registerSemanticError(new TypeMismatchException(reference.getType(), expression.getType()));
+        }
 
     }
 }

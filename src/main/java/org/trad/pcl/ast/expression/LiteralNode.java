@@ -1,5 +1,6 @@
 package org.trad.pcl.ast.expression;
 
+import org.trad.pcl.Helpers.TypeEnum;
 import org.trad.pcl.ast.ASTNode;
 import org.trad.pcl.semantic.ASTNodeVisitor;
 
@@ -22,10 +23,10 @@ public final class LiteralNode extends ASTNode implements ExpressionNode {
     @Override
     public String getType() {
         return switch (value.getClass().getSimpleName()) {
-            case "Integer", "Long" -> "integer";
-            case "Character" -> "character";
-            case "Boolean" -> "boolean";
-            default -> "unknown";
+            case "Integer", "Long" -> TypeEnum.INT.toString();
+            case "Character" -> TypeEnum.CHAR.toString();
+            case "Boolean" -> TypeEnum.BOOL.toString();
+            default -> TypeEnum.UNKNOWN.toString();
         };
     }
 }

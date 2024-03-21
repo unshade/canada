@@ -1,5 +1,8 @@
 package org.trad.pcl.ast.expression;
 
+import org.trad.pcl.Helpers.OperatorEnum;
+import org.trad.pcl.Helpers.TypeEnum;
+import org.trad.pcl.Services.ErrorService;
 import org.trad.pcl.ast.ASTNode;
 import org.trad.pcl.ast.OperatorNode;
 import org.trad.pcl.semantic.ASTNodeVisitor;
@@ -39,7 +42,7 @@ public final class BinaryExpressionNode extends ASTNode implements ExpressionNod
         this.operator = operator;
     }
 
-    public void setOperator(String operator) {
+    public void setOperator(OperatorEnum operator) {
         this.operator = new OperatorNode();
         this.operator.setOperator(operator);
     }
@@ -94,16 +97,15 @@ public final class BinaryExpressionNode extends ASTNode implements ExpressionNod
         visitor.visit(this);
     }
 
+    public void checkType() {
+
+        if (!left.getType().equals(right.getType()) || !left.getType().equals(operator.getType())) {
+            ErrorService.getInstance().registerSemanticError(new Exception("The types of the binary expression are not compatible(" + left.getType() + ", " + operator.getOperator() + "(" + operator.getType() + "), " + right.getType() + ")"));
+        }
+    }
+
     @Override
     public String getType() {
-        // Si l'opérateur est un opérateur logique, le type est un booléen
-        if (operator.getOperator().equals("AND") || operator.getOperator().equals("AND ELSE") || operator.getOperator().equals("or")) {
-            return "boolean";
-        }
-        // Si l'opérateur est un opérateur arithmétique, le type est un entier
-        if (operator.getOperator().equals("+") || operator.getOperator().equals("-") || operator.getOperator().equals("*") || operator.getOperator().equals("/")) {
-            return "integer";
-        }
-        return "integer";
+        return operator.getType();
     }
 }

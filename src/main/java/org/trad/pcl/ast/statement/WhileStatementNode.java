@@ -29,7 +29,7 @@ public final class WhileStatementNode extends ASTNode implements StatementNode {
     }
 
     @Override
-    public void accept(ASTNodeVisitor visitor) {
+    public void accept(ASTNodeVisitor visitor) throws Exception {
         visitor.visit(this);
     }
 }

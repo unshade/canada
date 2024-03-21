@@ -3,17 +3,20 @@ package org.trad.pcl.semantic;
 import org.trad.pcl.Exceptions.Semantic.InvalidReturnTypeException;
 import org.trad.pcl.Exceptions.Semantic.UndefinedVariableException;
 import org.trad.pcl.Helpers.StringFormatHelper;
+import org.trad.pcl.Helpers.TypeEnum;
 import org.trad.pcl.Services.ErrorService;
 import org.trad.pcl.ast.ParameterNode;
 import org.trad.pcl.ast.ProgramNode;
-import org.trad.pcl.ast.declaration.FunctionDeclarationNode;
-import org.trad.pcl.ast.declaration.ProcedureDeclarationNode;
-import org.trad.pcl.ast.declaration.TypeDeclarationNode;
-import org.trad.pcl.ast.declaration.VariableDeclarationNode;
+import org.trad.pcl.ast.declaration.*;
 import org.trad.pcl.ast.expression.*;
 import org.trad.pcl.ast.statement.*;
+import org.trad.pcl.ast.type.AccessTypeNode;
+import org.trad.pcl.ast.type.RecordTypeNode;
 import org.trad.pcl.ast.type.TypeNode;
+import org.trad.pcl.semantic.symbol.Function;
+import org.trad.pcl.semantic.symbol.Record;
 import org.trad.pcl.semantic.symbol.Symbol;
+import org.trad.pcl.semantic.symbol.Type;
 import org.trad.pcl.semantic.symbol.Variable;
 
 import java.util.Stack;
@@ -21,18 +24,17 @@ import java.util.Stack;
 public class SemanticAnalysisVisitor implements ASTNodeVisitor {
     private static final Stack<SymbolTable> scopeStack = new Stack<>();
     private final ErrorService errorService;
-    private String currentFunctionReturnType;
 
     public SemanticAnalysisVisitor() {
         this.errorService = ErrorService.getInstance();
-        // Global scope
-        scopeStack.push(new SymbolTable());
+    }
 
-        // Build-in features
-        scopeStack.peek().addSymbol(Symbol.builtinFunction("put"), 0);
-        // TODO pourquoi ?
-        scopeStack.peek().addSymbol(Symbol.builtinVariable("integer"), 0);
-        scopeStack.peek().addSymbol(Symbol.builtinVariable("character"), 0);
+    public void addPrimitiveTypes() {
+        Type integer = new Type(TypeEnum.INT.toString(), 4);
+        Type character = new Type(TypeEnum.CHAR.toString(), 1);
+
+        scopeStack.peek().addSymbol(integer, 0);
+        scopeStack.peek().addSymbol(character, 0);
     }
 
     public static Symbol findSymbolInScopes(String identifier) {
@@ -49,17 +51,19 @@ public class SemanticAnalysisVisitor implements ASTNodeVisitor {
     }
 
     @Override
-    public void visit(FunctionDeclarationNode node) {
-        this.currentFunctionReturnType = node.getReturnType().getIdentifier();
+    public void visit(FunctionDeclarationNode node) throws Exception {
         // Add the function to the current scope with current shift
         scopeStack.peek().addSymbol(node.toSymbol(), 0);
         // Create a new scope
-        scopeStack.push(new SymbolTable());
+        scopeStack.push(new SymbolTable(node.getIdentifier()));
+
+        node.checkHasReturn();
 
         // Traverse the parameters
         for (ParameterNode parameter : node.getParameters()) {
             parameter.accept(this);
         }
+
 
         node.getBody().accept(this);
         StringFormatHelper.printTDS(scopeStack.peek(), "FUNCTION", node.getIdentifier());
@@ -69,11 +73,11 @@ public class SemanticAnalysisVisitor implements ASTNodeVisitor {
     }
 
     @Override
-    public void visit(ProcedureDeclarationNode node) {
+    public void visit(ProcedureDeclarationNode node) throws Exception {
         // Add the procedure to the current scope
         scopeStack.peek().addSymbol(node.toSymbol(), 0);
         // Create a new scope
-        scopeStack.push(new SymbolTable());
+        scopeStack.push(new SymbolTable(node.getIdentifier()));
 
         // Traverse the parameters
         for (ParameterNode parameter : node.getParameters()) {
@@ -91,15 +95,14 @@ public class SemanticAnalysisVisitor implements ASTNodeVisitor {
     }
 
     @Override
-    public void visit(TypeDeclarationNode node) {
-        // On récupère la TDS courante
-        SymbolTable currentScope = scopeStack.peek();
-        // Ajoutez le type à la TDS courante
-        currentScope.addSymbol(node.toSymbol(), 4);
+    public void visit(TypeDeclarationNode node) throws Exception {
+
+        node.getType().accept(this);
+        scopeStack.peek().addSymbol(node.toSymbol(), 4);
     }
 
     @Override
-    public void visit(VariableDeclarationNode node) {
+    public void visit(VariableDeclarationNode node) throws Exception {
 
         node.getType().accept(this);
         scopeStack.peek().addSymbol(node.toSymbol(), 4);
@@ -110,75 +113,42 @@ public class SemanticAnalysisVisitor implements ASTNodeVisitor {
     }
 
     @Override
-    public void visit(AssignmentStatementNode node) {
+    public void visit(AssignmentStatementNode node) throws Exception {
 
-//        Variable variable = (Variable) findSymbolInScopes(node.getIdentifier());
-//        if (variable == null) {
-//            return;
-//        }
         node.getExpression().accept(this);
         node.checkIfAssignable();
-
-        // check if expression type is the same as variable type
-//        switch (node.getExpression().getClass().getSimpleName()) {
-//            case "FunctionCallNode" -> {
-//                Function function = (Function) findSymbolInScopes(((FunctionCallNode) node.getExpression()).getIdentifier());
-//                if (function == null) {
-//                    return;
-//                }
-//                if (!function.getReturnType().equals(variable.getType())) {
-//                    errorService.registerSemanticError(new Exception("The type of the function return does not match the type of the variable " + colorize(variable.getIdentifier(), Attribute.YELLOW_TEXT()) + " (expected " + colorize(variable.getType(), Attribute.MAGENTA_TEXT()) + " but got " + colorize(function.getReturnType(), Attribute.MAGENTA_TEXT()) + ")"));
-//                }
-//            }
-//            case "LiteralNode" -> {
-//                LiteralNode literal = (LiteralNode) node.getExpression();
-//                String objectValueInstance = literal.getValue().getClass().getSimpleName();
-//                if (objectValueInstance.equals("Long")) {
-//                    objectValueInstance = "Integer";
-//                }
-//                System.out.println(objectValueInstance);
-//                switch (objectValueInstance) {
-//                    case "Integer" -> {
-//                        String literalValue = literal.getValue().toString();
-//                        if (!variable.getType().equals("integer")) {
-//                            errorService.registerSemanticError(new Exception("The type of the literal " + colorize(literalValue, Attribute.GREEN_TEXT())+ " does not match the type of the variable (expected " + colorize(variable.getType(), Attribute.MAGENTA_TEXT()) + " but got " + colorize(objectValueInstance, Attribute.MAGENTA_TEXT()) + ")"));
-//                        }
-//                    }
-//                    case "Character" -> {
-//                        if (!variable.getType().equals("character")) {
-//                            errorService.registerSemanticError(new Exception("The type of the expression does not match the type of the variable (expected " + colorize(variable.getType(), Attribute.MAGENTA_TEXT()) + " but got " + colorize(objectValueInstance, Attribute.MAGENTA_TEXT()) + ")"));
-//                        }
-//                    }
-//                    default -> {
-//                        // TODO unknown type
-//                    }
-//                }
-//            }
-//            case "VariableReferenceNode" -> {
-//                VariableReferenceNode variableReferenceNode = (VariableReferenceNode) node.getExpression();
-//                Variable variableExpression = (Variable) findSymbolInScopes(variableReferenceNode.getIdentifier());
-//                if (!variableExpression.getType().equals(variable.getType())) {
-//                    errorService.registerSemanticError(new Exception("The type of the expression does not match the type of the variable (expected " + colorize(variable.getType(), Attribute.MAGENTA_TEXT()) + " but got " + colorize(variableExpression.getType(), Attribute.MAGENTA_TEXT()) + ")"));
-//                }
-//            }
-//        }
-
     }
 
     @Override
     public void visit(BlockNode node) {
 
+
+
         // Traverse the declarations
-        node.getDeclarations().forEach(declarationNode -> declarationNode.accept(this));
+        for (DeclarationNode declarationNode : node.getDeclarations()) {
+            try{
+                declarationNode.accept(this);
+            } catch (Exception ignored) {
+
+            }
+        }
         // Traverse the statements
-        node.getStatements().forEach(statementNode -> statementNode.accept(this));
+        for (StatementNode statementNode : node.getStatements()) {
+            try{
+            statementNode.accept(this);
+            } catch (Exception ignored) {
+
+            }
+        }
     }
 
     @Override
     public void visit(FunctionCallNode node) {
         // Check if the function is defined
         try {
-            node.getArguments().forEach(expressionNode -> expressionNode.accept(this));
+            for (ExpressionNode expressionNode : node.getArguments()) {
+                expressionNode.accept(this);
+            }
             node.checkParametersSize();
             node.checkParametersTypes();
         } catch (Exception ignored) {
@@ -187,58 +157,75 @@ public class SemanticAnalysisVisitor implements ASTNodeVisitor {
 
     @Override
     public void visit(IfStatementNode node) {
+        try {
+            node.getCondition().accept(this);
 
-        node.getCondition().accept(this);
+            node.getThenBranch().accept(this);
 
-        node.getThenBranch().accept(this);
+            if (node.getElseIfBranch() != null) {
+                node.getElseIfBranch().accept(this);
+            }
 
-        if (node.getElseIfBranch() != null) {
-            node.getElseIfBranch().accept(this);
-        }
+            if (node.getElseBranch() != null) {
+                node.getElseBranch().accept(this);
+            }
 
-        if (node.getElseBranch() != null) {
-            node.getElseBranch().accept(this);
+            node.checkConditionType();
+        } catch (Exception e) {
+            errorService.registerSemanticError(e);
         }
 
     }
 
     @Override
     public void visit(LoopStatementNode node) {
-        node.getStartExpression().accept(this);
-        node.getEndExpression().accept(this);
-        node.getBody().accept(this);
+        try {
+            node.getStartExpression().accept(this);
+            node.getEndExpression().accept(this);
+            node.getBody().accept(this);
+        } catch (Exception e) {
+            errorService.registerSemanticError(e);
+        }
+
     }
 
     @Override
-    public void visit(ReturnStatementNode node) {
+    public void visit(ReturnStatementNode node) throws Exception {
         node.getExpression().accept(this);
-        // TODO : it's not always a variable reference ex : return 5+5;
-        VariableReferenceNode variableReferenceNode = (VariableReferenceNode) node.getExpression();
-        Variable variable = (Variable) findSymbolInScopes(variableReferenceNode.getIdentifier());
-        String returnVariableType = variable.getType();
-        if (!returnVariableType.equals(currentFunctionReturnType)) {
-            errorService.registerSemanticError(new InvalidReturnTypeException(currentFunctionReturnType, returnVariableType));
+        Symbol s = findSymbolInScopes(scopeStack.peek().getScopeIdentifier());
+        if (!(s instanceof Function)) {
+            errorService.registerSemanticError(new Exception("Return statement can only be used in a function"));
+            return;
+        }
+        if (!node.getExpression().getType().equals(((Function) s).getReturnType())) {
+            errorService.registerSemanticError(new InvalidReturnTypeException(((Function) s).getReturnType(), node.getExpression().getType()));
         }
     }
 
     @Override
-    public void visit(WhileStatementNode node) {
+    public void visit(WhileStatementNode node) throws Exception {
         node.getCondition().accept(this);
         node.getBody().accept(this);
     }
 
     @Override
     public void visit(BinaryExpressionNode node) {
+        try {
         node.getLeft().accept(this);
         node.getRight().accept(this);
+        node.checkType();
+        } catch (Exception e) {
+            errorService.registerSemanticError(e);
+        }
+
     }
 
     @Override
-    public void visit(CharacterValExpressionNode node) {
+    public void visit(CharacterValExpressionNode node) throws Exception {
         // Check if the expression is valid
         node.getExpression().accept(this);
         // Check if the expression is an integer
-        if (!node.getExpression().getType().equals("integer")) {
+        if (!node.getExpression().getType().equals(TypeEnum.CHAR.toString())) {
             errorService.registerSemanticError(new Exception("The expression is not a integer"));
         }
     }
@@ -248,9 +235,28 @@ public class SemanticAnalysisVisitor implements ASTNodeVisitor {
     }
 
     @Override
-    public void visit(VariableReferenceNode node) {
+    public void visit(VariableReferenceNode node) throws Exception {
         // Check if the variable is defined
-        Symbol variable = findSymbolInScopes(node.getIdentifier());
+        Symbol var = findSymbolInScopes(node.getIdentifier());
+        if (!(var instanceof Variable variable)) {
+            throw new Exception("The identifier " + node.getIdentifier() + " is not a valid variable");
+        }
+
+        while(node.getNextExpression() != null) {
+            Symbol type = findSymbolInScopes((variable).getType());
+            if (!(type instanceof Record)) {
+                throw new Exception("The type " + ((Variable) variable).getType() + " is not a valid record");
+            }
+
+            Variable field = ((Record) type).getField(node.getNextExpression().getIdentifier());
+            if (field == null) {
+                throw new Exception("The field " + node.getNextExpression().getIdentifier() + " for the record " + ((Variable) variable).getType() + " is not defined");
+            }
+
+            node = node.getNextExpression();
+            variable = field;
+
+        }
     }
 
     @Override
@@ -260,23 +266,58 @@ public class SemanticAnalysisVisitor implements ASTNodeVisitor {
     }
 
     @Override
-    public void visit(UnaryExpressionNode node) {
+    public void visit(UnaryExpressionNode node) throws Exception {
         node.getOperand().accept(this);
+        if (!node.getOperator().getType().equals(node.getOperand().getType())) {
+            errorService.registerSemanticError(new Exception("Type mismatch"));
+        }
     }
 
     @Override
     public void visit(TypeNode node) {
         // Check if the type is defined
         Symbol s = findSymbolInScopes(node.getIdentifier());
+
+    }
+
+    @Override
+    public void visit(RecordTypeNode node) throws Exception {
+        System.out.println("RecordTypeNode " + node.getIdentifier());
+
+        if(node.getFields().isEmpty()) {
+            throw new Exception("Record " + node.getIdentifier() + " has no fields");
+        }
+
+        for (VariableDeclarationNode field : node.getFields()) {
+            field.getType().accept(this);
+
+        }
+    }
+
+    @Override
+    public void visit(AccessTypeNode node) {
+
     }
 
     @Override
     public void visit(ProgramNode node) {
-        node.getRootProcedure().accept(this);
+        // Global scope
+        scopeStack.push(new SymbolTable());
+
+        // Build-in features
+        scopeStack.peek().addSymbol(Symbol.builtinFunction("put"), 0);
+
+        addPrimitiveTypes();
+        StringFormatHelper.printTDS(scopeStack.peek(), "PROCEDURE", "root");
+
+        try {
+            node.getRootProcedure().accept(this);
+        } catch (Exception e) {
+        }
     }
 
     @Override
-    public void visit(ParameterNode node) {
+    public void visit(ParameterNode node) throws Exception {
 
         scopeStack.peek().addSymbol(node.toSymbol(), 4);
         node.getType().accept(this);

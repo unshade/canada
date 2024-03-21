@@ -1,6 +1,8 @@
 package org.trad.pcl.ast.statement;
 
 
+import org.trad.pcl.Helpers.TypeEnum;
+import org.trad.pcl.Services.ErrorService;
 import org.trad.pcl.ast.ASTNode;
 import org.trad.pcl.ast.expression.ExpressionNode;
 import org.trad.pcl.semantic.ASTNodeVisitor;
@@ -41,6 +43,12 @@ public final class IfStatementNode extends ASTNode implements StatementNode {
 
     public IfStatementNode getElseIfBranch() {
         return elseIfBranch;
+    }
+
+    public void checkConditionType() {
+        if (!condition.getType().equals(TypeEnum.BOOL.toString())) {
+            ErrorService.getInstance().registerSemanticError(new Exception("The condition of the if statement must be of type boolean"));
+        }
     }
 
     @Override

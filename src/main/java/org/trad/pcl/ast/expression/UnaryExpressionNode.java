@@ -1,5 +1,6 @@
 package org.trad.pcl.ast.expression;
 
+import org.trad.pcl.Helpers.TypeEnum;
 import org.trad.pcl.ast.ASTNode;
 import org.trad.pcl.ast.OperatorNode;
 import org.trad.pcl.semantic.ASTNodeVisitor;
@@ -20,13 +21,17 @@ public final class UnaryExpressionNode extends ASTNode implements ExpressionNode
         return operand;
     }
 
+    public OperatorNode getOperator() {
+        return operator;
+    }
+
     @Override
-    public void accept(ASTNodeVisitor visitor) {
+    public void accept(ASTNodeVisitor visitor) throws Exception {
         visitor.visit(this);
     }
 
     @Override
     public String getType() {
-        return "unknown";
+        return operand.getType();
     }
 }

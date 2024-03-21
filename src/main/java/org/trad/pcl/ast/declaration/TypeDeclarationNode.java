@@ -10,6 +10,7 @@ import org.trad.pcl.semantic.symbol.Type;
 public final class TypeDeclarationNode extends ASTNode implements DeclarationNode {
     private TypeNode type;
 
+
     public void setType(TypeNode type) {
         this.type = type;
     }
@@ -19,19 +20,12 @@ public final class TypeDeclarationNode extends ASTNode implements DeclarationNod
     }
 
     public Symbol toSymbol() {
-        return new Type(type.getIdentifier(),0);
+        return type.toSymbol();
     }
 
-    public void initTDS(SymbolTable tdsBefore) {
-        // Nothing to do
-    }
-
-    public void displayTDS() {
-        // Nothing to do
-    }
 
     @Override
-    public void accept(ASTNodeVisitor visitor) {
+    public void accept(ASTNodeVisitor visitor) throws Exception {
         visitor.visit(this);
     }
 }

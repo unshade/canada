@@ -15,8 +15,9 @@ end aireRectangle ;
 function returnChar(larg : integer; long : integer) return character is
 aire: integer;
 giga: character;
+larg : integer;
 begin
-    aire2 := larg * long ;
+    aire := larg * long ;
     giga := aireRectangle(2, 3, 6) ;
     aire := giga ;
 return aire ;
@@ -38,9 +39,7 @@ begin
         then valeur := perimetreRectangle(aireRectangle(returnChar('c', 7), 4), 3) ;
             put(valeur) ;
         elsif choix = 2
-            then valeur := aireRectangale(2, 3) ;
-            put(valeur) ;
-        else valeur := aireRectangale(2, 3) ;
-            put(valeur) ;
+            then choix := 1 ;
+        else put(3) ;
     end if;
 end unDebut ;

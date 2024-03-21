@@ -1,5 +1,8 @@
 package org.trad.pcl.semantic.symbol;
 
+import org.trad.pcl.Helpers.TypeEnum;
+import org.trad.pcl.semantic.SemanticAnalysisVisitor;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -31,8 +34,10 @@ public class Function extends Symbol {
 
     @Override
     public String toString() {
-        return "Function{" +
-                "parameters=" + indexedParametersTypes +
-                '}';
+        return "Function { " +
+                super.toString() +
+                ", indexedParametersTypes = '" + indexedParametersTypes.toString() + '\'' +
+                ", returnType = '" + returnType + '\'' +
+                " }";
     }
 }

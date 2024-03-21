@@ -13,12 +13,22 @@ public class SymbolTable {
     private final HashMap<String, Symbol> symbols;
     private final ErrorService errorService;
 
+    private final String scopeIdentifier;
+
     private int currentShift;
 
     public SymbolTable() {
         this.symbols = new HashMap<>();
         this.errorService = ErrorService.getInstance();
         this.currentShift = 0;
+        this.scopeIdentifier = null;
+    }
+
+    public SymbolTable(String scopeIdentifier) {
+        this.symbols = new HashMap<>();
+        this.errorService = ErrorService.getInstance();
+        this.currentShift = 0;
+        this.scopeIdentifier = scopeIdentifier;
     }
 
     public void addSymbol(Symbol symbol, int shift) {
@@ -37,6 +47,10 @@ public class SymbolTable {
 
     public HashMap<String, Symbol> getSymbols() {
         return symbols;
+    }
+
+    public String getScopeIdentifier() {
+        return scopeIdentifier;
     }
 
     @Override

@@ -1,10 +1,14 @@
 package org.trad.pcl.ast.expression;
 
+import org.trad.pcl.Helpers.TypeEnum;
 import org.trad.pcl.Services.ErrorService;
 import org.trad.pcl.ast.ASTNode;
 import org.trad.pcl.ast.statement.StatementNode;
 import org.trad.pcl.semantic.ASTNodeVisitor;
 import org.trad.pcl.semantic.SemanticAnalysisVisitor;
+import org.trad.pcl.semantic.symbol.Record;
+import org.trad.pcl.semantic.symbol.Symbol;
+import org.trad.pcl.semantic.symbol.Type;
 import org.trad.pcl.semantic.symbol.Variable;
 
 public class VariableReferenceNode extends ASTNode implements ExpressionNode, StatementNode {
@@ -29,17 +33,29 @@ public class VariableReferenceNode extends ASTNode implements ExpressionNode, St
     }
 
     @Override
-    public void accept(ASTNodeVisitor visitor) {
+    public void accept(ASTNodeVisitor visitor) throws Exception {
         visitor.visit(this);
     }
 
     @Override
     public String getType() {
+
         Variable variableExpression = (Variable) SemanticAnalysisVisitor.findSymbolInScopes(this.getIdentifier());
-        if (variableExpression == null) {
-            ErrorService.getInstance().registerSemanticError(new Exception("The variable " + this.getIdentifier() + " has not been declared"));
-            return "unknown";
+        assert variableExpression != null;
+        String type = variableExpression.getType();
+
+        if (this.nextExpression != null) {
+
+                VariableReferenceNode next = this.nextExpression;
+                while (next != null) {
+                    Record recordType = (Record) SemanticAnalysisVisitor.findSymbolInScopes(type);
+                    assert recordType != null;
+                    type = recordType.getField(next.getIdentifier()).getType();
+                    next = next.getNextExpression();
+                }
+            System.out.println("VariableReferenceNode: " + type);
+
         }
-        return variableExpression.getType();
+        return type;
     }
 }

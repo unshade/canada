@@ -2,10 +2,12 @@ package org.trad.pcl.ast.expression;
 
 import org.trad.pcl.Exceptions.Semantic.ArgumentTypeMismatchException;
 import org.trad.pcl.Exceptions.Semantic.IncorrectNumberOfArgumentsException;
+import org.trad.pcl.Helpers.TypeEnum;
 import org.trad.pcl.Services.ErrorService;
 import org.trad.pcl.semantic.ASTNodeVisitor;
 import org.trad.pcl.semantic.SemanticAnalysisVisitor;
 import org.trad.pcl.semantic.symbol.Function;
+import org.trad.pcl.semantic.symbol.Type;
 
 import java.util.List;
 import java.util.Locale;
@@ -27,7 +29,7 @@ public final class FunctionCallNode extends VariableReferenceNode {
         Function correspondingDeclaration = (Function) SemanticAnalysisVisitor.findSymbolInScopes(this.getIdentifier());
         if (correspondingDeclaration == null) {
             ErrorService.getInstance().registerSemanticError(new Exception("The function " + this.getIdentifier() + " has not been declared"));
-            return "undefined";
+            return TypeEnum.UNKNOWN.toString();
         }
         return correspondingDeclaration.getReturnType();
     }
@@ -51,7 +53,7 @@ public final class FunctionCallNode extends VariableReferenceNode {
             throw new Exception();
         }
         for (int i = 0; i < this.getArguments().size(); i++) {
-            String argumentType = this.getArguments().get(i).getType().toLowerCase(Locale.ROOT);
+            String argumentType = this.getArguments().get(i).getType();
             String parameterType = correspondingDeclaration.getIndexedParametersTypes().get(i).toLowerCase(Locale.ROOT);
             if (!argumentType.equals(parameterType)) {
                 ErrorService.getInstance().registerSemanticError(new ArgumentTypeMismatchException(correspondingDeclaration.getIndexedParametersTypes().get(i), argumentType));

@@ -9,22 +9,28 @@ import org.trad.pcl.ast.declaration.ProcedureDeclarationNode;
 import org.trad.pcl.ast.declaration.TypeDeclarationNode;
 import org.trad.pcl.ast.declaration.VariableDeclarationNode;
 import org.trad.pcl.ast.statement.*;
+import org.trad.pcl.ast.type.AccessTypeNode;
+import org.trad.pcl.ast.type.RecordTypeNode;
 import org.trad.pcl.ast.type.TypeNode;
 
 public interface ASTNodeVisitor {
 
     // DeclarationNode
-    void visit(FunctionDeclarationNode node);
+    void visit(FunctionDeclarationNode node) throws Exception;
 
-    void visit(ProcedureDeclarationNode node);
+    void visit(ProcedureDeclarationNode node) throws Exception;
 
-    void visit(TypeDeclarationNode node);
+    void visit(TypeDeclarationNode node) throws Exception;
 
-    void visit(VariableDeclarationNode node);
+    void visit(RecordTypeNode node) throws Exception;
+
+    void visit(AccessTypeNode node);
+
+    void visit(VariableDeclarationNode node) throws Exception;
 
     // StatementNode
 
-    void visit(AssignmentStatementNode node);
+    void visit(AssignmentStatementNode node) throws Exception;
 
     void visit(BlockNode node);
 
@@ -34,23 +40,23 @@ public interface ASTNodeVisitor {
 
     void visit(LoopStatementNode node);
 
-    void visit(ReturnStatementNode node);
+    void visit(ReturnStatementNode node) throws Exception;
 
-    void visit(WhileStatementNode node);
+    void visit(WhileStatementNode node) throws Exception;
 
     // ExpressionNode
 
     void visit(BinaryExpressionNode node);
 
-    void visit(CharacterValExpressionNode node);
+    void visit(CharacterValExpressionNode node) throws Exception;
 
     void visit(LiteralNode node);
 
-    void visit(VariableReferenceNode node);
+    void visit(VariableReferenceNode node) throws Exception;
 
     void visit(NewExpressionNode node);
 
-    void visit(UnaryExpressionNode node);
+    void visit(UnaryExpressionNode node) throws Exception;
 
 
 
@@ -62,7 +68,7 @@ public interface ASTNodeVisitor {
 
     void visit(ProgramNode node);
 
-    void visit(ParameterNode node);
+    void visit(ParameterNode node) throws Exception;
 
 
 
