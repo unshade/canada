@@ -91,8 +91,7 @@ public class Parser {
                 block.addStatements(multipleStatements());
                 declaration.setBody(block);
                 analyseTerminal(Tag.END);
-                // TODO
-                hasident();
+                declaration.setEndIdentifier(hasident());
                 analyseTerminal(Tag.SEMICOLON);
             }
             case IDENT -> {
@@ -141,8 +140,7 @@ public class Parser {
                 block.addStatements(multipleStatements());
                 declaration.setBody(block);
                 analyseTerminal(Tag.END);
-                // TODO
-                hasident();
+                declaration.setEndIdentifier(hasident());
                 analyseTerminal(Tag.SEMICOLON);
             }
             default -> this.errorService.registerSyntaxError(
@@ -236,17 +234,21 @@ public class Parser {
     }
 
     @PrintMethodName
-    private void hasident() {
+    private String hasident() {
+        String ident = null;
         switch (this.currentToken.tag()) {
             case SEMICOLON -> {
             }
-            case IDENT -> analyseTerminal(Tag.IDENT);
+            case IDENT -> {
+                ident =(analyseTerminal(Tag.IDENT).getValue());
+            }
             default -> this.errorService.registerSyntaxError(
                     new UnexpectedTokenListException(this.currentToken,
                             Token.generateExpectedToken(Tag.SEMICOLON, this.currentToken),
                             Token.generateExpectedToken(Tag.IDENT, this.currentToken))
             );
         }
+        return ident;
     }
 
     /**

@@ -60,6 +60,8 @@ public class SemanticAnalysisVisitor implements ASTNodeVisitor {
 
         node.checkHasReturn();
 
+        node.checkEndIdentifier();
+
         // Traverse the parameters
         for (ParameterNode parameter : node.getParameters()) {
             parameter.accept(this);
@@ -79,6 +81,8 @@ public class SemanticAnalysisVisitor implements ASTNodeVisitor {
         scopeStack.peek().addSymbol(node.toSymbol(), 0);
         // Create a new scope
         scopeStack.push(new SymbolTable(node.getIdentifier()));
+
+        node.checkEndIdentifier();
 
         // Traverse the parameters
         for (ParameterNode parameter : node.getParameters()) {
@@ -149,7 +153,6 @@ public class SemanticAnalysisVisitor implements ASTNodeVisitor {
     public void visit(FunctionCallNode node) throws Exception {
         // Check if the function is defined
         node.getVariableReference().accept(this);
-        System.out.println("Ne devrait pas arriver");
         for (ExpressionNode expressionNode : node.getArguments()) {
             expressionNode.accept(this);
         }

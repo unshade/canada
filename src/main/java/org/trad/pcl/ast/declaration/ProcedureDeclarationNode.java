@@ -1,5 +1,6 @@
 package org.trad.pcl.ast.declaration;
 
+import org.trad.pcl.Services.ErrorService;
 import org.trad.pcl.ast.ASTNode;
 import org.trad.pcl.ast.ParameterNode;
 import org.trad.pcl.ast.statement.BlockNode;
@@ -15,6 +16,8 @@ public final class ProcedureDeclarationNode extends ASTNode implements Declarati
 
     private String identifier;
 
+    private String endIdentifier;
+
     private BlockNode body;
 
     public ProcedureDeclarationNode() {
@@ -27,6 +30,14 @@ public final class ProcedureDeclarationNode extends ASTNode implements Declarati
 
     public String getIdentifier() {
         return identifier;
+    }
+
+    public void setEndIdentifier(String endIdentifier) {
+        this.endIdentifier = endIdentifier;
+    }
+
+    public String getEndIdentifier() {
+        return endIdentifier;
     }
 
     public void addParameter(ParameterNode parameter) {
@@ -66,6 +77,12 @@ public final class ProcedureDeclarationNode extends ASTNode implements Declarati
 
     public Symbol toSymbol() {
         return new Procedure(this.identifier, 0);
+    }
+
+    public void checkEndIdentifier(){
+        if(!this.identifier.equals(this.endIdentifier)){
+            ErrorService.getInstance().registerSemanticError(new Exception("End identifier does not match the procedure identifier"));
+        }
     }
 
 

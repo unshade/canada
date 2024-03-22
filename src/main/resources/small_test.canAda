@@ -16,9 +16,9 @@ aire: point;
 giga: character;
 begin
 return aire ;
-end aireRectangle ;
+end aireRectangle2 ;
 
 
 begin
 c.x := a + aireRectangle(3, 4).y ;
-end;
+end bleu;

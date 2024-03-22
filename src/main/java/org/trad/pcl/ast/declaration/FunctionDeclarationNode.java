@@ -21,6 +21,8 @@ public final class FunctionDeclarationNode extends ASTNode implements Declaratio
 
     private String identifier;
     private TypeNode returnType;
+
+    private String endIdentifier;
     private BlockNode body;
 
     public FunctionDeclarationNode() {
@@ -34,6 +36,13 @@ public final class FunctionDeclarationNode extends ASTNode implements Declaratio
     public void setIdentifier(String identifier) {
         this.identifier = identifier;
     }
+
+    public void setEndIdentifier(String identifier) {
+        this.endIdentifier = identifier;
+    }
+
+    public String getEndIdentifier(String identifier){ return this.endIdentifier;}
+
 
     public String getIdentifier() {
         return identifier;
@@ -52,6 +61,12 @@ public final class FunctionDeclarationNode extends ASTNode implements Declaratio
             }
         }
         ErrorService.getInstance().registerSemanticError(new MissingReturnStatementException(this.identifier));
+    }
+
+    public void checkEndIdentifier(){
+        if(!this.identifier.equals(this.endIdentifier)){
+            ErrorService.getInstance().registerSemanticError(new Exception("End identifier does not match the function identifier"));
+        }
     }
 
 
