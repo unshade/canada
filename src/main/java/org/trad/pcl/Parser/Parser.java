@@ -6,13 +6,11 @@ import org.trad.pcl.Exceptions.Syntax.UnexpectedTokenListException;
 import org.trad.pcl.Helpers.OperatorEnum;
 import org.trad.pcl.Helpers.ParameterMode;
 import org.trad.pcl.Helpers.TagHelper;
-import org.trad.pcl.Helpers.TypeEnum;
 import org.trad.pcl.Lexer.Lexer;
 import org.trad.pcl.Lexer.Tokens.Tag;
 import org.trad.pcl.Lexer.Tokens.Token;
 import org.trad.pcl.Services.ErrorService;
 import org.trad.pcl.annotation.PrintMethodName;
-import org.trad.pcl.ast.statement.BlockNode;
 import org.trad.pcl.ast.OperatorNode;
 import org.trad.pcl.ast.ParameterNode;
 import org.trad.pcl.ast.ProgramNode;
@@ -573,7 +571,7 @@ public class Parser {
                 ExpressionNode firstExpression = LeftAndExpression();
                 BinaryExpressionNode secondExpression = OrExpression();
                 if (secondExpression != null) {
-                    secondExpression.setLeft(firstExpression);
+                    secondExpression.setMostLeft(firstExpression);
                     return secondExpression;
                 } else {
                     return firstExpression;
@@ -648,7 +646,7 @@ public class Parser {
                 BinaryExpressionNode secondExpression = OrExpression();
 
                 if (secondExpression != null) {
-                    secondExpression.setLeft(firstExpression);
+                    secondExpression.setMostLeft(firstExpression);
                     return secondExpression;
                 } else {
                     return firstExpression;
@@ -689,10 +687,13 @@ public class Parser {
         switch (this.currentToken.tag()) {
             case IDENT, OPEN_PAREN, MINUS, ENTIER, CARACTERE, TRUE, FALSE, NULL, NEW, CHARACTER, NOT -> {
                 ExpressionNode firstExpression = NotExpression();
+                System.out.println("firstExpression = " + firstExpression);
                 BinaryExpressionNode secondExpression = AndExpression();
+                System.out.println("secondExpression = " + secondExpression);
 
                 if (secondExpression != null) {
-                    secondExpression.setLeft(firstExpression);
+                    secondExpression.setMostLeft(firstExpression);
+                    System.out.println("secondExpression = " + secondExpression);
                     return secondExpression;
                 } else {
                     return firstExpression;
@@ -731,7 +732,6 @@ public class Parser {
             case AND -> {
                 analyseTerminal(Tag.AND);
                 return RightAndExpression();
-
             }
             default -> this.errorService.registerSyntaxError(
                     new UnexpectedTokenListException(this.currentToken,
@@ -759,6 +759,7 @@ public class Parser {
                 expression = new BinaryExpressionNode();
                 expression.setOperator(OperatorEnum.AND);
                 expression.setRight(NotExpression(), AndExpression());
+                System.out.println("expression = " + expression);
             }
             case THEN -> {
                 analyseTerminal(Tag.THEN);
@@ -782,7 +783,7 @@ public class Parser {
                             Token.generateExpectedToken(Tag.NOT, this.currentToken))
             );
         }
-        return null;
+        return expression;
     }
 
     /**
@@ -834,7 +835,7 @@ public class Parser {
                 BinaryExpressionNode secondExpression = EqualityExpression();
 
                 if (secondExpression != null) {
-                    secondExpression.setLeft(firstExpression);
+                    secondExpression.setMostLeft(firstExpression);
                     return secondExpression;
                 } else {
                     return firstExpression;
@@ -909,7 +910,7 @@ public class Parser {
                 ExpressionNode firstExpression = LeftAdditiveExpression();
                 BinaryExpressionNode secondExpression = RelationalExpression();
                 if (secondExpression != null) {
-                    secondExpression.setLeft(firstExpression);
+                    secondExpression.setMostLeft(firstExpression);
                     return secondExpression;
                 } else {
                     return firstExpression;
@@ -1559,15 +1560,13 @@ public class Parser {
     private VariableReferenceNode instr3() {
         VariableReferenceNode accessReferenceNode = null;
         switch (this.currentToken.tag()) {
-            case ASSIGN -> {
+            case ASSIGN, SEMICOLON -> {
             }
             case DOT -> {
                 analyseTerminal(Tag.DOT);
                 accessReferenceNode = new VariableReferenceNode();
                 accessReferenceNode.setIdentifier(analyseTerminal(Tag.IDENT).getValue());
                 accessReferenceNode.setNextExpression(instr3());
-            }
-            case SEMICOLON -> {
             }
             default -> this.errorService.registerSyntaxError(
                     new UnexpectedTokenListException(this.currentToken,
