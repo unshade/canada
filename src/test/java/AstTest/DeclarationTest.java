@@ -347,7 +347,7 @@ public class DeclarationTest {
 
         TypeDeclarationNode typeDeclarationNode = (TypeDeclarationNode) declarations.get(0);
 
-        assertEquals("test", typeDeclarationNode.getIdentifier());
+        assertEquals("test", typeDeclarationNode.getType().getIdentifier());
 
         assertNotNull(typeDeclarationNode.getType());
         assertInstanceOf(TypeNode.class, typeDeclarationNode.getType());
@@ -374,7 +374,7 @@ public class DeclarationTest {
 
         TypeDeclarationNode typeDeclarationNode = (TypeDeclarationNode) declarations.get(0);
 
-        assertEquals("test", typeDeclarationNode.getIdentifier());
+        assertEquals("test", typeDeclarationNode.getType().getIdentifier());
 
         assertNotNull(typeDeclarationNode.getType());
         assertInstanceOf(AccessTypeNode.class, typeDeclarationNode.getType());
@@ -409,7 +409,7 @@ public class DeclarationTest {
 
         TypeDeclarationNode typeDeclarationNode = (TypeDeclarationNode) declarations.get(0);
 
-        assertEquals("test", typeDeclarationNode.getIdentifier());
+        assertEquals("test", typeDeclarationNode.getType().getIdentifier());
 
         assertNotNull(typeDeclarationNode.getType());
         assertInstanceOf(RecordTypeNode.class, typeDeclarationNode.getType());

@@ -2,13 +2,14 @@ package AstTest;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.trad.pcl.Helpers.OperatorEnum;
 import org.trad.pcl.Lexer.Lexer;
 import org.trad.pcl.Lexer.Tokens.Tag;
 import org.trad.pcl.Lexer.Tokens.Token;
 import org.trad.pcl.Parser.Parser;
 import org.trad.pcl.Services.ErrorService;
-import org.trad.pcl.ast.statement.BlockNode;
 import org.trad.pcl.ast.expression.BinaryExpressionNode;
+import org.trad.pcl.ast.expression.FunctionCallNode;
 import org.trad.pcl.ast.expression.VariableReferenceNode;
 import org.trad.pcl.ast.statement.*;
 
@@ -38,13 +39,13 @@ public class StatementTest {
 
         assertNotNull(callFunctionNode);
 
-        assertInstanceOf(FunctionCallStatementNode.class, callFunctionNode);
+        assertInstanceOf(FunctionCallNode.class, callFunctionNode);
 
-        FunctionCallStatementNode callFunction = (FunctionCallStatementNode) callFunctionNode;
+        FunctionCallNode callFunction = (FunctionCallNode) callFunctionNode;
 
-        assertEquals("foo", callFunction.getIdentifier().getIdentifier());
+        assertEquals("foo", callFunction.getVariableReference().getIdentifier());
 
-        assertNull(callFunction.getIdentifier().getNextExpression());
+        assertNull(callFunction.getVariableReference().getNextExpression());
 
         assertNull(callFunction.getArguments());
 
@@ -66,13 +67,13 @@ public class StatementTest {
 
         assertNotNull(callFunctionNode);
 
-        assertInstanceOf(FunctionCallStatementNode.class, callFunctionNode);
+        assertInstanceOf(FunctionCallNode.class, callFunctionNode);
 
-        FunctionCallStatementNode callFunction = (FunctionCallStatementNode) callFunctionNode;
+        FunctionCallNode callFunction = (FunctionCallNode) callFunctionNode;
 
-        assertEquals("foo", callFunction.getIdentifier().getIdentifier());
+        assertEquals("foo", callFunction.getVariableReference().getIdentifier());
 
-        assertNull(callFunction.getIdentifier().getNextExpression());
+        assertNull(callFunction.getVariableReference());
 
         assertNotNull(callFunction.getArguments());
 
@@ -141,7 +142,7 @@ public class StatementTest {
 
         AssignmentStatementNode assignStatement = (AssignmentStatementNode) multipleIdentStatementNode;
 
-        VariableReferenceNode ident = assignStatement.getVariableReference();
+        VariableReferenceNode ident = assignStatement.getVariableReference().getNextExpression();
 
         assertEquals("foo", ident.getIdentifier());
 
@@ -179,13 +180,11 @@ public class StatementTest {
 
         ReturnStatementNode returnStatement = (ReturnStatementNode) returnStatementNode;
 
-        assertNotNull(returnStatement.getExpressions());
+        assertNotNull(returnStatement.getExpression());
 
-        assertEquals(1, returnStatement.getExpressions().size());
+        assertInstanceOf(VariableReferenceNode.class, returnStatement.getExpression());
 
-        assertInstanceOf(VariableReferenceNode.class, returnStatement.getExpressions().get(0));
-
-        VariableReferenceNode expression = (VariableReferenceNode) returnStatement.getExpressions().get(0);
+        VariableReferenceNode expression = (VariableReferenceNode) returnStatement.getExpression();
 
         assertEquals("foo", expression.getIdentifier());
 
@@ -206,9 +205,7 @@ public class StatementTest {
 
         ReturnStatementNode returnStatement = (ReturnStatementNode) returnStatementNode;
 
-        assertNotNull(returnStatement.getExpressions());
-
-        assertEquals(0, returnStatement.getExpressions().size());
+        assertNull(returnStatement.getExpression());
 
     }
 
@@ -243,7 +240,7 @@ public class StatementTest {
 
         BinaryExpressionNode condition = (BinaryExpressionNode) ifStatement.getCondition();
 
-        assertEquals("=", condition.getOperatorNode().getOperator());
+        assertEquals(OperatorEnum.EQUALS, condition.getOperatorNode().getOperator());
 
         assertInstanceOf(VariableReferenceNode.class, condition.getLeft());
         assertInstanceOf(AssignmentStatementNode.class, ifStatement.getThenBranch().getStatements().get(0));
