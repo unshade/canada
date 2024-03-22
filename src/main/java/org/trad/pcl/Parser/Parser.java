@@ -64,7 +64,7 @@ public class Parser {
         rootProcedure.setBody(block);
         abstractSyntaxTreeRoot.setRootProcedure(rootProcedure);
         analyseTerminal(Tag.END);
-        hasident();
+        rootProcedure.setEndIdentifier(hasident());
         analyseTerminal(Tag.SEMICOLON);
         analyseTerminal(Tag.EOF);
 

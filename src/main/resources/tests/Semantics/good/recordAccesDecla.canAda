@@ -6,5 +6,5 @@ procedure UseRecord is
    end record;
    Var1 : RecordTest; -- Correct si RecordTest est bien défini avant cette déclaration.
 begin
-    put(Var1);
+    put;
 end UseRecord;

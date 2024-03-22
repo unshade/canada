@@ -64,8 +64,11 @@ public final class FunctionDeclarationNode extends ASTNode implements Declaratio
     }
 
     public void checkEndIdentifier(){
+        if (this.endIdentifier == null){
+            return;
+        }
         if(!this.identifier.equals(this.endIdentifier)){
-            ErrorService.getInstance().registerSemanticError(new Exception("End identifier does not match the function identifier"));
+            ErrorService.getInstance().registerSemanticError(new Exception("End identifier does not match the function identifier : " + this.identifier + " != " + this.endIdentifier));
         }
     }
 

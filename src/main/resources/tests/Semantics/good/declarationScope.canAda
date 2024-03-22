@@ -1,13 +1,14 @@
 with Ada.Text_IO; use Ada.Text_IO;
 procedure Main is
-   Var1 : integer; -- Déclaration au niveau de la procédure principale.
 
-   procedure NestedProcedure is
-      Var1 : integer; -- Nouvelle déclaration de Var1 dans un scope différent (celui de NestedProcedure).
-   begin
-      -- Ici, Var1 fait référence à la variable Float déclarée au début de NestedProcedure.
-      Var1 := 5;
-   end NestedProcedure;
+Var1 : integer; -- Déclaration au niveau de la procédure principale.
+
+procedure NestedProcedure is
+  Var1 : integer; -- Nouvelle déclaration de Var1 dans un scope différent (celui de NestedProcedure).
+begin
+  -- Ici, Var1 fait référence à la variable Float déclarée au début de NestedProcedure.
+  Var1 := 5;
+end NestedProcedure;
 
 begin
    -- Ici, Var1 fait référence à la variable Integer déclarée au début de Main.

@@ -80,8 +80,11 @@ public final class ProcedureDeclarationNode extends ASTNode implements Declarati
     }
 
     public void checkEndIdentifier(){
+        if (this.endIdentifier == null){
+            return;
+        }
         if(!this.identifier.equals(this.endIdentifier)){
-            ErrorService.getInstance().registerSemanticError(new Exception("End identifier does not match the procedure identifier"));
+            ErrorService.getInstance().registerSemanticError(new Exception("End identifier does not match the procedure identifier : " + this.identifier + " != " + this.endIdentifier));
         }
     }
 
