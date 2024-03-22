@@ -1,7 +1,7 @@
 with Ada.Text_IO; use Ada.Text_IO;
 procedure TestIn is
     X : integer;
-    function Get(X : in integer) return Integer is
+    function Get(X : in integer) return integer is
     begin
         put(X); -- I can read X
         return X;

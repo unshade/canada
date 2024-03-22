@@ -70,11 +70,12 @@ public class SemanticTest {
     public boolean run(File file) throws BadFileExtension, IOException {
         Lexer lexer = new Lexer(file);
         Parser parser = new Parser(lexer);
-        ProgramNode AST = parser.parse();
-        SemanticAnalysisVisitor semanticChecker = new SemanticAnalysisVisitor();
 
         ErrorService.resetInstance();
         ErrorService errorService = ErrorService.getInstance();
+
+        ProgramNode AST = parser.parse();
+        SemanticAnalysisVisitor semanticChecker = new SemanticAnalysisVisitor();
 
         System.out.println("🔍 " + colorize("STARTING SEMANTIC ANALYSIS PHASE", new AnsiFormat(Attribute.WHITE_TEXT(), Attribute.BLUE_BACK(), Attribute.BOLD())));
         AST.accept(semanticChecker);

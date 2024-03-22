@@ -2,12 +2,12 @@ with Ada.Text_IO; use Ada.Text_IO;
 
 procedure TestUniqueProcedure is
 
-   procedure TestInOut(X : in out Integer) is
+   procedure TestInOut(X : in out integer) is
    begin
       put(X); -- Affiche la valeur de X.
    end TestInOut;
 
-   Value : Integer;
+   Value : integer;
 begin
    -- TestInOut(5);     -- Ceci est incorrect et devrait être commenté ou supprimé car 5 n'est pas une valeur gauche.
    -- L'appel suivant est correct et doit fonctionner sans problème.

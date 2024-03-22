@@ -2,7 +2,7 @@ with Ada.Text_IO; use Ada.Text_IO;
 
 procedure CallTest is
    Value : integer;
-   function TestInOut (X : in out integer) return Integer is
+   function TestInOut (X : in out integer) return integer is
     begin
         X := X + 1;
         return X;

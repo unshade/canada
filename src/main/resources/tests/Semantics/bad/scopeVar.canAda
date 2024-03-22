@@ -1,12 +1,12 @@
 with Ada.Text_IO; use Ada.Text_IO;
 procedure Outer is
-   OuterVar : Integer;
+   OuterVar : integer;
    procedure Inner is
-      InnerVar : Integer;
+      InnerVar : integer;
    begin
       OuterVar := 1; -- Correct, accès à une variable du niveau supérieur.
       InnerVar := 2; -- Correct, accès à une variable locale.
    end Inner;
 begin
-   -- InnerVar := 3; -- Doit générer une erreur de compilation, 'InnerVar' n'est pas accessible ici.
+   InnerVar := 3; -- Doit générer une erreur de compilation, 'InnerVar' n'est pas accessible ici.
 end Outer;
