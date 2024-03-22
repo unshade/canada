@@ -97,9 +97,12 @@ public class SemanticAnalysisVisitor implements ASTNodeVisitor {
 
     @Override
     public void visit(TypeDeclarationNode node) throws Exception {
-
+    try {
         node.getType().accept(this);
         scopeStack.peek().addSymbol(node.toSymbol(), 4);
+    } catch (Exception e) {
+        errorService.registerSemanticError(e);
+    }
     }
 
     @Override
