@@ -19,6 +19,7 @@ import org.trad.pcl.semantic.symbol.Symbol;
 import org.trad.pcl.semantic.symbol.Type;
 import org.trad.pcl.semantic.symbol.Variable;
 
+import java.util.List;
 import java.util.Stack;
 
 public class SemanticAnalysisVisitor implements ASTNodeVisitor {
@@ -286,7 +287,12 @@ public class SemanticAnalysisVisitor implements ASTNodeVisitor {
             throw new Exception("Record " + node.getIdentifier() + " has no fields");
         }
 
+        List<String> identifiers = node.getFields().stream().map(VariableDeclarationNode::getIdentifier).toList();
+
         for (VariableDeclarationNode field : node.getFields()) {
+            if (identifiers.indexOf(field.getIdentifier()) != identifiers.lastIndexOf(field.getIdentifier())) {
+                throw new Exception("Field " + field.getIdentifier() + " is defined multiple times");
+            }
             field.getType().accept(this);
 
         }
