@@ -1,6 +1,7 @@
 package org.trad.pcl.ast.statement;
 
 
+import org.trad.pcl.Exceptions.Semantic.InvalidConditionTypeException;
 import org.trad.pcl.Exceptions.Semantic.UndefinedVariableException;
 import org.trad.pcl.Helpers.TypeEnum;
 import org.trad.pcl.Services.ErrorService;
@@ -48,7 +49,7 @@ public final class IfStatementNode extends ASTNode implements StatementNode {
 
     public void checkConditionType() throws UndefinedVariableException {
         if (!condition.getType().equals(TypeEnum.BOOL.toString())) {
-            ErrorService.getInstance().registerSemanticError(new Exception("The condition of the if statement must be of type boolean"));
+            ErrorService.getInstance().registerSemanticError(new InvalidConditionTypeException(condition.getType()));
         }
     }
 

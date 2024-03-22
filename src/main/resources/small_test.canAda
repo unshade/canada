@@ -5,19 +5,27 @@ a : integer ;
 b : character ;
 
 type point is record
-x : integer ;
-y : character ;
+x : integer;
+y : integer;
 end record;
 
 c : point ;
 
-function aireRectangle(larg : in integer; long : in out integer) return integer is
+function aireRectangle(larg : in integer; long : in out integer) return point is
 aire: point;
 giga: character;
 begin
 return;
 end aireRectangle ;
 
+procedure unDebut is
+p : point ;
 begin
-c.x := a + aireRectangle(3, 4) ;
+p.x := 3 ;
+p.p := 4 ;
+end;
+
+begin
+c.x := a + aireRectangle(3, 4).x + c.x;
+aireRectangle := 5 ;
 end;

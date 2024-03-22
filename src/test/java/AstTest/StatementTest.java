@@ -43,9 +43,9 @@ public class StatementTest {
 
         FunctionCallNode callFunction = (FunctionCallNode) callFunctionNode;
 
-        assertEquals("foo", callFunction.getVariableReference().getIdentifier());
+        assertEquals("foo", callFunction.getIdentifier());
 
-        assertNull(callFunction.getVariableReference().getNextExpression());
+        assertNull(callFunction.getNextExpression());
 
         assertNull(callFunction.getArguments());
 
@@ -71,9 +71,7 @@ public class StatementTest {
 
         FunctionCallNode callFunction = (FunctionCallNode) callFunctionNode;
 
-        assertEquals("foo", callFunction.getVariableReference().getIdentifier());
-
-        assertNull(callFunction.getVariableReference());
+        assertEquals("foo", callFunction.getIdentifier());
 
         assertNotNull(callFunction.getArguments());
 

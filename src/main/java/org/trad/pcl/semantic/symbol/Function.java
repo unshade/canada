@@ -6,7 +6,9 @@ import org.trad.pcl.semantic.SemanticAnalysisVisitor;
 import java.util.ArrayList;
 import java.util.List;
 
-public class Function extends Variable {
+public class Function extends Symbol {
+
+    private String returnType;
 
     private final List<String> indexedParametersTypes;
     public Function(String identifier, int shift) {
@@ -16,6 +18,14 @@ public class Function extends Variable {
 
     public void addParameter(String parameterType) {
         indexedParametersTypes.add(parameterType);
+    }
+
+    public void setReturnType(String returnType) {
+        this.returnType = returnType;
+    }
+
+    public String getReturnType() {
+        return returnType;
     }
 
     public List<String> getIndexedParametersTypes() {

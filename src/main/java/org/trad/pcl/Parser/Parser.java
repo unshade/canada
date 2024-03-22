@@ -1317,7 +1317,7 @@ public class Parser {
                 expression = new FunctionCallNode();
                 ((FunctionCallNode) expression).setArguments(multipleExpressions());
                 analyseTerminal(Tag.CLOSE_PAREN);
-                ((FunctionCallNode)expression).getVariableReference().setNextExpression(acces());
+                ((FunctionCallNode)expression).setNextExpression(acces());
             }
             default -> this.errorService.registerSyntaxError(
                     new UnexpectedTokenListException(this.currentToken,

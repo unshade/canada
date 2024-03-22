@@ -1,6 +1,7 @@
 package org.trad.pcl.ast.declaration;
 
 
+import org.trad.pcl.Exceptions.Semantic.InvalidEndIdentifierException;
 import org.trad.pcl.Exceptions.Semantic.MissingReturnStatementException;
 import org.trad.pcl.Services.ErrorService;
 import org.trad.pcl.ast.ASTNode;
@@ -68,7 +69,7 @@ public final class FunctionDeclarationNode extends ASTNode implements Declaratio
             return;
         }
         if(!this.identifier.equals(this.endIdentifier)){
-            ErrorService.getInstance().registerSemanticError(new Exception("End identifier does not match the function identifier : " + this.identifier + " != " + this.endIdentifier));
+            ErrorService.getInstance().registerSemanticError(new InvalidEndIdentifierException(this.identifier, this.endIdentifier));
         }
     }
 
@@ -109,7 +110,7 @@ public final class FunctionDeclarationNode extends ASTNode implements Declaratio
 
     public Symbol toSymbol() {
         Function f = new Function(this.identifier, 0);
-        f.setType(this.returnType.getIdentifier());
+        f.setReturnType(this.returnType.getIdentifier());
         for (ParameterNode parameter : parameters) {
             f.addParameter(parameter.getType().getIdentifier());
         }

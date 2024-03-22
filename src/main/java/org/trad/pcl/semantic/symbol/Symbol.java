@@ -20,17 +20,6 @@ public class Symbol {
         this.shift = shift;
     }
 
-    public static Symbol builtinFunction(String identifier) {
-        Function f = new Function(identifier, 0);
-        f.setType("integer");
-        f.addParameter("integer");
-        return f;
-    }
-
-    public static Symbol builtinVariable(String identifier) {
-        return new Symbol(identifier, 0);
-    }
-
 
     public String getIdentifier() {
         return identifier;

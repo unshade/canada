@@ -1,7 +1,6 @@
 package org.trad.pcl.semantic;
 
-import org.trad.pcl.Exceptions.Semantic.InvalidReturnTypeException;
-import org.trad.pcl.Exceptions.Semantic.UndefinedVariableException;
+import org.trad.pcl.Exceptions.Semantic.*;
 import org.trad.pcl.Helpers.StringFormatHelper;
 import org.trad.pcl.Helpers.TypeEnum;
 import org.trad.pcl.Services.ErrorService;
@@ -13,11 +12,8 @@ import org.trad.pcl.ast.statement.*;
 import org.trad.pcl.ast.type.AccessTypeNode;
 import org.trad.pcl.ast.type.RecordTypeNode;
 import org.trad.pcl.ast.type.TypeNode;
-import org.trad.pcl.semantic.symbol.Function;
+import org.trad.pcl.semantic.symbol.*;
 import org.trad.pcl.semantic.symbol.Record;
-import org.trad.pcl.semantic.symbol.Symbol;
-import org.trad.pcl.semantic.symbol.Type;
-import org.trad.pcl.semantic.symbol.Variable;
 
 import java.util.List;
 import java.util.Stack;
@@ -36,6 +32,13 @@ public class SemanticAnalysisVisitor implements ASTNodeVisitor {
 
         scopeStack.peek().addSymbol(integer, 0);
         scopeStack.peek().addSymbol(character, 0);
+    }
+
+    public void addPredefinedFunctions() {
+        Procedure put = new Procedure("put",  4);
+        put.addParameter(TypeEnum.CHAR.toString());
+
+        scopeStack.peek().addSymbol(put, 0);
     }
 
     public static Symbol findSymbolInScopes(String identifier) throws UndefinedVariableException {
@@ -110,18 +113,13 @@ public class SemanticAnalysisVisitor implements ASTNodeVisitor {
             case "RecordTypeNode":
                 RecordTypeNode recordTypeNode = (RecordTypeNode) node.getType();
 
-                if(recordTypeNode.getFields().isEmpty()) {
-                    throw new Exception("Record " + recordTypeNode.getIdentifier() + " has no fields");
-                }
-
                 List<String> identifiers = recordTypeNode.getFields().stream().map(VariableDeclarationNode::getIdentifier).toList();
 
                 for (VariableDeclarationNode field : recordTypeNode.getFields()) {
                     if (identifiers.indexOf(field.getIdentifier()) != identifiers.lastIndexOf(field.getIdentifier())) {
-                        throw new Exception("Field " + field.getIdentifier() + " is defined multiple times");
+                        throw new DuplicateRecordFieldException(field.getIdentifier(), recordTypeNode.getIdentifier());
                     }
                     field.getType().accept(this);
-
                 }
                 break;
             case "TypeNode":
@@ -171,8 +169,13 @@ public class SemanticAnalysisVisitor implements ASTNodeVisitor {
 
     @Override
     public void visit(FunctionCallNode node) throws Exception {
-        // Check if the function is defined
-        node.getVariableReference().accept(this);
+        Symbol symbol = findSymbolInScopes(node.getIdentifier());
+        if (!(symbol instanceof Function function)) {
+            throw new Exception("The identifier " + node.getIdentifier() + " is not a valid function");
+        }
+
+        node.checkVariableReferenceAccess(function.getReturnType());
+
         for (ExpressionNode expressionNode : node.getArguments()) {
             expressionNode.accept(this);
         }
@@ -207,19 +210,25 @@ public class SemanticAnalysisVisitor implements ASTNodeVisitor {
     @Override
     public void visit(ReturnStatementNode node) throws Exception {
         Symbol s = findSymbolInScopes(scopeStack.peek().getScopeIdentifier());
-        if (!(s instanceof Function)) {
-            throw new Exception("Return statement can only be used in a function");
+        switch (s.getClass().getSimpleName()) {
+            case "Function" -> {
+                if (node.getExpression() == null) {
+                    throw new InvalidReturnTypeException(((Function) s).getReturnType(), TypeEnum.VOID.toString());
+                }
+
+                node.getExpression().accept(this);
+
+                if (!node.getExpression().getType().equals(((Function) s).getReturnType())) {
+                    throw new InvalidReturnTypeException(((Function) s).getReturnType(), node.getExpression().getType());
+                }
+            }
+            case "Procedure" -> {
+                if (node.getExpression() != null) {
+                    throw new InvalidReturnTypeException(TypeEnum.VOID.toString(), node.getExpression().getType());
+                }
+            }
         }
 
-        if(node.getExpression() == null) {
-            return;
-        }
-        node.getExpression().accept(this);
-
-
-        if (!node.getExpression().getType().equals(((Function) s).getType())) {
-            throw new InvalidReturnTypeException(((Function) s).getType(), node.getExpression().getType());
-        }
     }
 
     @Override
@@ -242,12 +251,13 @@ public class SemanticAnalysisVisitor implements ASTNodeVisitor {
         node.getExpression().accept(this);
         // Check if the expression is an integer
         if (!node.getExpression().getType().equals(TypeEnum.CHAR.toString())) {
-            errorService.registerSemanticError(new Exception("The expression is not a integer"));
+            throw new TypeMismatchException(TypeEnum.CHAR.toString(), node.getExpression().getType());
         }
     }
 
     @Override
     public void visit(LiteralNode node) {
+        // Do nothing
     }
 
     @Override
@@ -255,24 +265,10 @@ public class SemanticAnalysisVisitor implements ASTNodeVisitor {
         // Check if the variable is defined
         Symbol var = findSymbolInScopes(node.getIdentifier());
         if (!(var instanceof Variable variable)) {
-            throw new Exception("The identifier " + node.getIdentifier() + " is not a valid variable");
+            throw new InvalidVariableReferenceException(node.getIdentifier(), var.getClass().getSimpleName());
         }
 
-        while(node.getNextExpression() != null) {
-            Symbol type = findSymbolInScopes((variable).getType());
-            if (type != null && !(type instanceof Record)) {
-                throw new Exception("The type " + variable.getType() + " is not a record");
-            }
-
-            Variable field = ((Record) type).getField(node.getNextExpression().getIdentifier());
-            if (field == null) {
-                throw new Exception("The field " + node.getNextExpression().getIdentifier() + " for the record " + ((Variable) variable).getType() + " is not defined");
-            }
-
-            node = node.getNextExpression();
-            variable = field;
-
-        }
+        node.checkVariableReferenceAccess(variable.getType());
     }
 
     @Override
@@ -285,7 +281,7 @@ public class SemanticAnalysisVisitor implements ASTNodeVisitor {
     public void visit(UnaryExpressionNode node) throws Exception {
         node.getOperand().accept(this);
         if (!node.getOperator().getType().equals(node.getOperand().getType())) {
-            errorService.registerSemanticError(new Exception("Type mismatch"));
+            throw new TypeMismatchException(node.getOperator().getType(), node.getOperand().getType());
         }
     }
 
@@ -303,9 +299,9 @@ public class SemanticAnalysisVisitor implements ASTNodeVisitor {
         scopeStack.push(new SymbolTable());
 
         // Build-in features
-        scopeStack.peek().addSymbol(Symbol.builtinFunction("put"), 0);
-
         addPrimitiveTypes();
+        addPredefinedFunctions();
+
         StringFormatHelper.printTDS(scopeStack.peek(), "PROCEDURE", "root");
 
         try {

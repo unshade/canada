@@ -46,7 +46,6 @@ public final class AssignmentStatementNode extends ASTNode implements Identifiab
 
     public void checkIfAssignable() throws UndefinedVariableException {
         Variable reference = (Variable) SemanticAnalysisVisitor.findSymbolInScopes(this.variableReference.getIdentifier());
-        assert reference != null;
 
         if (reference instanceof Parameter) {
             if (((Parameter) reference).getMode().equals(ParameterMode.IN)) {

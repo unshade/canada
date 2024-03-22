@@ -1,5 +1,6 @@
 package org.trad.pcl.ast.declaration;
 
+import org.trad.pcl.Exceptions.Semantic.InvalidEndIdentifierException;
 import org.trad.pcl.Services.ErrorService;
 import org.trad.pcl.ast.ASTNode;
 import org.trad.pcl.ast.ParameterNode;
@@ -84,7 +85,7 @@ public final class ProcedureDeclarationNode extends ASTNode implements Declarati
             return;
         }
         if(!this.identifier.equals(this.endIdentifier)){
-            ErrorService.getInstance().registerSemanticError(new Exception("End identifier does not match the procedure identifier : " + this.identifier + " != " + this.endIdentifier));
+            ErrorService.getInstance().registerSemanticError(new InvalidEndIdentifierException(this.identifier, this.endIdentifier));
         }
     }
 

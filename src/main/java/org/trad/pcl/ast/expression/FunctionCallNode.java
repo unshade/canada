@@ -14,14 +14,10 @@ import org.trad.pcl.semantic.symbol.Record;
 import java.util.List;
 import java.util.Locale;
 
-public final class FunctionCallNode extends ASTNode implements IdentifiableExpression, IdentifiableStatement {
+public final class FunctionCallNode extends VariableReferenceNode {
 
-    private VariableReferenceNode variableReferenceNode;
     private List<ExpressionNode> arguments;
 
-    public FunctionCallNode() {
-        this.variableReferenceNode = new VariableReferenceNode();
-    }
 
     public void setArguments(List<ExpressionNode> arguments) {
         this.arguments = arguments;
@@ -30,22 +26,13 @@ public final class FunctionCallNode extends ASTNode implements IdentifiableExpre
         return arguments;
     }
 
-    public void setIdentifier(String variableReference) {
-        this.variableReferenceNode.setIdentifier(variableReference);
-    }
-
-    public VariableReferenceNode getVariableReference() {
-        return variableReferenceNode;
-    }
-
-
     @Override
     public String getType() throws UndefinedVariableException {
-        Function function = (Function) SemanticAnalysisVisitor.findSymbolInScopes(this.variableReferenceNode.getIdentifier());
-        String type = function.getType();
+        Function function = (Function) SemanticAnalysisVisitor.findSymbolInScopes(this.getIdentifier());
+        String type = function.getReturnType();
 
-        if (this.variableReferenceNode.getNextExpression() != null) {
-            VariableReferenceNode next = this.variableReferenceNode.getNextExpression();
+        if (this.getNextExpression() != null) {
+            VariableReferenceNode next = this.getNextExpression();
             while (next != null) {
                 Record recordType = (Record) SemanticAnalysisVisitor.findSymbolInScopes(type);
                 type = recordType.getField(next.getIdentifier()).getType();
@@ -56,17 +43,17 @@ public final class FunctionCallNode extends ASTNode implements IdentifiableExpre
     }
 
     public void checkParametersSize() throws Exception {
-        Function correspondingDeclaration = (Function) SemanticAnalysisVisitor.findSymbolInScopes(this.variableReferenceNode.getIdentifier());
+        Function correspondingDeclaration = (Function) SemanticAnalysisVisitor.findSymbolInScopes(this.getIdentifier());
 
         // Check if the number of arguments match the number of declared parameters
         if (this.getArguments().size() != correspondingDeclaration.getIndexedParametersTypes().size()) {
-            throw new IncorrectNumberOfArgumentsException(this.variableReferenceNode.getIdentifier(), correspondingDeclaration.getIndexedParametersTypes().size(), this.getArguments().size());
+            throw new IncorrectNumberOfArgumentsException(this.getIdentifier(), correspondingDeclaration.getIndexedParametersTypes().size(), this.getArguments().size());
         }
     }
 
     public void checkParametersTypes() throws Exception {
         // Check if the types of the arguments match the types of the declared parameters
-        Function correspondingDeclaration = (Function) SemanticAnalysisVisitor.findSymbolInScopes(this.variableReferenceNode.getIdentifier());
+        Function correspondingDeclaration = (Function) SemanticAnalysisVisitor.findSymbolInScopes(this.getIdentifier());
 
         for (int i = 0; i < this.getArguments().size(); i++) {
             String argumentType = this.getArguments().get(i).getType();

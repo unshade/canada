@@ -1,5 +1,6 @@
 package org.trad.pcl.ast.expression;
 
+import org.trad.pcl.Exceptions.Semantic.BinaryTypeMismatchException;
 import org.trad.pcl.Exceptions.Semantic.UndefinedVariableException;
 import org.trad.pcl.Helpers.OperatorEnum;
 import org.trad.pcl.Helpers.TypeEnum;
@@ -101,10 +102,9 @@ public final class BinaryExpressionNode extends ASTNode implements ExpressionNod
     public void checkType() throws UndefinedVariableException {
 
         if (!left.getType().equals(right.getType()) || !left.getType().equals(operator.getType())) {
-            ErrorService.getInstance().registerSemanticError(new Exception("The types of the binary expression are not compatible(" + left.getType() + ", " + operator.getOperator() + "(" + operator.getType() + "), " + right.getType() + ")"));
+            ErrorService.getInstance().registerSemanticError(new BinaryTypeMismatchException(left.getType(), right.getType(), operator.getType()));
         }
     }
-
     @Override
     public String getType() {
         return operator.getType();
