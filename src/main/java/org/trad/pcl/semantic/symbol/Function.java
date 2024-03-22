@@ -6,14 +6,12 @@ import org.trad.pcl.semantic.SemanticAnalysisVisitor;
 import java.util.ArrayList;
 import java.util.List;
 
-public class Function extends Symbol {
+public class Function extends Variable {
 
     private final List<String> indexedParametersTypes;
-    private String returnType;
     public Function(String identifier, int shift) {
         super(identifier, shift);
         this.indexedParametersTypes = new ArrayList<>();
-        this.returnType = null;
     }
 
     public void addParameter(String parameterType) {
@@ -24,20 +22,12 @@ public class Function extends Symbol {
         return indexedParametersTypes;
     }
 
-    public void setReturnType(String returnType) {
-        this.returnType = returnType;
-    }
-
-    public String getReturnType() {
-        return returnType;
-    }
 
     @Override
     public String toString() {
         return "Function { " +
                 super.toString() +
                 ", indexedParametersTypes = '" + indexedParametersTypes.toString() + '\'' +
-                ", returnType = '" + returnType + '\'' +
                 " }";
     }
 }

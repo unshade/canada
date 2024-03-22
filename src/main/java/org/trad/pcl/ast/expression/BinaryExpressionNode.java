@@ -93,7 +93,7 @@ public final class BinaryExpressionNode extends ASTNode implements ExpressionNod
     }
 
     @Override
-    public void accept(ASTNodeVisitor visitor) {
+    public void accept(ASTNodeVisitor visitor) throws Exception {
         visitor.visit(this);
     }
 

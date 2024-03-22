@@ -22,6 +22,7 @@ public class Symbol {
 
     public static Symbol builtinFunction(String identifier) {
         Function f = new Function(identifier, 0);
+        f.setType("integer");
         f.addParameter("integer");
         return f;
     }

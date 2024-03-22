@@ -113,16 +113,18 @@ public class SemanticAnalysisVisitor implements ASTNodeVisitor {
     }
 
     @Override
-    public void visit(AssignmentStatementNode node) throws Exception {
-
+    public void visit(AssignmentStatementNode node) {
+        try{
+        node.getVariableReference().accept(this);
         node.getExpression().accept(this);
         node.checkIfAssignable();
+        } catch (Exception e) {
+            errorService.registerSemanticError(e);
+        }
     }
 
     @Override
     public void visit(BlockNode node) {
-
-
 
         // Traverse the declarations
         for (DeclarationNode declarationNode : node.getDeclarations()) {
@@ -143,16 +145,15 @@ public class SemanticAnalysisVisitor implements ASTNodeVisitor {
     }
 
     @Override
-    public void visit(FunctionCallNode node) {
+    public void visit(FunctionCallNode node) throws Exception {
         // Check if the function is defined
-        try {
-            for (ExpressionNode expressionNode : node.getArguments()) {
-                expressionNode.accept(this);
-            }
-            node.checkParametersSize();
-            node.checkParametersTypes();
-        } catch (Exception ignored) {
+        node.getIdentifier().accept(this);
+        System.out.println("Ne devrait pas arriver");
+        for (ExpressionNode expressionNode : node.getArguments()) {
+            expressionNode.accept(this);
         }
+        node.checkParametersSize();
+        node.checkParametersTypes();
     }
 
     @Override
@@ -197,8 +198,8 @@ public class SemanticAnalysisVisitor implements ASTNodeVisitor {
             errorService.registerSemanticError(new Exception("Return statement can only be used in a function"));
             return;
         }
-        if (!node.getExpression().getType().equals(((Function) s).getReturnType())) {
-            errorService.registerSemanticError(new InvalidReturnTypeException(((Function) s).getReturnType(), node.getExpression().getType()));
+        if (!node.getExpression().getType().equals(((Function) s).getType())) {
+            errorService.registerSemanticError(new InvalidReturnTypeException(((Function) s).getType(), node.getExpression().getType()));
         }
     }
 
@@ -209,14 +210,11 @@ public class SemanticAnalysisVisitor implements ASTNodeVisitor {
     }
 
     @Override
-    public void visit(BinaryExpressionNode node) {
-        try {
+    public void visit(BinaryExpressionNode node) throws Exception {
+
         node.getLeft().accept(this);
         node.getRight().accept(this);
         node.checkType();
-        } catch (Exception e) {
-            errorService.registerSemanticError(e);
-        }
 
     }
 
@@ -245,7 +243,7 @@ public class SemanticAnalysisVisitor implements ASTNodeVisitor {
         while(node.getNextExpression() != null) {
             Symbol type = findSymbolInScopes((variable).getType());
             if (!(type instanceof Record)) {
-                throw new Exception("The type " + ((Variable) variable).getType() + " is not a valid record");
+                throw new Exception("The type " + (variable).getType() + " is not a valid record");
             }
 
             Variable field = ((Record) type).getField(node.getNextExpression().getIdentifier());
@@ -312,7 +310,7 @@ public class SemanticAnalysisVisitor implements ASTNodeVisitor {
 
         try {
             node.getRootProcedure().accept(this);
-        } catch (Exception e) {
+        } catch (Exception ignored) {
         }
     }
 

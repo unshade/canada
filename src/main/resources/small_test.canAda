@@ -6,12 +6,19 @@ b : bk ;
 
 type point is record
 x : integer ;
-y : integer ;
+y : character ;
 end record;
 
 c : point ;
 
+function aireRectangle(larg : in integer; long : in out integer) return point is
+aire: point;
+giga: character;
 begin
-choix := a + c.x.z ;
-choix := a + c.c ;
+return aire ;
+end aireRectangle ;
+
+
+begin
+c.x := a + aireRectangle(3, 4).y ;
 end;

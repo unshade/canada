@@ -1212,7 +1212,7 @@ public class Parser {
                 } else {
                     String ident = analyseTerminal(Tag.IDENT).getValue();
                     expression = identPrimary();
-                    ((VariableReferenceNode) expression).setIdentifier(ident);
+                    ((IdentifiableExpression) expression).setIdentifier(ident);
                 }
 
             }
@@ -1303,19 +1303,19 @@ public class Parser {
      * Grammar rule : primary2
      */
     @PrintMethodName
-    private VariableReferenceNode identPrimary() {
-        VariableReferenceNode expression = null;
+    private IdentifiableExpression identPrimary() {
+        IdentifiableExpression expression = null;
         switch (this.currentToken.tag()) {
             case SEMICOLON, COMMA, CLOSE_PAREN, OR, AND, THEN, NOT, EQ, NE, LT, LE, GT, GE, PLUS, MINUS, MULTI, DIV, REM, DOTDOT, LOOP, DOT -> {
                 expression = new VariableReferenceNode();
-                expression.setNextExpression(acces());
+                ((VariableReferenceNode)expression).setNextExpression(acces());
             }
             case OPEN_PAREN -> {
                 analyseTerminal(Tag.OPEN_PAREN);
                 expression = new FunctionCallNode();
                 ((FunctionCallNode) expression).setArguments(multipleExpressions());
                 analyseTerminal(Tag.CLOSE_PAREN);
-                expression.setNextExpression(acces());
+                ((FunctionCallNode)expression).getIdentifier().setNextExpression(acces());
             }
             default -> this.errorService.registerSyntaxError(
                     new UnexpectedTokenListException(this.currentToken,
@@ -1438,7 +1438,7 @@ public class Parser {
                 // appel de fonction et Assign
                 String ident = analyseTerminal(Tag.IDENT).getValue();
                 statement = identifiableStatement();
-                ((VariableReferenceNode) statement).setIdentifier(ident);
+                ((IdentifiableStatement) statement).setIdentifier(ident);
             }
             case BEGIN -> {
                 statement = new BlockNode();
@@ -1514,8 +1514,8 @@ public class Parser {
      * Grammar rule : instr2
      */
     @PrintMethodName
-    private VariableReferenceNode identifiableStatement() {
-        VariableReferenceNode statement = null;
+    private IdentifiableStatement identifiableStatement() {
+        IdentifiableStatement statement = null;
         switch (this.currentToken.tag()) {
 
             case SEMICOLON -> {
@@ -1535,7 +1535,7 @@ public class Parser {
             }
             case ASSIGN, DOT -> {
                 statement = new AssignmentStatementNode();
-                statement.setNextExpression(instr3());
+                ((AssignmentStatementNode) statement).getVariableReference().setNextExpression(instr3());
                 analyseTerminal(Tag.ASSIGN);
                 ((AssignmentStatementNode) statement).setExpression(expression());
                 analyseTerminal(Tag.SEMICOLON);

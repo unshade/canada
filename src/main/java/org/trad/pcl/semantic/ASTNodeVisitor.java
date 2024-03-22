@@ -34,7 +34,7 @@ public interface ASTNodeVisitor {
 
     void visit(BlockNode node);
 
-    void visit(FunctionCallNode node);
+    void visit(FunctionCallNode node) throws Exception;
 
     void visit(IfStatementNode node);
 
@@ -46,7 +46,7 @@ public interface ASTNodeVisitor {
 
     // ExpressionNode
 
-    void visit(BinaryExpressionNode node);
+    void visit(BinaryExpressionNode node) throws Exception;
 
     void visit(CharacterValExpressionNode node) throws Exception;
 

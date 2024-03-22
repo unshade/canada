@@ -321,13 +321,13 @@ public class DeclarationTest {
         assertNotNull(v3.getAssignment());
 
         assertEquals(Long.parseLong("1"), ((LiteralNode) v1.getAssignment().getExpression()).getValue());
-        assertEquals("var", v1.getAssignment().getIdentifier().getIdentifier());
+        assertEquals("var", v1.getAssignment().getVariableReference().getIdentifier());
 
         assertEquals(Long.parseLong("1"), ((LiteralNode) v2.getAssignment().getExpression()).getValue());
-        assertEquals("var2", v2.getAssignment().getIdentifier().getIdentifier());
+        assertEquals("var2", v2.getAssignment().getVariableReference().getIdentifier());
 
         assertEquals(Long.parseLong("1"), ((LiteralNode) v3.getAssignment().getExpression()).getValue());
-        assertEquals("var3", v3.getAssignment().getIdentifier().getIdentifier());
+        assertEquals("var3", v3.getAssignment().getVariableReference().getIdentifier());
 
     }
 

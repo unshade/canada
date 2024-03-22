@@ -106,9 +106,9 @@ public class StatementTest {
 
         AssignmentStatementNode assignmentStatement = (AssignmentStatementNode) assignmentStatementNode;
 
-        assertEquals("foo", assignmentStatement.getIdentifier().getIdentifier());
+        assertEquals("foo", assignmentStatement.getVariableReference().getIdentifier());
 
-        assertNull(assignmentStatement.getIdentifier().getNextExpression());
+        assertNull(assignmentStatement.getVariableReference().getNextExpression());
 
         assertNotNull(assignmentStatement.getExpression());
 
@@ -141,7 +141,7 @@ public class StatementTest {
 
         AssignmentStatementNode assignStatement = (AssignmentStatementNode) multipleIdentStatementNode;
 
-        VariableReferenceNode ident = assignStatement.getIdentifier();
+        VariableReferenceNode ident = assignStatement.getVariableReference();
 
         assertEquals("foo", ident.getIdentifier());
 

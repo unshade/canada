@@ -1,17 +1,13 @@
 package org.trad.pcl.ast.expression;
 
-import org.trad.pcl.Helpers.TypeEnum;
-import org.trad.pcl.Services.ErrorService;
 import org.trad.pcl.ast.ASTNode;
-import org.trad.pcl.ast.statement.StatementNode;
+import org.trad.pcl.ast.statement.IdentifiableStatement;
 import org.trad.pcl.semantic.ASTNodeVisitor;
 import org.trad.pcl.semantic.SemanticAnalysisVisitor;
 import org.trad.pcl.semantic.symbol.Record;
-import org.trad.pcl.semantic.symbol.Symbol;
-import org.trad.pcl.semantic.symbol.Type;
 import org.trad.pcl.semantic.symbol.Variable;
 
-public class VariableReferenceNode extends ASTNode implements ExpressionNode, StatementNode {
+public class VariableReferenceNode extends ASTNode implements IdentifiableExpression, IdentifiableStatement {
     private String identifier;
 
     private VariableReferenceNode nextExpression;
