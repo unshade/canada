@@ -33,7 +33,7 @@ public final class FunctionCallNode extends ASTNode implements IdentifiableExpre
         this.variableReferenceNode.setIdentifier(variableReference);
     }
 
-    public VariableReferenceNode getIdentifier() {
+    public VariableReferenceNode getVariableReference() {
         return variableReferenceNode;
     }
 

@@ -147,7 +147,7 @@ public class SemanticAnalysisVisitor implements ASTNodeVisitor {
     @Override
     public void visit(FunctionCallNode node) throws Exception {
         // Check if the function is defined
-        node.getIdentifier().accept(this);
+        node.getVariableReference().accept(this);
         System.out.println("Ne devrait pas arriver");
         for (ExpressionNode expressionNode : node.getArguments()) {
             expressionNode.accept(this);
