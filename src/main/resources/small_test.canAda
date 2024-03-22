@@ -2,7 +2,7 @@ with Ada.Text_IO; use Ada.Text_IO;
 procedure unDebut is
 choix : integer ;
 a : integer ;
-b : bk ;
+b : character ;
 
 type point is record
 x : integer ;
@@ -11,14 +11,13 @@ end record;
 
 c : point ;
 
-function aireRectangle(larg : in integer; long : in out integer) return point is
+function aireRectangle(larg : in integer; long : in out integer) return integer is
 aire: point;
 giga: character;
 begin
-return aire ;
-end aireRectangle2 ;
-
+return;
+end aireRectangle ;
 
 begin
-c.x := a + aireRectangle(3, 4).y ;
-end bleu;
+c.x := a + aireRectangle(3, 4) ;
+end;

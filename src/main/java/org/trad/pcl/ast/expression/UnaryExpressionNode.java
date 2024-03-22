@@ -1,5 +1,6 @@
 package org.trad.pcl.ast.expression;
 
+import org.trad.pcl.Exceptions.Semantic.UndefinedVariableException;
 import org.trad.pcl.Helpers.TypeEnum;
 import org.trad.pcl.ast.ASTNode;
 import org.trad.pcl.ast.OperatorNode;
@@ -31,7 +32,7 @@ public final class UnaryExpressionNode extends ASTNode implements ExpressionNode
     }
 
     @Override
-    public String getType() {
+    public String getType() throws UndefinedVariableException {
         return operand.getType();
     }
 }

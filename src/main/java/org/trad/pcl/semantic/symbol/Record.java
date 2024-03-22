@@ -7,7 +7,7 @@ import java.util.List;
 
 import static com.diogonunes.jcolor.Ansi.colorize;
 
-public class Record extends Symbol {
+public class Record extends Type {
 
     List<Variable> fields;
 

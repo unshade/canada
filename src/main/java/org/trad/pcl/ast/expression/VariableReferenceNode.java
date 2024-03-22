@@ -1,5 +1,6 @@
 package org.trad.pcl.ast.expression;
 
+import org.trad.pcl.Exceptions.Semantic.UndefinedVariableException;
 import org.trad.pcl.ast.ASTNode;
 import org.trad.pcl.ast.statement.IdentifiableStatement;
 import org.trad.pcl.semantic.ASTNodeVisitor;
@@ -34,10 +35,9 @@ public class VariableReferenceNode extends ASTNode implements IdentifiableExpres
     }
 
     @Override
-    public String getType() {
-
+    public String getType() throws UndefinedVariableException {
         Variable variableExpression = (Variable) SemanticAnalysisVisitor.findSymbolInScopes(this.getIdentifier());
-        assert variableExpression != null;
+
         String type = variableExpression.getType();
 
         if (this.nextExpression != null) {

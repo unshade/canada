@@ -2,6 +2,7 @@ package org.trad.pcl.ast.expression;
 
 import org.trad.pcl.Exceptions.Semantic.ArgumentTypeMismatchException;
 import org.trad.pcl.Exceptions.Semantic.IncorrectNumberOfArgumentsException;
+import org.trad.pcl.Exceptions.Semantic.UndefinedVariableException;
 import org.trad.pcl.Services.ErrorService;
 import org.trad.pcl.ast.ASTNode;
 import org.trad.pcl.ast.statement.IdentifiableStatement;
@@ -39,16 +40,14 @@ public final class FunctionCallNode extends ASTNode implements IdentifiableExpre
 
 
     @Override
-    public String getType() {
+    public String getType() throws UndefinedVariableException {
         Function function = (Function) SemanticAnalysisVisitor.findSymbolInScopes(this.variableReferenceNode.getIdentifier());
-        assert function != null;
         String type = function.getType();
 
         if (this.variableReferenceNode.getNextExpression() != null) {
             VariableReferenceNode next = this.variableReferenceNode.getNextExpression();
             while (next != null) {
                 Record recordType = (Record) SemanticAnalysisVisitor.findSymbolInScopes(type);
-                assert recordType != null;
                 type = recordType.getField(next.getIdentifier()).getType();
                 next = next.getNextExpression();
             }
@@ -58,28 +57,22 @@ public final class FunctionCallNode extends ASTNode implements IdentifiableExpre
 
     public void checkParametersSize() throws Exception {
         Function correspondingDeclaration = (Function) SemanticAnalysisVisitor.findSymbolInScopes(this.variableReferenceNode.getIdentifier());
-        if (correspondingDeclaration == null) {
-            throw new Exception();
-        }
+
         // Check if the number of arguments match the number of declared parameters
         if (this.getArguments().size() != correspondingDeclaration.getIndexedParametersTypes().size()) {
-            ErrorService.getInstance().registerSemanticError(new IncorrectNumberOfArgumentsException(this.variableReferenceNode.getIdentifier(), correspondingDeclaration.getIndexedParametersTypes().size(), this.getArguments().size()));
-            throw new Exception();
+            throw new IncorrectNumberOfArgumentsException(this.variableReferenceNode.getIdentifier(), correspondingDeclaration.getIndexedParametersTypes().size(), this.getArguments().size());
         }
     }
 
     public void checkParametersTypes() throws Exception {
         // Check if the types of the arguments match the types of the declared parameters
         Function correspondingDeclaration = (Function) SemanticAnalysisVisitor.findSymbolInScopes(this.variableReferenceNode.getIdentifier());
-        if (correspondingDeclaration == null) {
-            throw new Exception();
-        }
+
         for (int i = 0; i < this.getArguments().size(); i++) {
             String argumentType = this.getArguments().get(i).getType();
             String parameterType = correspondingDeclaration.getIndexedParametersTypes().get(i).toLowerCase(Locale.ROOT);
             if (!argumentType.equals(parameterType)) {
-                ErrorService.getInstance().registerSemanticError(new ArgumentTypeMismatchException(correspondingDeclaration.getIndexedParametersTypes().get(i), argumentType));
-                throw new Exception();
+                throw new ArgumentTypeMismatchException(correspondingDeclaration.getIndexedParametersTypes().get(i), argumentType);
             }
         }
     }

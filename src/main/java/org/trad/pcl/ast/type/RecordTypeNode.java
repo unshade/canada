@@ -32,10 +32,6 @@ public final class RecordTypeNode extends TypeNode {
         return fields;
     }
 
-    @Override
-    public void accept(ASTNodeVisitor visitor) throws Exception {
-        visitor.visit(this);
-    }
 
     public Symbol toSymbol() {
         Record record = new Record(getIdentifier(), 0);

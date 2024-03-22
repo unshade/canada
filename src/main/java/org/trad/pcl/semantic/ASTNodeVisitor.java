@@ -1,5 +1,6 @@
 package org.trad.pcl.semantic;
 
+import org.trad.pcl.Exceptions.Semantic.UndefinedVariableException;
 import org.trad.pcl.ast.ParameterNode;
 import org.trad.pcl.ast.ProgramNode;
 import org.trad.pcl.ast.expression.*;
@@ -22,9 +23,6 @@ public interface ASTNodeVisitor {
 
     void visit(TypeDeclarationNode node) throws Exception;
 
-    void visit(RecordTypeNode node) throws Exception;
-
-    void visit(AccessTypeNode node);
 
     void visit(VariableDeclarationNode node) throws Exception;
 
@@ -36,9 +34,9 @@ public interface ASTNodeVisitor {
 
     void visit(FunctionCallNode node) throws Exception;
 
-    void visit(IfStatementNode node);
+    void visit(IfStatementNode node) throws Exception;
 
-    void visit(LoopStatementNode node);
+    void visit(LoopStatementNode node) throws Exception;
 
     void visit(ReturnStatementNode node) throws Exception;
 
@@ -54,16 +52,14 @@ public interface ASTNodeVisitor {
 
     void visit(VariableReferenceNode node) throws Exception;
 
-    void visit(NewExpressionNode node);
+    void visit(NewExpressionNode node) throws UndefinedVariableException;
 
     void visit(UnaryExpressionNode node) throws Exception;
 
 
-
-
     // Tupe
 
-    void visit(TypeNode node);
+    void visit(TypeNode node) throws Exception;
     // Other
 
     void visit(ProgramNode node);

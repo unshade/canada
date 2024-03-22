@@ -3,6 +3,7 @@ package org.trad.pcl.ast.statement;
 
 import org.trad.pcl.Exceptions.Semantic.InParameterModificationException;
 import org.trad.pcl.Exceptions.Semantic.TypeMismatchException;
+import org.trad.pcl.Exceptions.Semantic.UndefinedVariableException;
 import org.trad.pcl.Helpers.ParameterMode;
 import org.trad.pcl.Services.ErrorService;
 import org.trad.pcl.ast.ASTNode;
@@ -43,7 +44,7 @@ public final class AssignmentStatementNode extends ASTNode implements Identifiab
         visitor.visit(this);
     }
 
-    public void checkIfAssignable() {
+    public void checkIfAssignable() throws UndefinedVariableException {
         Variable reference = (Variable) SemanticAnalysisVisitor.findSymbolInScopes(this.variableReference.getIdentifier());
         assert reference != null;
 

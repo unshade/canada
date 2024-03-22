@@ -1,5 +1,6 @@
 package org.trad.pcl.ast.expression;
 
+import org.trad.pcl.Exceptions.Semantic.UndefinedVariableException;
 import org.trad.pcl.Helpers.TypeEnum;
 import org.trad.pcl.ast.ASTNode;
 import org.trad.pcl.semantic.ASTNodeVisitor;
@@ -16,7 +17,7 @@ public class NewExpressionNode extends ASTNode implements ExpressionNode {
     }
 
     @Override
-    public void accept(ASTNodeVisitor visitor) {
+    public void accept(ASTNodeVisitor visitor) throws UndefinedVariableException {
         visitor.visit(this);
     }
 
