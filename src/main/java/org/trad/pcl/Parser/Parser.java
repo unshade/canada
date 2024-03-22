@@ -687,13 +687,10 @@ public class Parser {
         switch (this.currentToken.tag()) {
             case IDENT, OPEN_PAREN, MINUS, ENTIER, CARACTERE, TRUE, FALSE, NULL, NEW, CHARACTER, NOT -> {
                 ExpressionNode firstExpression = NotExpression();
-                System.out.println("firstExpression = " + firstExpression);
                 BinaryExpressionNode secondExpression = AndExpression();
-                System.out.println("secondExpression = " + secondExpression);
 
                 if (secondExpression != null) {
                     secondExpression.setMostLeft(firstExpression);
-                    System.out.println("secondExpression = " + secondExpression);
                     return secondExpression;
                 } else {
                     return firstExpression;
@@ -759,7 +756,6 @@ public class Parser {
                 expression = new BinaryExpressionNode();
                 expression.setOperator(OperatorEnum.AND);
                 expression.setRight(NotExpression(), AndExpression());
-                System.out.println("expression = " + expression);
             }
             case THEN -> {
                 analyseTerminal(Tag.THEN);
@@ -1029,7 +1025,6 @@ public class Parser {
                 expression.setOperator(OperatorEnum.ADD);
                 ExpressionNode left = LeftMultiplicativeExpression();
                 BinaryExpressionNode right = AdditiveExpression();
-                System.out.println("right : " + right);
                 if (right != null) {
                     right.setMostLeft(left);
                     expression.setRight(right);
