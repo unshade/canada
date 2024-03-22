@@ -1,5 +1,11 @@
 with Ada.Text_IO; use Ada.Text_IO;
-procedure TestIn(X : in Integer) is
+procedure TestIn is
+    X : integer := 0;
+    function F(X : in integer) return integer is
+        begin
+            X := X + 1;
+            return X;
+        end F;
 begin
-   X := X + 1; -- Doit générer une erreur de compilation.
+    X := F(X);
 end TestIn;

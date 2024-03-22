@@ -1,9 +1,6 @@
 with Ada.Text_IO; use Ada.Text_IO;
 procedure Main is
-    A : Integer := 5;
-    B : Integer := 10;
     Sum : Integer;
 begin
-    Sum := A + B;
-    Sum := 2 + A * B;
+    Sum := 1 + 1 and 2;
 end Main;

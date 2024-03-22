@@ -3,6 +3,7 @@ with Ada.Text_IO; use Ada.Text_IO;
 procedure UseRecord is
    type RecordTest is record
       Field1 : integer;
+      Field1 : integer; -- Doit générer une erreur de compilation car 'Field1' est déjà déclaré.
    end record;
    Var1 : RecordTest; -- Correct si RecordTest est bien défini avant cette déclaration.
 begin

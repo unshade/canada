@@ -1,5 +1,5 @@
 with Ada.Text_IO; use Ada.Text_IO;
 procedure AnotherProcedure is
 begin
-   put();
+   put;
 end ExampleProcedure; -- Doit générer une erreur de compilation.

@@ -1,7 +1,7 @@
 with Ada.Text_IO; use Ada.Text_IO;
 procedure UniqueIdentifiers is
-   A : Integer;
-   -- A : Float; -- Doit générer une erreur de compilation car 'A' est déjà déclaré.
+   A : integer;
+   A : integer; -- Doit générer une erreur de compilation car 'A' est déjà déclaré.
 begin
-   null;
+   put(A);
 end UniqueIdentifiers;
