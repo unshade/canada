@@ -1,0 +1,12 @@
+with Ada.Text_IO; use Ada.Text_IO;
+procedure Outer is
+   OuterVar : integer;
+   procedure Inner is
+      InnerVar : integer;
+   begin
+      OuterVar := 1; -- Correct, accès à une variable du niveau supérieur.
+      InnerVar := 2; -- Correct, accès à une variable locale.
+   end Inner;
+begin
+    put(OuterVar); -- Correct, accès à une variable du niveau supérieur.
+end Outer;

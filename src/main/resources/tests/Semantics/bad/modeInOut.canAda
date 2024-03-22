@@ -1,0 +1,22 @@
+with Ada.Text_IO; use Ada.Text_IO;
+
+procedure TestUniqueProcedure is
+
+   procedure TestInOut(X : in out Integer) is
+   begin
+      put(X); -- Affiche la valeur de X.
+   end TestInOut;
+
+   Value : Integer;
+begin
+   -- TestInOut(5);     -- Ceci est incorrect et devrait être commenté ou supprimé car 5 n'est pas une valeur gauche.
+   -- L'appel suivant est correct et doit fonctionner sans problème.
+   Value := 10;
+   TestInOut(Value);     -- Correct : 'Value' est une valeur gauche.
+
+   -- Note : Le commentaire ci-dessus explique que l'appel commenté de TestInOut avec une constante
+   -- comme argument devrait normalement entraîner une erreur de compilation,
+   -- reflétant la contrainte que le paramètre effectif correspondant à un paramètre formel 'in out'
+   -- doit être une valeur gauche.
+
+end TestUniqueProcedure;
