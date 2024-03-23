@@ -16,16 +16,6 @@ import java.util.Locale;
 
 public final class FunctionCallNode extends CallNode {
 
-    private List<ExpressionNode> arguments;
-
-
-    public void setArguments(List<ExpressionNode> arguments) {
-        this.arguments = arguments;
-    }
-    public List<ExpressionNode> getArguments() {
-        return arguments;
-    }
-
     @Override
     public String getType() throws UndefinedVariableException {
         Function function = (Function) SemanticAnalysisVisitor.findSymbolInScopes(this.getIdentifier());

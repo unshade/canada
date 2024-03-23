@@ -18,16 +18,6 @@ import java.util.Locale;
 
 public final class ProcedureCallNode extends CallNode {
 
-    private List<ExpressionNode> arguments;
-
-
-    public void setArguments(List<ExpressionNode> arguments) {
-        this.arguments = arguments;
-    }
-    public List<ExpressionNode> getArguments() {
-        return arguments;
-    }
-
     public void checkParametersSize() throws Exception {
         Procedure correspondingDeclaration = (Procedure) SemanticAnalysisVisitor.findSymbolInScopes(this.getIdentifier());
 
