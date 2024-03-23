@@ -7,5 +7,5 @@ procedure UseRecord is
       Field1 : Float; -- Doit générer une erreur de compilation car 'Field1' est déjà déclaré.
    end record;
 begin
-   put(Var1);
+   X := 10;
 end UseRecord;

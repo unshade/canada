@@ -1,5 +1,6 @@
 with Ada.Text_IO; use Ada.Text_IO;
 procedure AnotherProcedure is
+   X : integer := 0;
 begin
-   put;
+    X;
 end ExampleProcedure; -- Doit générer une erreur de compilation.

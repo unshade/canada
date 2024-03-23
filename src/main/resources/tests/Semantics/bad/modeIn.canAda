@@ -3,7 +3,7 @@ procedure TestIn is
     X : integer := 0;
     function F(X : in integer) return integer is
         begin
-            X := X + 1;
+            X := X + 1; -- Error: X is read-only
             return X;
         end F;
 begin

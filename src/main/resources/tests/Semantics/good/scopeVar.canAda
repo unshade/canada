@@ -8,5 +8,5 @@ procedure Outer is
       InnerVar := 2; -- Correct, accès à une variable locale.
    end Inner;
 begin
-    put(OuterVar); -- Correct, accès à une variable du niveau supérieur.
+    OuterVar := 3; -- Correct, accès à une variable locale.
 end Outer;

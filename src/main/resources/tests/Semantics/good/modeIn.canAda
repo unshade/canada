@@ -1,11 +1,13 @@
 with Ada.Text_IO; use Ada.Text_IO;
 procedure TestIn is
-    X : integer;
-    function Get(X : in integer) return integer is
-    begin
-        put(X); -- I can read X
-        return X;
-    end Get;
+X : integer;
+Y : integer;
+function Get(X : in integer) return integer is
+Y : integer;
 begin
-   put(X); -- I can read X
+    Y := X; -- I can read X
+    return Y;
+end Get;
+begin
+   Y := X; -- I can read X
 end TestIn;

@@ -1,0 +1,10 @@
+with Ada.Text_IO; use Ada.Text_IO;
+procedure ExampleProcedure is
+ X : integer ;
+function ExampleFunction (X : integer) return integer is
+begin
+   return X + 1;
+end ExampleFunction;
+begin
+   X := ExampleFunction (null); -- Error: null not of type integer
+end ExampleProcedure;

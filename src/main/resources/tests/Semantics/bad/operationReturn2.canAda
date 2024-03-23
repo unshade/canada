@@ -2,5 +2,5 @@ with Ada.Text_IO; use Ada.Text_IO;
 procedure ExampleProcedure is
 X : integer;
 begin
-   X := 10;
-end ExampleProcedure; -- Correct
+   X := true and false;
+end ExampleProcedure;

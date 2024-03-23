@@ -1,6 +1,6 @@
 with Ada.Text_IO; use Ada.Text_IO;
 procedure ExampleProcedure is
-X : integer;
+   X : integer := false;
 begin
-   X := 10;
-end ExampleProcedure; -- Correct
+    X;
+end ExampleProcedure;
