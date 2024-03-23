@@ -1,6 +1,5 @@
 package org.trad.pcl.semantic;
 
-import org.aspectj.weaver.ast.Call;
 import org.trad.pcl.Exceptions.Semantic.UndefinedVariableException;
 import org.trad.pcl.ast.ParameterNode;
 import org.trad.pcl.ast.ProgramNode;
@@ -11,8 +10,6 @@ import org.trad.pcl.ast.declaration.ProcedureDeclarationNode;
 import org.trad.pcl.ast.declaration.TypeDeclarationNode;
 import org.trad.pcl.ast.declaration.VariableDeclarationNode;
 import org.trad.pcl.ast.statement.*;
-import org.trad.pcl.ast.type.AccessTypeNode;
-import org.trad.pcl.ast.type.RecordTypeNode;
 import org.trad.pcl.ast.type.TypeNode;
 
 public interface ASTNodeVisitor {
@@ -34,10 +31,6 @@ public interface ASTNodeVisitor {
     void visit(BlockNode node);
 
     void visit(CallNode node) throws Exception;
-
-    void visit(FunctionCallNode node) throws Exception;
-
-    void visit(ProcedureCallNode node) throws Exception;
 
     void visit(IfStatementNode node) throws Exception;
 

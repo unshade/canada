@@ -9,11 +9,9 @@ import org.trad.pcl.ast.ProgramNode;
 import org.trad.pcl.ast.declaration.*;
 import org.trad.pcl.ast.expression.*;
 import org.trad.pcl.ast.statement.*;
-import org.trad.pcl.ast.type.AccessTypeNode;
 import org.trad.pcl.ast.type.RecordTypeNode;
 import org.trad.pcl.ast.type.TypeNode;
 import org.trad.pcl.semantic.symbol.*;
-import org.trad.pcl.semantic.symbol.Record;
 
 import java.util.List;
 import java.util.Stack;
@@ -167,47 +165,19 @@ public class SemanticAnalysisVisitor implements ASTNodeVisitor {
         }
     }
 
+
     @Override
     public void visit(CallNode node) throws Exception {
-        Symbol symbol = findSymbolInScopes(node.getIdentifier());
-
-        if (!(symbol instanceof Function) && !(symbol instanceof Procedure)) {
-            throw new Exception("The identifier " + node.getIdentifier() + " is not a valid function or procedure");
+        Symbol s = findSymbolInScopes(node.getIdentifier());
+        if (!(s instanceof Function) && node.getIsExpression()) {
+            throw new Exception("The identifier " + node.getIdentifier() + " is not a valid function");
         }
 
-        if (symbol instanceof Function) {
-            // On setup notre FunctionCallNode
-            FunctionCallNode functionCallNode = new FunctionCallNode();
-            functionCallNode.setIdentifier(node.getIdentifier());
-            functionCallNode.setArguments(node.getArguments());
-            functionCallNode.accept(this);
-        } else {
-            // On setup notre ProcedureCallNode
-            ProcedureCallNode procedureCallNode = new ProcedureCallNode();
-            procedureCallNode.setIdentifier(node.getIdentifier());
-            procedureCallNode.setArguments(node.getArguments());
-            procedureCallNode.accept(this);
+        if(s instanceof Function function) {
+            node.checkVariableReferenceAccess(function.getReturnType());
+        } else if (!(s instanceof Procedure)) {
+            throw new Exception("The identifier " + node.getIdentifier() + " is not a valid procedure");
         }
-    }
-
-    @Override
-    public void visit(FunctionCallNode node) throws Exception {
-        Function function = (Function) findSymbolInScopes(node.getIdentifier());
-
-        node.checkVariableReferenceAccess(function.getReturnType());
-
-        if (node.getArguments() != null) { // Check if the function or procedure has arguments
-            for (ExpressionNode expressionNode : node.getArguments()) {
-                expressionNode.accept(this);
-            }
-        }
-
-        node.checkParametersSize();
-        node.checkParametersTypes();
-    }
-
-    @Override
-    public void visit(ProcedureCallNode node) throws Exception {
 
         if (node.getArguments() != null) { // Check if the function or procedure has arguments
             for (ExpressionNode expressionNode : node.getArguments()) {

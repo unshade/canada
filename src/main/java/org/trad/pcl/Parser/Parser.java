@@ -1305,19 +1305,20 @@ public class Parser {
      * Grammar rule : primary2
      */
     @PrintMethodName
-    private IdentifiableExpression identPrimary() {
-        IdentifiableExpression expression = null;
+    private VariableReferenceNode identPrimary() {
+        VariableReferenceNode expression = null;
         switch (this.currentToken.tag()) {
             case SEMICOLON, COMMA, CLOSE_PAREN, OR, AND, THEN, NOT, EQ, NE, LT, LE, GT, GE, PLUS, MINUS, MULTI, DIV, REM, DOTDOT, LOOP, DOT -> {
                 expression = new VariableReferenceNode();
-                ((VariableReferenceNode)expression).setNextExpression(acces());
+                expression.setNextExpression(acces());
             }
             case OPEN_PAREN -> {
                 analyseTerminal(Tag.OPEN_PAREN);
-                expression = new FunctionCallNode();
-                ((FunctionCallNode) expression).setArguments(multipleExpressions());
+                expression = new CallNode();
+                ((CallNode) expression).setIsExpression(true);
+                ((CallNode) expression).setArguments(multipleExpressions());
                 analyseTerminal(Tag.CLOSE_PAREN);
-                ((FunctionCallNode)expression).setNextExpression(acces());
+                expression.setNextExpression(acces());
             }
             default -> this.errorService.registerSyntaxError(
                     new UnexpectedTokenListException(this.currentToken,

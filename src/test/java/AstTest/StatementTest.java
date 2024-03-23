@@ -9,7 +9,7 @@ import org.trad.pcl.Lexer.Tokens.Token;
 import org.trad.pcl.Parser.Parser;
 import org.trad.pcl.Services.ErrorService;
 import org.trad.pcl.ast.expression.BinaryExpressionNode;
-import org.trad.pcl.ast.expression.FunctionCallNode;
+import org.trad.pcl.ast.expression.CallNode;
 import org.trad.pcl.ast.expression.VariableReferenceNode;
 import org.trad.pcl.ast.statement.*;
 
@@ -39,9 +39,9 @@ public class StatementTest {
 
         assertNotNull(callFunctionNode);
 
-        assertInstanceOf(FunctionCallNode.class, callFunctionNode);
+        assertInstanceOf(CallNode.class, callFunctionNode);
 
-        FunctionCallNode callFunction = (FunctionCallNode) callFunctionNode;
+        CallNode callFunction = (CallNode) callFunctionNode;
 
         assertEquals("foo", callFunction.getIdentifier());
 
@@ -67,9 +67,9 @@ public class StatementTest {
 
         assertNotNull(callFunctionNode);
 
-        assertInstanceOf(FunctionCallNode.class, callFunctionNode);
+        assertInstanceOf(CallNode.class, callFunctionNode);
 
-        FunctionCallNode callFunction = (FunctionCallNode) callFunctionNode;
+        CallNode callFunction = (CallNode) callFunctionNode;
 
         assertEquals("foo", callFunction.getIdentifier());
 
