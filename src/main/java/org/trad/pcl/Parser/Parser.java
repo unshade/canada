@@ -1314,10 +1314,10 @@ public class Parser {
             }
             case OPEN_PAREN -> {
                 analyseTerminal(Tag.OPEN_PAREN);
-                expression = new FunctionCallNode();
-                ((FunctionCallNode) expression).setArguments(multipleExpressions());
+                expression = new CallNode();
+                ((CallNode) expression).setArguments(multipleExpressions());
                 analyseTerminal(Tag.CLOSE_PAREN);
-                ((FunctionCallNode)expression).setNextExpression(acces());
+                ((CallNode)expression).setNextExpression(acces());
             }
             default -> this.errorService.registerSyntaxError(
                     new UnexpectedTokenListException(this.currentToken,
@@ -1521,14 +1521,14 @@ public class Parser {
         switch (this.currentToken.tag()) {
 
             case SEMICOLON -> {
-                statement = new FunctionCallNode();
+                statement = new CallNode();
                 analyseTerminal(Tag.SEMICOLON);
             }
 
             case OPEN_PAREN -> {
-                statement = new FunctionCallNode();
+                statement = new CallNode();
                 analyseTerminal(Tag.OPEN_PAREN);
-                ((FunctionCallNode) statement).setArguments(multipleExpressions());
+                ((CallNode) statement).setArguments(multipleExpressions());
                 analyseTerminal(Tag.CLOSE_PAREN);
                 // TODO
                 instr3();

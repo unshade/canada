@@ -168,17 +168,53 @@ public class SemanticAnalysisVisitor implements ASTNodeVisitor {
     }
 
     @Override
-    public void visit(FunctionCallNode node) throws Exception {
+    public void visit(CallNode node) throws Exception {
         Symbol symbol = findSymbolInScopes(node.getIdentifier());
-        if (!(symbol instanceof Function function)) {
-            throw new Exception("The identifier " + node.getIdentifier() + " is not a valid function");
+
+        if (!(symbol instanceof Function) && !(symbol instanceof Procedure)) {
+            throw new Exception("The identifier " + node.getIdentifier() + " is not a valid function or procedure");
         }
+
+        if (symbol instanceof Function) {
+            // On setup notre FunctionCallNode
+            FunctionCallNode functionCallNode = new FunctionCallNode();
+            functionCallNode.setIdentifier(node.getIdentifier());
+            functionCallNode.setArguments(node.getArguments());
+            functionCallNode.accept(this);
+        } else {
+            // On setup notre ProcedureCallNode
+            ProcedureCallNode procedureCallNode = new ProcedureCallNode();
+            procedureCallNode.setIdentifier(node.getIdentifier());
+            procedureCallNode.setArguments(node.getArguments());
+            procedureCallNode.accept(this);
+        }
+    }
+
+    @Override
+    public void visit(FunctionCallNode node) throws Exception {
+        Function function = (Function) findSymbolInScopes(node.getIdentifier());
 
         node.checkVariableReferenceAccess(function.getReturnType());
 
-        for (ExpressionNode expressionNode : node.getArguments()) {
-            expressionNode.accept(this);
+        if (node.getArguments() != null) { // Check if the function or procedure has arguments
+            for (ExpressionNode expressionNode : node.getArguments()) {
+                expressionNode.accept(this);
+            }
         }
+
+        node.checkParametersSize();
+        node.checkParametersTypes();
+    }
+
+    @Override
+    public void visit(ProcedureCallNode node) throws Exception {
+
+        if (node.getArguments() != null) { // Check if the function or procedure has arguments
+            for (ExpressionNode expressionNode : node.getArguments()) {
+                expressionNode.accept(this);
+            }
+        }
+
         node.checkParametersSize();
         node.checkParametersTypes();
     }
