@@ -4,8 +4,8 @@ import com.diogonunes.jcolor.Attribute;
 import static com.diogonunes.jcolor.Ansi.colorize;
 
 public class Symbol {
-    private final String identifier;
-    private int shift;
+    protected final String identifier;
+    protected int shift;
 
     public Symbol(String identifier, int shift) {
         this.identifier = identifier;
@@ -29,10 +29,4 @@ public class Symbol {
         return new String[] {identifier, Integer.toString(shift)};
     }
 
-    @Override
-    public String toString() {
-        return
-                "identifier = '" + colorize(identifier, Attribute.YELLOW_TEXT()) + '\'' +
-                ", shift = " + colorize(Integer.toString(shift), Attribute.RED_TEXT());
-    }
 }

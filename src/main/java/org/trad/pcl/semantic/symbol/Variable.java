@@ -9,7 +9,7 @@ import static com.diogonunes.jcolor.Ansi.colorize;
 
 public class Variable extends Symbol {
 
-    private String type;
+    protected String type;
 
     public Variable(String identifier, int shift) {
         super(identifier, shift);
@@ -27,8 +27,9 @@ public class Variable extends Symbol {
     @Override
     public String toString() {
         return "Variable { " +
-                super.toString() +
+                "identifier = '" + colorize(identifier, Attribute.YELLOW_TEXT()) + '\'' +
                 ", type = '" + colorize(type, Attribute.YELLOW_TEXT()) + '\'' +
+                ", shift = " + colorize(Integer.toString(shift), Attribute.RED_TEXT()) +
                 " }";
     }
 }

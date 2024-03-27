@@ -36,8 +36,9 @@ public class Record extends Type {
     @Override
     public String toString() {
         return "Record { " +
-                super.toString() +
+                "identifier = '" + colorize(identifier, Attribute.YELLOW_TEXT()) + '\'' +
                 ", fields = '" + colorize(fields.toString(), Attribute.YELLOW_TEXT()) + '\'' +
+                ", shift = " + colorize(Integer.toString(shift), Attribute.RED_TEXT()) +
                 " }";
     }
 

@@ -14,7 +14,8 @@ public class Type extends Symbol {
     @Override
     public String toString() {
         return "Type { " +
-                super.toString() +
+                "identifier = '" + colorize(identifier, Attribute.YELLOW_TEXT()) + '\'' +
+                ", shift = " + colorize(Integer.toString(shift), Attribute.RED_TEXT()) +
                 " }";
     }
 

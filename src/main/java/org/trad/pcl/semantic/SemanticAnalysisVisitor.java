@@ -176,7 +176,7 @@ public class SemanticAnalysisVisitor implements ASTNodeVisitor {
         if(s instanceof Function function) {
             node.checkVariableReferenceAccess(function.getReturnType());
         } else if (!(s instanceof Procedure)) {
-            throw new Exception("The identifier " + node.getIdentifier() + " is not a valid procedure");
+            throw new Exception("The identifier " + node.getIdentifier() + " is not a valid procedure or function");
         }
 
         if (node.getArguments() != null) { // Check if the function or procedure has arguments
