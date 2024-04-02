@@ -15,17 +15,15 @@ function aireRectangle(larg : in integer; long : in out integer) return point is
 aire: point;
 giga: character;
 begin
-return;
+return aire;
 end aireRectangle ;
 
 procedure unDebut is
 p : point ;
 begin
 p.x := 3 ;
-p.p := 4 ;
 end;
 
 begin
 c.x := a + aireRectangle(3, 4).x + c.x;
-aireRectangle := 5 ;
 end;

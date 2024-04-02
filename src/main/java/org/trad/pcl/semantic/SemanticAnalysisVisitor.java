@@ -13,11 +13,14 @@ import org.trad.pcl.ast.type.RecordTypeNode;
 import org.trad.pcl.ast.type.TypeNode;
 import org.trad.pcl.semantic.symbol.*;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Stack;
 
 public class SemanticAnalysisVisitor implements ASTNodeVisitor {
     private static final Stack<SymbolTable> scopeStack = new Stack<>();
+
+    private List<SymbolTable> symbolTables = new ArrayList<>();
     private final ErrorService errorService;
 
     public SemanticAnalysisVisitor() {
@@ -62,7 +65,7 @@ public class SemanticAnalysisVisitor implements ASTNodeVisitor {
         scopeStack.peek().addSymbol(node.toSymbol(), 0);
 
         // Create a new scope
-        scopeStack.push(new SymbolTable(node.getIdentifier()));
+        enterScope(new SymbolTable(node.getIdentifier()));
 
 
         // Traverse the parameters
@@ -71,7 +74,7 @@ public class SemanticAnalysisVisitor implements ASTNodeVisitor {
         }
 
         node.getBody().accept(this);
-        StringFormatHelper.printTDS(scopeStack.peek(), "FUNCTION", node.getIdentifier());
+        //StringFormatHelper.printTDS(scopeStack.peek(), "FUNCTION", node.getIdentifier());
 
         // Exit the scope
         exitScope();
@@ -85,7 +88,7 @@ public class SemanticAnalysisVisitor implements ASTNodeVisitor {
         // Add the procedure to the current scope
         scopeStack.peek().addSymbol(node.toSymbol(), 0);
         // Create a new scope
-        scopeStack.push(new SymbolTable(node.getIdentifier()));
+        enterScope(new SymbolTable(node.getIdentifier()));
 
         // Traverse the parameters
         for (ParameterNode parameter : node.getParameters()) {
@@ -95,7 +98,7 @@ public class SemanticAnalysisVisitor implements ASTNodeVisitor {
         // Traverse the body
         node.getBody().accept(this);
 
-        StringFormatHelper.printTDS(scopeStack.peek(), "PROCEDURE", node.getIdentifier());
+        //StringFormatHelper.printTDS(scopeStack.peek(), "PROCEDURE", node.getIdentifier());
 
         // Exit the scope
         exitScope();
@@ -302,18 +305,19 @@ public class SemanticAnalysisVisitor implements ASTNodeVisitor {
     @Override
     public void visit(ProgramNode node) {
         // Global scope
-        scopeStack.push(new SymbolTable());
+        enterScope(new SymbolTable("root"));
 
         // Build-in features
         addPrimitiveTypes();
         addPredefinedFunctions();
 
-        StringFormatHelper.printTDS(scopeStack.peek(), "PROCEDURE", "root");
+        //StringFormatHelper.printTDS(scopeStack.peek(), "PROCEDURE", "root");
 
         try {
             node.getRootProcedure().accept(this);
         } catch (Exception ignored) {
         }
+        exitScope();
     }
 
     @Override
@@ -323,10 +327,20 @@ public class SemanticAnalysisVisitor implements ASTNodeVisitor {
         node.getType().accept(this);
     }
 
+
+    public void enterScope(SymbolTable symbolTable) {
+        scopeStack.push(symbolTable);
+        symbolTables.add(symbolTable);
+    }
+
     //sortir de la portée
     public void exitScope() {
         if (!scopeStack.isEmpty()) {
             scopeStack.pop();
         }
+    }
+
+    public List<SymbolTable> getSymbolTables() {
+        return symbolTables;
     }
 }

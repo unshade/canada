@@ -1,12 +1,13 @@
 package org.trad.pcl.semantic;
 
+import com.diogonunes.jcolor.Attribute;
 import org.trad.pcl.Exceptions.Semantic.DuplicateSymbolException;
 import org.trad.pcl.Services.ErrorService;
 import org.trad.pcl.semantic.symbol.Symbol;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
+import java.util.*;
+
+import static com.diogonunes.jcolor.Ansi.colorize;
 
 public class SymbolTable {
 
@@ -55,36 +56,16 @@ public class SymbolTable {
 
     @Override
     public String toString() {
-        List<String[]> liste = new ArrayList<>();
-
-        this.symbols.forEach((k, v) -> liste.add(v.toStringArray()));
-
-        // Détermination du nombre maximum de colonnes
-        int maxColumns = 0;
-        for (String[] row : liste) {
-            maxColumns = Math.max(maxColumns, row.length);
-        }
-
-        // Calcul de la largeur maximale de chaque colonne
-        int[] maxWidth = new int[maxColumns];
-        for (String[] row : liste) {
-            for (int i = 0; i < row.length; i++) {
-                maxWidth[i] = Math.max(maxWidth[i], row[i].length());
-            }
-        }
-
         StringBuilder sb = new StringBuilder();
-
-        // Affichage du tableau
-        for (String[] row : liste) {
-            for (int i = 0; i < row.length; i++) {
-                // Affichage avec padding adapté
-                //System.out.printf("%-" + (maxWidth[i] + 2) + "s", row[i]);
-                sb.append(String.format("%-" + (maxWidth[i] + 2) + "s", row[i]));
-            }
-            //System.out.println();
-            sb.append("\n");
+        //System.out.println(colorize("Entering new scope", Attribute.GREEN_TEXT()) + " -> creating new SymbolTable for " + colorize(type + " ", Attribute.MAGENTA_TEXT()) + colorize(nodeIdentifier, Attribute.BLUE_TEXT()) + " : ");
+        sb.append(colorize("Entering new scope", Attribute.GREEN_TEXT())).append(" -> creating new SymbolTable for ").append(colorize(scopeIdentifier + " ", Attribute.MAGENTA_TEXT())).append(" : \n");
+        Set<Map.Entry<String, Symbol>> entrySet = this.getSymbols().entrySet();
+        for (Map.Entry<String, Symbol> entry : entrySet) {
+            //System.out.println("\t" + colorize(entry.getKey(), Attribute.YELLOW_TEXT()) + " -> "+ entry.getValue());
+            sb.append("\t").append(colorize(entry.getKey(), Attribute.YELLOW_TEXT())).append(" -> ").append(entry.getValue()).append("\n");
         }
+        sb.append("\n");
+        //System.out.println();
         return sb.toString();
     }
 

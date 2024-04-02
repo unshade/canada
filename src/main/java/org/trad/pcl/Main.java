@@ -4,15 +4,19 @@ import com.diogonunes.jcolor.AnsiFormat;
 import com.diogonunes.jcolor.Attribute;
 import org.trad.pcl.Exceptions.BadFileExtension;
 import org.trad.pcl.Helpers.FileHelper;
+import org.trad.pcl.Helpers.StringFormatHelper;
 import org.trad.pcl.Lexer.Lexer;
 import org.trad.pcl.Parser.Parser;
 import org.trad.pcl.Services.ErrorService;
 import org.trad.pcl.Services.PythonRunner;
+import org.trad.pcl.asm.ASMGenerator;
 import org.trad.pcl.ast.ProgramNode;
 import org.trad.pcl.semantic.SemanticAnalysisVisitor;
+import org.trad.pcl.semantic.SymbolTable;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.List;
 import java.util.Objects;
 
 import static com.diogonunes.jcolor.Ansi.colorize;
@@ -57,6 +61,21 @@ public final class Main {
                 System.out.println("🔍 " + colorize("STARTING SEMANTIC ANALYSIS PHASE", new AnsiFormat(Attribute.WHITE_TEXT(), Attribute.BLUE_BACK(), Attribute.BOLD())));
                 SemanticAnalysisVisitor semanticChecker = new SemanticAnalysisVisitor();
                 AST.accept(semanticChecker);
+                List<SymbolTable> symbolTables = semanticChecker.getSymbolTables();
+                for (SymbolTable symbolTable : symbolTables) {
+                    System.out.println(symbolTable);
+                }
+                if (errorService.hasNoErrors()) {
+                    AnsiFormat fWarning2 = new AnsiFormat(Attribute.WHITE_TEXT(), Attribute.GREEN_BACK(), Attribute.BOLD());
+                    System.out.println("\n✅ " + colorize("SEMANTIC ANALYSIS PHASE COMPLETED", fWarning2));
+
+                    System.out.println("🔍 " + colorize("STARTING ASM GENERATION PHASE", new AnsiFormat(Attribute.WHITE_TEXT(), Attribute.BLUE_BACK(), Attribute.BOLD())));
+                    ASMGenerator asmGenerator = new ASMGenerator(symbolTables);
+                    asmGenerator.visit(AST);
+                } else {
+                    AnsiFormat fWarning2 = new AnsiFormat(Attribute.WHITE_TEXT(), Attribute.RED_BACK(), Attribute.BOLD());
+                    System.out.println("\n❌ " + colorize("SEMANTIC ANALYSIS PHASE FAILED", fWarning2));
+                }
             } else {
                 AnsiFormat fWarning = new AnsiFormat(Attribute.WHITE_TEXT(), Attribute.RED_BACK(), Attribute.BOLD());
                 System.out.println("\n❌ " + colorize("PARSING PHASE FAILED, STOPPING", fWarning));

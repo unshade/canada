@@ -73,8 +73,6 @@ public class VariableReferenceNode extends ASTNode implements IdentifiableExpres
                     type = recordType.getField(next.getIdentifier()).getType();
                     next = next.getNextExpression();
                 }
-            System.out.println("VariableReferenceNode: " + type);
-
         }
         return type;
     }
