@@ -63,7 +63,6 @@ public final class ASMGenerator implements ASTNodeVisitor {
             }
         });
         node.getBody().accept(this);
-        this.output.append("\t END\n");
     }
 
     @Override
@@ -207,6 +206,7 @@ public final class ASMGenerator implements ASTNodeVisitor {
         } catch (Exception e) {
             e.printStackTrace();
         }
+        this.output.append("\t END\n");
     }
 
     @Override
