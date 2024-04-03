@@ -13,7 +13,9 @@ import org.trad.pcl.ast.expression.*;
 import org.trad.pcl.ast.statement.*;
 import org.trad.pcl.ast.type.TypeNode;
 import org.trad.pcl.semantic.ASTNodeVisitor;
+import org.trad.pcl.semantic.SemanticAnalysisVisitor;
 import org.trad.pcl.semantic.SymbolTable;
+import org.trad.pcl.semantic.symbol.Symbol;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -29,16 +31,45 @@ public final class ASMGenerator implements ASTNodeVisitor {
         output = new StringBuilder();
     }
 
+    public String getOutput() {
+        return this.output.toString();
+    }
+
+    public Symbol findSymbolInScopes(String identifier) throws UndefinedVariableException {
+
+        for (SymbolTable symbolTable : this.symbolTables) {
+            Symbol symbol = symbolTable.findSymbol(identifier);
+            if (symbol != null) {
+                return symbol;
+            }
+        }
+
+        throw new UndefinedVariableException(identifier);
+    }
 
     @Override
     public void visit(FunctionDeclarationNode node) throws Exception {
-
+        Symbol symbol = this.findSymbolInScopes(node.getIdentifier());
+        this.output.append(symbol.getIdentifier()).append("\n").append("""
+                \t STMFD   R13!, {R11, LR} ;
+                \t MOV     R11, R13 ;
+                """);
+        node.getParameters().forEach(param -> {
+            try {
+                param.accept(this);
+            } catch (Exception ex) {
+                throw new RuntimeException(ex);
+            }
+        });
+        node.getBody().accept(this);
     }
 
     @Override
     public void visit(ProcedureDeclarationNode node) throws Exception {
-        this.output.append("""
-                               
+        Symbol symbol = this.findSymbolInScopes(node.getIdentifier());
+        this.output.append(symbol.getIdentifier()).append("\n").append("""
+                \t STMFD   R13!, {R11, LR} ;
+                \t MOV     R11, R13 ;
                 """);
         node.getParameters().forEach(param -> {
             try {
@@ -57,6 +88,9 @@ public final class ASMGenerator implements ASTNodeVisitor {
 
     @Override
     public void visit(VariableDeclarationNode node) throws Exception {
+        this.output.append("""
+                \t SUB R13, R13, #4 ;
+                """);
 
     }
 
@@ -150,11 +184,6 @@ public final class ASMGenerator implements ASTNodeVisitor {
 
     @Override
     public void visit(ProgramNode node) {
-        this.output.append("""
-                main
-                \t MOV R11, R13 ;
-                \t STMFD   R13!, {R0, R1} ;
-                """);
         try {
             node.getRootProcedure().accept(this);
         } catch (Exception e) {

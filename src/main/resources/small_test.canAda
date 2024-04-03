@@ -18,7 +18,7 @@ begin
 return aire;
 end aireRectangle ;
 
-procedure unDebut is
+procedure other is
 p : point ;
 begin
 p.x := 3 ;

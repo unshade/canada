@@ -72,6 +72,7 @@ public final class Main {
                     System.out.println("🔍 " + colorize("STARTING ASM GENERATION PHASE", new AnsiFormat(Attribute.WHITE_TEXT(), Attribute.BLUE_BACK(), Attribute.BOLD())));
                     ASMGenerator asmGenerator = new ASMGenerator(symbolTables);
                     asmGenerator.visit(AST);
+                    System.out.println(asmGenerator.getOutput());
                 } else {
                     AnsiFormat fWarning2 = new AnsiFormat(Attribute.WHITE_TEXT(), Attribute.RED_BACK(), Attribute.BOLD());
                     System.out.println("\n❌ " + colorize("SEMANTIC ANALYSIS PHASE FAILED", fWarning2));
