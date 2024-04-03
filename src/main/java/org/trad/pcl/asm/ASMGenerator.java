@@ -21,6 +21,7 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
+// TODO DECLARE FUNCTIONS AND PROCEDURE AT END OF FILE ELSE IT WILL BE DISPLAYED WRONGLY
 public final class ASMGenerator implements ASTNodeVisitor {
 
     private List<SymbolTable> symbolTables;
@@ -62,6 +63,7 @@ public final class ASMGenerator implements ASTNodeVisitor {
             }
         });
         node.getBody().accept(this);
+        this.output.append("\t END\n");
     }
 
     @Override
@@ -149,7 +151,11 @@ public final class ASMGenerator implements ASTNodeVisitor {
 
     @Override
     public void visit(ReturnStatementNode node) throws Exception {
-
+        this.output.append("""
+                \t MOV     R0, #0 ;
+                \t MOV     R13, R11 ;
+                \t LDMFD   R13!, {R11, PC} ;
+                """);
     }
 
     @Override
