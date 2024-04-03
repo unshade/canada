@@ -88,6 +88,7 @@ public final class ASMGenerator implements ASTNodeVisitor {
 
     @Override
     public void visit(VariableDeclarationNode node) throws Exception {
+        // TODO set from shift
         this.output.append("""
                 \t SUB R13, R13, #4 ;
                 """);
@@ -96,7 +97,8 @@ public final class ASMGenerator implements ASTNodeVisitor {
 
     @Override
     public void visit(AssignmentStatementNode node) throws Exception {
-
+        node.getVariableReference().accept(this);
+        node.getExpression().accept(this);
     }
 
     @Override
@@ -119,7 +121,17 @@ public final class ASMGenerator implements ASTNodeVisitor {
 
     @Override
     public void visit(CallNode node) throws Exception {
-
+        Symbol symbol = this.findSymbolInScopes(node.getIdentifier());
+        node.getArguments().forEach(arg -> {
+            try {
+                arg.accept(this);
+            } catch (Exception ex) {
+                throw new RuntimeException(ex);
+            }
+        });
+        this.output.append("""
+                \t BL     %s ;
+                """.formatted(symbol.getIdentifier()));
     }
 
     @Override
