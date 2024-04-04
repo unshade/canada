@@ -23,6 +23,10 @@ public final class ParameterNode extends ASTNode {
         this.identifier = identifier;
     }
 
+    public String getIdentifier() {
+        return identifier;
+    }
+
     public void setType(TypeNode type) {
         this.type = type;
     }

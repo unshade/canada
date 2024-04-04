@@ -15,14 +15,11 @@ import org.trad.pcl.semantic.SymbolTable;
 import org.trad.pcl.semantic.symbol.Symbol;
 
 import java.util.List;
-import java.util.Stack;
 
 // TODO DECLARE FUNCTIONS AND PROCEDURE AT END OF FILE ELSE IT WILL BE DISPLAYED WRONGLY
 public final class ASMGenerator implements ASTNodeVisitor {
 
-    private List<SymbolTable> symbolTables;
-    private int symbolTableIndex = 0;
-    private static final Stack<SymbolTable> scopeStack = new Stack<>();
+    private final List<SymbolTable> symbolTables;
 
     private StringBuilder output;
 
@@ -89,7 +86,6 @@ public final class ASMGenerator implements ASTNodeVisitor {
     @Override
     public void visit(VariableDeclarationNode node) throws Exception {
         int lineToWrite = Context.background().getNonCallableDeclarationWriteLine();
-        System.out.println(lineToWrite);
 
         String[] outputLines = this.output.toString().split("\\r?\\n");
         StringBuilder newOutput = new StringBuilder();
@@ -98,7 +94,7 @@ public final class ASMGenerator implements ASTNodeVisitor {
             newOutput.append(outputLines[i]).append("\n");
 
             if (i == lineToWrite - 1) {
-                String formattedCode = String.format("\t SUB     R13, R13, #4 ; Put %s in stack-frame", node.getIdentifier());
+                String formattedCode = String.format("\t SUB     R13, R13, #4 ; Save space for %s in stack-frame", node.getIdentifier());
                 newOutput.append(formattedCode).append("\n");
             }
         }
@@ -232,7 +228,8 @@ public final class ASMGenerator implements ASTNodeVisitor {
                 try {
                     statementNode.accept(this);
                 } catch (Exception e) {
-                    e.printStackTrace();
+                    System.err.println(e.getMessage());
+                    System.exit(1);
                 }
             });
             this.output.append("\t END     ; Program ends here\n");
@@ -240,11 +237,13 @@ public final class ASMGenerator implements ASTNodeVisitor {
                 try {
                     declarationNode.accept(this);
                 } catch (Exception e) {
-                    e.printStackTrace();
+                    System.err.println(e.getMessage());
+                    System.exit(1);
                 }
             });
         } catch (Exception e) {
-            e.printStackTrace();
+            System.err.println(e.getMessage());
+            System.exit(1);
         }
 
     }
@@ -252,6 +251,11 @@ public final class ASMGenerator implements ASTNodeVisitor {
     @Override
     public void visit(ParameterNode node) throws Exception {
         node.getType().accept(this);
+        this.output.append("""
+                \t LDR     R5, [R11, #%s] ; Load parameter %s in R5
+                \t SUB     R13, R13, #4 ; Save space for %s in stack-frame
+                \t STR     R5, [R13] ; Store parameter %s in stack-frame
+                """.formatted(findSymbolInScopes(node.getIdentifier()).getShift(), node.getIdentifier(), node.getIdentifier(), node.getIdentifier()));
     }
 
     private void updateContextNonCallableDeclaration() {
