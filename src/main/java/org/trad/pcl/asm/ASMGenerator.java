@@ -104,7 +104,7 @@ public final class ASMGenerator implements ASTNodeVisitor {
         node.getVariableReference().accept(this);
         node.getExpression().accept(this);
         this.output.append("""
-                \t STR     R0, [R11, #%s] ; Assign right expression to left variable %s
+                \t STR     R0, [R11, #%s] ; Assign right expression (assuming result is in R0) to left variable %s
                 """.formatted(findSymbolInScopes(node.getVariableReference().getIdentifier()).getShift(), node.getVariableReference().getIdentifier()));
     }
 
@@ -137,8 +137,8 @@ public final class ASMGenerator implements ASTNodeVisitor {
             }
         });
         this.output.append("""
-                \t BL      %s ;
-                """.formatted(symbol.getIdentifier()));
+                \t BL      %s ; Branch link to %s (it will save the return address in LR)
+                """.formatted(symbol.getIdentifier(), symbol.getIdentifier()));
     }
 
     @Override
@@ -158,8 +158,8 @@ public final class ASMGenerator implements ASTNodeVisitor {
     public void visit(ReturnStatementNode node) throws Exception {
         this.output.append("""
                 \t MOV     R0, #0 ;
-                \t MOV     R13, R11 ;
-                \t LDMFD   R13!, {R11, PC} ;
+                \t MOV     R13, R11 ; Restore frame pointer
+                \t LDMFD   R13!, {R11, PC} ; Restore caller's frame pointer and return ASM address
                 """);
     }
 
@@ -172,6 +172,10 @@ public final class ASMGenerator implements ASTNodeVisitor {
     public void visit(BinaryExpressionNode node) throws Exception {
         node.getLeft().accept(this);
         node.getRight().accept(this);
+        switch (node.getOperatorNode().getOperator()) {
+            case ADD -> this.output.append("\t ADD     R0, R1, R0 ; Add left and right expression\n");
+            case SUB -> this.output.append("\t SUB     R0, R1, R0 ; Subtract left and right expression\n");
+        }
     }
 
     @Override
@@ -181,7 +185,7 @@ public final class ASMGenerator implements ASTNodeVisitor {
 
     @Override
     public void visit(LiteralNode node) {
-
+        this.output.append("\t MOV     R0, #%s ; Load literal value in R0\n".formatted(node.getValue()));
     }
 
     @Override
