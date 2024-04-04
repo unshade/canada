@@ -6,10 +6,13 @@ public class Context {
 
     private static Context instance;
 
+    private boolean isLeftOperand;
+
     private int nonCallableDeclarationWriteLine;
     private Context() {
         callerName = "unknown, that's bad bruh";
         nonCallableDeclarationWriteLine = 0;
+        isLeftOperand = false;
     }
 
     public static Context background() {
@@ -33,5 +36,13 @@ public class Context {
 
     public void setNonCallableDeclarationWriteLine(int nonCallableDeclarationWriteLine) {
         this.nonCallableDeclarationWriteLine = nonCallableDeclarationWriteLine;
+    }
+
+    public boolean isLeftOperand() {
+        return isLeftOperand;
+    }
+
+    public void setLeftOperand(boolean leftOperand) {
+        isLeftOperand = leftOperand;
     }
 }

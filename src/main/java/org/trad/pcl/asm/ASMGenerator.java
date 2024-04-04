@@ -161,7 +161,8 @@ public final class ASMGenerator implements ASTNodeVisitor {
     @Override
     public void visit(ReturnStatementNode node) throws Exception {
         this.output.append("""
-                \t MOV     R0, #0 ;
+                \t MOV     R0, #0 ; Clear R0
+                \t MOV     R5, #0 ; Clear R5
                 \t MOV     R13, R11 ; Restore frame pointer
                 \t LDMFD   R13!, {R11, PC} ; Restore caller's (%s) frame pointer and return ASM address
                 """.formatted(Context.background().getCallerName()));
@@ -174,11 +175,13 @@ public final class ASMGenerator implements ASTNodeVisitor {
 
     @Override
     public void visit(BinaryExpressionNode node) throws Exception {
-        node.getLeft().accept(this);
+        Context.background().setLeftOperand(false);
         node.getRight().accept(this);
+        Context.background().setLeftOperand(true);
+        node.getLeft().accept(this);
         switch (node.getOperatorNode().getOperator()) {
-            case ADD -> this.output.append("\t ADD     R0, R1, R0 ; Add left and right expression\n");
-            case SUB -> this.output.append("\t SUB     R0, R1, R0 ; Subtract left and right expression\n");
+            case ADD -> output.append("\t ADD     R0, R0, R1 ; Add operands\n");
+            case SUB -> output.append("\t SUB     R0, R0, R1 ; Sub operands\n");
         }
     }
 
@@ -189,7 +192,11 @@ public final class ASMGenerator implements ASTNodeVisitor {
 
     @Override
     public void visit(LiteralNode node) {
-        this.output.append("\t MOV     R0, #%s ; Load literal value in R0\n".formatted(node.getValue()));
+        if (Context.background().isLeftOperand()) {
+            this.output.append("\t MOV     R1, #%s ; Load literal value in R1\n".formatted(node.getValue()));
+        } else {
+            this.output.append("\t MOV     R0, #%s ; Load literal value in R0\n".formatted(node.getValue()));
+        }
     }
 
     @Override
