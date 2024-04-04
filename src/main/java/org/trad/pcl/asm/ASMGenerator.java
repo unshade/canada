@@ -40,12 +40,12 @@ public final class ASMGenerator implements ASTNodeVisitor {
         return this.output.toString();
     }
 
-    public static Symbol findSymbolInScopes(String identifier) throws UndefinedVariableException {
+    public Symbol findSymbolInScopes(String identifier) throws UndefinedVariableException {
 
-        for (int i = scopeStack.size() - 1; i >= 0; i--) {
-            Symbol s = scopeStack.get(i).findSymbol(identifier);
-            if (s != null) {
-                return s;
+        for (SymbolTable symbolTable : this.symbolTables) {
+            Symbol symbol = symbolTable.findSymbol(identifier);
+            if (symbol != null) {
+                return symbol;
             }
         }
 
@@ -103,6 +103,9 @@ public final class ASMGenerator implements ASTNodeVisitor {
     public void visit(AssignmentStatementNode node) throws Exception {
         node.getVariableReference().accept(this);
         node.getExpression().accept(this);
+        this.output.append("""
+                \t STR     R0, [R11, #%s] ;
+                """.formatted(findSymbolInScopes(node.getVariableReference().getIdentifier()).getShift()));
     }
 
     @Override
