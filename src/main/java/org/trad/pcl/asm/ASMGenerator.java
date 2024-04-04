@@ -20,11 +20,15 @@ import org.trad.pcl.semantic.symbol.Symbol;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Stack;
 
 // TODO DECLARE FUNCTIONS AND PROCEDURE AT END OF FILE ELSE IT WILL BE DISPLAYED WRONGLY
 public final class ASMGenerator implements ASTNodeVisitor {
 
     private List<SymbolTable> symbolTables;
+    private int symbolTableIndex = 0;
+    private static final Stack<SymbolTable> scopeStack = new Stack<>();
+
     private final StringBuilder output;
 
     public ASMGenerator(List<SymbolTable> symbolTables) {
@@ -36,12 +40,12 @@ public final class ASMGenerator implements ASTNodeVisitor {
         return this.output.toString();
     }
 
-    public Symbol findSymbolInScopes(String identifier) throws UndefinedVariableException {
+    public static Symbol findSymbolInScopes(String identifier) throws UndefinedVariableException {
 
-        for (SymbolTable symbolTable : this.symbolTables) {
-            Symbol symbol = symbolTable.findSymbol(identifier);
-            if (symbol != null) {
-                return symbol;
+        for (int i = scopeStack.size() - 1; i >= 0; i--) {
+            Symbol s = scopeStack.get(i).findSymbol(identifier);
+            if (s != null) {
+                return s;
             }
         }
 
@@ -89,7 +93,6 @@ public final class ASMGenerator implements ASTNodeVisitor {
 
     @Override
     public void visit(VariableDeclarationNode node) throws Exception {
-        // TODO set from shift
         this.output.append("""
                 \t SUB R13, R13, #4 ;
                 """);
