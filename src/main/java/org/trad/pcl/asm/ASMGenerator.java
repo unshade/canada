@@ -56,9 +56,9 @@ public final class ASMGenerator implements ASTNodeVisitor {
     public void visit(FunctionDeclarationNode node) throws Exception {
         Symbol symbol = this.findSymbolInScopes(node.getIdentifier());
         this.output.append(symbol.getIdentifier()).append("\n").append("""
-                \t STMFD   R13!, {R11, LR} ; Save caller's frame pointer and return ASM address
+                \t STMFD   R13!, {R11, LR} ; Save caller's (%s) frame pointer and return ASM address
                 \t MOV     R11, R13 ; Set up new frame pointer
-                """);
+                """.formatted(Context.background().getCallerName()));
         node.getParameters().forEach(param -> {
             try {
                 param.accept(this);
@@ -73,9 +73,9 @@ public final class ASMGenerator implements ASTNodeVisitor {
     public void visit(ProcedureDeclarationNode node) throws Exception {
         Symbol symbol = this.findSymbolInScopes(node.getIdentifier());
         this.output.append(symbol.getIdentifier()).append("\n").append("""
-                \t STMFD   R13!, {R11, LR} ; Save caller's frame pointer and return ASM address
+                \t STMFD   R13!, {R11, LR} ; Save caller's (%s) frame pointer and return ASM address
                 \t MOV     R11, R13 ; Set up new frame pointer
-                """);
+                """.formatted(Context.background().getCallerName()));
         node.getParameters().forEach(param -> {
             try {
                 param.accept(this);
@@ -159,8 +159,8 @@ public final class ASMGenerator implements ASTNodeVisitor {
         this.output.append("""
                 \t MOV     R0, #0 ;
                 \t MOV     R13, R11 ; Restore frame pointer
-                \t LDMFD   R13!, {R11, PC} ; Restore caller's frame pointer and return ASM address
-                """);
+                \t LDMFD   R13!, {R11, PC} ; Restore caller's (%s) frame pointer and return ASM address
+                """.formatted(Context.background().getCallerName()));
     }
 
     @Override
@@ -214,6 +214,7 @@ public final class ASMGenerator implements ASTNodeVisitor {
         // TODO Find a way to do this clearly and not to get var decl at the bottom
         try {
             Symbol symbol = this.findSymbolInScopes(node.getRootProcedure().getIdentifier());
+            Context.background().setCallerName(symbol.getIdentifier());
             this.output.append(symbol.getIdentifier()).append("\n").append("""
                 \t STMFD   R13!, {R11, LR} ; Main environment setup
                 \t MOV     R11, R13 ; Set up new frame pointer
