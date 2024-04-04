@@ -6,8 +6,10 @@ public class Context {
 
     private static Context instance;
 
+    private int nonCallableDeclarationWriteLine;
     private Context() {
         callerName = "unknown, that's bad bruh";
+        nonCallableDeclarationWriteLine = 0;
     }
 
     public static Context background() {
@@ -25,5 +27,11 @@ public class Context {
         return callerName;
     }
 
+    public int getNonCallableDeclarationWriteLine() {
+        return nonCallableDeclarationWriteLine;
+    }
 
+    public void setNonCallableDeclarationWriteLine(int nonCallableDeclarationWriteLine) {
+        this.nonCallableDeclarationWriteLine = nonCallableDeclarationWriteLine;
+    }
 }

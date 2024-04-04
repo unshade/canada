@@ -1,8 +1,6 @@
 package org.trad.pcl.asm;
 
 import org.trad.pcl.Exceptions.Semantic.UndefinedVariableException;
-import org.trad.pcl.Helpers.OperatorEnum;
-import org.trad.pcl.Helpers.StringFormatHelper;
 import org.trad.pcl.ast.ParameterNode;
 import org.trad.pcl.ast.ProgramNode;
 import org.trad.pcl.ast.declaration.FunctionDeclarationNode;
@@ -13,12 +11,9 @@ import org.trad.pcl.ast.expression.*;
 import org.trad.pcl.ast.statement.*;
 import org.trad.pcl.ast.type.TypeNode;
 import org.trad.pcl.semantic.ASTNodeVisitor;
-import org.trad.pcl.semantic.SemanticAnalysisVisitor;
 import org.trad.pcl.semantic.SymbolTable;
 import org.trad.pcl.semantic.symbol.Symbol;
 
-import java.io.File;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Stack;
 
@@ -29,7 +24,7 @@ public final class ASMGenerator implements ASTNodeVisitor {
     private int symbolTableIndex = 0;
     private static final Stack<SymbolTable> scopeStack = new Stack<>();
 
-    private final StringBuilder output;
+    private StringBuilder output;
 
     public ASMGenerator(List<SymbolTable> symbolTables) {
         this.symbolTables = symbolTables;
@@ -93,11 +88,24 @@ public final class ASMGenerator implements ASTNodeVisitor {
 
     @Override
     public void visit(VariableDeclarationNode node) throws Exception {
-        this.output.append("""
-                \t SUB     R13, R13, #4 ; Put %s in stack-frame
-                """.formatted(node.getIdentifier()));
+        int lineToWrite = Context.background().getNonCallableDeclarationWriteLine();
+        System.out.println(lineToWrite);
 
+        String[] outputLines = this.output.toString().split("\\r?\\n");
+        StringBuilder newOutput = new StringBuilder();
+
+        for (int i = 0; i < outputLines.length; i++) {
+            newOutput.append(outputLines[i]).append("\n");
+
+            if (i == lineToWrite - 1) {
+                String formattedCode = String.format("\t SUB     R13, R13, #4 ; Put %s in stack-frame", node.getIdentifier());
+                newOutput.append(formattedCode).append("\n");
+            }
+        }
+
+        this.output = newOutput;
     }
+
 
     @Override
     public void visit(AssignmentStatementNode node) throws Exception {
@@ -219,6 +227,7 @@ public final class ASMGenerator implements ASTNodeVisitor {
                 \t STMFD   R13!, {R11, LR} ; Main environment setup
                 \t MOV     R11, R13 ; Set up new frame pointer
                 """);
+            this.updateContextNonCallableDeclaration();
             node.getRootProcedure().getBody().getStatements().forEach(statementNode -> {
                 try {
                     statementNode.accept(this);
@@ -243,5 +252,9 @@ public final class ASMGenerator implements ASTNodeVisitor {
     @Override
     public void visit(ParameterNode node) throws Exception {
         node.getType().accept(this);
+    }
+
+    private void updateContextNonCallableDeclaration() {
+        Context.background().setNonCallableDeclarationWriteLine(this.output.toString().split("\n").length + 1);
     }
 }
