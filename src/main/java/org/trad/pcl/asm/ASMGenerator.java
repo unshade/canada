@@ -56,8 +56,8 @@ public final class ASMGenerator implements ASTNodeVisitor {
     public void visit(FunctionDeclarationNode node) throws Exception {
         Symbol symbol = this.findSymbolInScopes(node.getIdentifier());
         this.output.append(symbol.getIdentifier()).append("\n").append("""
-                \t STMFD   R13!, {R11, LR} ;
-                \t MOV     R11, R13 ;
+                \t STMFD   R13!, {R11, LR} ; Save caller's frame pointer and return ASM address
+                \t MOV     R11, R13 ; Set up new frame pointer
                 """);
         node.getParameters().forEach(param -> {
             try {
@@ -73,8 +73,8 @@ public final class ASMGenerator implements ASTNodeVisitor {
     public void visit(ProcedureDeclarationNode node) throws Exception {
         Symbol symbol = this.findSymbolInScopes(node.getIdentifier());
         this.output.append(symbol.getIdentifier()).append("\n").append("""
-                \t STMFD   R13!, {R11, LR} ;
-                \t MOV     R11, R13 ;
+                \t STMFD   R13!, {R11, LR} ; Save caller's frame pointer and return ASM address
+                \t MOV     R11, R13 ; Set up new frame pointer
                 """);
         node.getParameters().forEach(param -> {
             try {
@@ -94,8 +94,8 @@ public final class ASMGenerator implements ASTNodeVisitor {
     @Override
     public void visit(VariableDeclarationNode node) throws Exception {
         this.output.append("""
-                \t SUB R13, R13, #4 ;
-                """);
+                \t SUB     R13, R13, #4 ; Put %s in stack-frame
+                """.formatted(node.getIdentifier()));
 
     }
 
@@ -104,22 +104,22 @@ public final class ASMGenerator implements ASTNodeVisitor {
         node.getVariableReference().accept(this);
         node.getExpression().accept(this);
         this.output.append("""
-                \t STR     R0, [R11, #%s] ;
-                """.formatted(findSymbolInScopes(node.getVariableReference().getIdentifier()).getShift()));
+                \t STR     R0, [R11, #%s] ; Assign right expression to left variable %s
+                """.formatted(findSymbolInScopes(node.getVariableReference().getIdentifier()).getShift(), node.getVariableReference().getIdentifier()));
     }
 
     @Override
     public void visit(BlockNode node) {
-        node.getStatements().forEach(statement -> {
+        node.getDeclarations().forEach(declaration -> {
             try {
-                statement.accept(this);
+                declaration.accept(this);
             } catch (Exception ex) {
                 throw new RuntimeException(ex);
             }
         });
-        node.getDeclarations().forEach(declaration -> {
+        node.getStatements().forEach(statement -> {
             try {
-                declaration.accept(this);
+                statement.accept(this);
             } catch (Exception ex) {
                 throw new RuntimeException(ex);
             }
@@ -137,7 +137,7 @@ public final class ASMGenerator implements ASTNodeVisitor {
             }
         });
         this.output.append("""
-                \t BL     %s ;
+                \t BL      %s ;
                 """.formatted(symbol.getIdentifier()));
     }
 
@@ -207,12 +207,32 @@ public final class ASMGenerator implements ASTNodeVisitor {
 
     @Override
     public void visit(ProgramNode node) {
+        // TODO Find a way to do this clearly and not to get var decl at the bottom
         try {
-            node.getRootProcedure().accept(this);
+            Symbol symbol = this.findSymbolInScopes(node.getRootProcedure().getIdentifier());
+            this.output.append(symbol.getIdentifier()).append("\n").append("""
+                \t STMFD   R13!, {R11, LR} ; Main environment setup
+                \t MOV     R11, R13 ; Set up new frame pointer
+                """);
+            node.getRootProcedure().getBody().getStatements().forEach(statementNode -> {
+                try {
+                    statementNode.accept(this);
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            });
+            this.output.append("\t END     ; Program ends here\n");
+            node.getRootProcedure().getBody().getDeclarations().forEach(declarationNode -> {
+                try {
+                    declarationNode.accept(this);
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            });
         } catch (Exception e) {
             e.printStackTrace();
         }
-        this.output.append("\t END\n");
+
     }
 
     @Override
