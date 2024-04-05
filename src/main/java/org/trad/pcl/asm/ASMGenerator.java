@@ -16,7 +16,6 @@ import org.trad.pcl.semantic.symbol.Symbol;
 
 import java.util.List;
 
-// TODO DECLARE FUNCTIONS AND PROCEDURE AT END OF FILE ELSE IT WILL BE DISPLAYED WRONGLY
 public final class ASMGenerator implements ASTNodeVisitor {
 
     private final List<SymbolTable> symbolTables;

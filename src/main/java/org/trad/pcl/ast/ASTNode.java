@@ -12,6 +12,8 @@ public abstract class ASTNode implements VisitorElement{
 
     private static boolean isJson = false;
 
+    private int concernedLine = 0;
+
     public String format(String toFormat) {
         String tab = this.getTab();
         return toFormat.replaceAll("\n", "\n" + tab);
@@ -26,6 +28,15 @@ public abstract class ASTNode implements VisitorElement{
     }
 
     private static int depth = 0;
+
+    public int getConcernedLine() {
+        return concernedLine;
+    }
+
+    public void setConcernedLine(int concernedLine) {
+        this.concernedLine = concernedLine;
+    }
+
     @Override
     public String toString() {
         depth++;

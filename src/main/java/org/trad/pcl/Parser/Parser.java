@@ -55,9 +55,11 @@ public class Parser {
         analyseTerminal(Tag.SEMICOLON);
         analyseTerminal(Tag.PROCEDURE);
         ProcedureDeclarationNode rootProcedure = new ProcedureDeclarationNode();
+        rootProcedure.setConcernedLine(this.currentToken.line());
         rootProcedure.setIdentifier(analyseTerminal(Tag.IDENT).getValue());
         analyseTerminal(Tag.IS);
         BlockNode block = new BlockNode();
+        block.setConcernedLine(this.currentToken.line());
         block.addDeclarations(multipleDeclarations());
         analyseTerminal(Tag.BEGIN);
         block.addStatements(multipleStatements());
@@ -80,6 +82,7 @@ public class Parser {
         switch (this.currentToken.tag()) {
             case PROCEDURE -> {
                 ProcedureDeclarationNode declaration = new ProcedureDeclarationNode();
+                declaration.setConcernedLine(this.currentToken.line());
                 declarations.add(declaration);
                 analyseTerminal(Tag.PROCEDURE);
                 declaration.setIdentifier(analyseTerminal(Tag.IDENT).getValue());
