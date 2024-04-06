@@ -42,7 +42,6 @@ public class Parser {
     @PrintMethodName
     private ProgramNode fichier() {
         ProgramNode abstractSyntaxTreeRoot = new ProgramNode();
-
         analyseTerminal(Tag.WITH);
         analyseTerminal(Tag.IDENT);
         analyseTerminal(Tag.DOT);
@@ -89,6 +88,7 @@ public class Parser {
                 declaration.addParameters(hasParameters());
                 analyseTerminal(Tag.IS);
                 BlockNode block = new BlockNode();
+                block.setConcernedLine(this.currentToken.line());
                 block.addDeclarations(multipleDeclarations());
                 analyseTerminal(Tag.BEGIN);
                 block.addStatements(multipleStatements());
@@ -102,14 +102,16 @@ public class Parser {
                 List<String> idents = multipleIdent();
                 analyseTerminal(Tag.COLON);
                 TypeNode typeNode = type();
-
+                typeNode.setConcernedLine(this.currentToken.line());
                 ExpressionNode assignNode = assignDeclarationExpression();
                 for (String ident : idents) {
                     VariableDeclarationNode variableDeclarationNode = new VariableDeclarationNode();
+                    variableDeclarationNode.setConcernedLine(this.currentToken.line());
                     variableDeclarationNode.setIdentifier(ident);
                     variableDeclarationNode.setType(typeNode);
                     if (assignNode != null) {
                         AssignmentStatementNode assignmentStatementNode = new AssignmentStatementNode();
+                        assignmentStatementNode.setConcernedLine(this.currentToken.line());
                         assignmentStatementNode.setIdentifier(variableDeclarationNode.getIdentifier());
                         assignmentStatementNode.setExpression(assignNode);
                         variableDeclarationNode.setAssignment(assignmentStatementNode);
@@ -120,6 +122,7 @@ public class Parser {
             }
             case TYPE -> {
                 TypeDeclarationNode declaration = new TypeDeclarationNode();
+                declaration.setConcernedLine(this.currentToken.line());
                 declarations.add(declaration);
                 analyseTerminal(Tag.TYPE);
                 String ident = analyseTerminal(Tag.IDENT).getValue();
@@ -130,6 +133,7 @@ public class Parser {
             }
             case FUNCTION -> {
                 FunctionDeclarationNode declaration = new FunctionDeclarationNode();
+                declaration.setConcernedLine(this.currentToken.line());
                 declarations.add(declaration);
                 analyseTerminal(Tag.FUNCTION);
                 declaration.setIdentifier(analyseTerminal(Tag.IDENT).getValue());
@@ -138,6 +142,7 @@ public class Parser {
                 declaration.setReturnType(type());
                 analyseTerminal(Tag.IS);
                 BlockNode block = new BlockNode();
+                block.setConcernedLine(this.currentToken.line());
                 block.addDeclarations(multipleDeclarations());
                 analyseTerminal(Tag.BEGIN);
                 block.addStatements(multipleStatements());
@@ -170,6 +175,7 @@ public class Parser {
             }
             case SEMICOLON -> {
                 type = new TypeNode();
+                type.setConcernedLine(this.currentToken.line());
             }
             default -> this.errorService.registerSyntaxError(
                     new UnexpectedTokenListException(this.currentToken,
@@ -190,13 +196,16 @@ public class Parser {
         switch (this.currentToken.tag()) {
             case ACCESS -> {
                 type = new AccessTypeNode();
+                type.setConcernedLine(this.currentToken.line());
                 analyseTerminal(Tag.ACCESS);
                 TypeNode simpleTypeNode = new TypeNode();
+                simpleTypeNode.setConcernedLine(this.currentToken.line());
                 simpleTypeNode.setIdentifier(analyseTerminal(Tag.IDENT).getValue());
                 ((AccessTypeNode) type).setBaseType(simpleTypeNode);
             }
             case RECORD -> {
                 type = new RecordTypeNode();
+                type.setConcernedLine(this.currentToken.line());
                 analyseTerminal(Tag.RECORD);
                 ((RecordTypeNode) type).addFields(multipleFields());
                 analyseTerminal(Tag.END);
@@ -303,6 +312,7 @@ public class Parser {
             TypeNode type = type();
             for (String ident : idents) {
                 VariableDeclarationNode declaration = new VariableDeclarationNode();
+                declaration.setConcernedLine(this.currentToken.line());
                 declaration.setIdentifier(ident);
                 declaration.setType(type);
                 declarations.add(declaration);
@@ -358,12 +368,15 @@ public class Parser {
             case ACCESS -> {
                 analyseTerminal(Tag.ACCESS);
                 type = new AccessTypeNode();
+                type.setConcernedLine(this.currentToken.line());
                 TypeNode simpleTypeNode = new TypeNode();
+                simpleTypeNode.setConcernedLine(this.currentToken.line());
                 simpleTypeNode.setIdentifier(analyseTerminal(Tag.IDENT).getValue());
                 ((AccessTypeNode) type).setBaseType(simpleTypeNode);
             }
             case IDENT -> {
                 type = new TypeNode();
+                type.setConcernedLine(this.currentToken.line());
                 ((TypeNode) type).setIdentifier(analyseTerminal(Tag.IDENT).getValue());
             }
             default -> this.errorService.registerSyntaxError(
@@ -485,6 +498,7 @@ public class Parser {
             TypeNode type = type();
             for (String ident : idents) {
                 ParameterNode parameter = new ParameterNode();
+                parameter.setConcernedLine(this.currentToken.line());
                 parameter.setIdentifier(ident);
                 parameter.setMode(mode);
                 parameter.setType(type);
@@ -576,6 +590,7 @@ public class Parser {
                 ExpressionNode firstExpression = LeftAndExpression();
                 BinaryExpressionNode secondExpression = OrExpression();
                 if (secondExpression != null) {
+                    secondExpression.setConcernedLine(this.currentToken.line());
                     secondExpression.setMostLeft(firstExpression);
                     return secondExpression;
                 } else {
@@ -614,16 +629,8 @@ public class Parser {
             case SEMICOLON, COMMA, CLOSE_PAREN, THEN, DOTDOT, LOOP -> {
             }
             case OR -> {
-                expression = new BinaryExpressionNode();
-
-                OperatorNode operator = new OperatorNode();
                 analyseTerminal(Tag.OR);
-                operator.setOperator(OperatorEnum.OR);
-                expression.setOperator(operator);
-
-                ExpressionNode secondExpression = RightOrExpression();
-                expression.setRight(secondExpression);
-
+                return RightOrExpression();
             }
             default -> this.errorService.registerSyntaxError(
                     new UnexpectedTokenListException(this.currentToken,
@@ -643,23 +650,20 @@ public class Parser {
      * Grammar rule : or_expr3
      */
     @PrintMethodName
-    private ExpressionNode RightOrExpression() {
+    private BinaryExpressionNode RightOrExpression() {
         BinaryExpressionNode expression = null;
         switch (this.currentToken.tag()) {
             case IDENT, OPEN_PAREN, DOT, MINUS, ENTIER, CARACTERE, TRUE, FALSE, NULL, NEW, CHARACTER, NOT -> {
-                ExpressionNode firstExpression = LeftAndExpression();
-                BinaryExpressionNode secondExpression = OrExpression();
-
-                if (secondExpression != null) {
-                    secondExpression.setMostLeft(firstExpression);
-                    return secondExpression;
-                } else {
-                    return firstExpression;
-                }
+                expression = new BinaryExpressionNode();
+                expression.setConcernedLine(this.currentToken.line());
+                expression.setOperator(OperatorEnum.OR);
+                expression.setRight(LeftAndExpression(), OrExpression());
+                return expression;
             }
             case ELSE -> {
                 analyseTerminal(Tag.ELSE);
                 expression = new BinaryExpressionNode();
+                expression.setConcernedLine(this.currentToken.line());
                 expression.setOperator(OperatorEnum.ORELSE);
                 expression.setRight(LeftAndExpression(), OrExpression());
                 return expression;
@@ -693,8 +697,8 @@ public class Parser {
             case IDENT, OPEN_PAREN, MINUS, ENTIER, CARACTERE, TRUE, FALSE, NULL, NEW, CHARACTER, NOT -> {
                 ExpressionNode firstExpression = NotExpression();
                 BinaryExpressionNode secondExpression = AndExpression();
-
                 if (secondExpression != null) {
+                    secondExpression.setConcernedLine(this.currentToken.line());
                     secondExpression.setMostLeft(firstExpression);
                     return secondExpression;
                 } else {
@@ -759,12 +763,14 @@ public class Parser {
         switch (this.currentToken.tag()) {
             case IDENT, OPEN_PAREN, MINUS, ENTIER, CARACTERE, TRUE, FALSE, NULL, NEW, CHARACTER, NOT -> {
                 expression = new BinaryExpressionNode();
+                expression.setConcernedLine(this.currentToken.line());
                 expression.setOperator(OperatorEnum.AND);
                 expression.setRight(NotExpression(), AndExpression());
             }
             case THEN -> {
                 analyseTerminal(Tag.THEN);
                 expression = new BinaryExpressionNode();
+                expression.setConcernedLine(this.currentToken.line());
                 expression.setOperator(OperatorEnum.ANDTHEN);
                 expression.setRight(NotExpression(), AndExpression());
             }
@@ -800,6 +806,7 @@ public class Parser {
             case NOT -> {
                 expression = new UnaryExpressionNode();
                 OperatorNode operator = new OperatorNode();
+                operator.setConcernedLine(this.currentToken.line());
                 analyseTerminal(Tag.NOT);
                 operator.setOperator(OperatorEnum.NOT);
                 ((UnaryExpressionNode) expression).setOperator(operator);
@@ -834,8 +841,8 @@ public class Parser {
             case IDENT, OPEN_PAREN, MINUS, ENTIER, CARACTERE, TRUE, FALSE, NULL, NEW, CHARACTER -> {
                 ExpressionNode firstExpression = LeftRelationalExpression();
                 BinaryExpressionNode secondExpression = EqualityExpression();
-
                 if (secondExpression != null) {
+                    secondExpression.setConcernedLine(this.currentToken.line());
                     secondExpression.setMostLeft(firstExpression);
                     return secondExpression;
                 } else {
@@ -873,12 +880,14 @@ public class Parser {
             }
             case EQ -> {
                 expression = new BinaryExpressionNode();
+                expression.setConcernedLine(this.currentToken.line());
                 analyseTerminal(Tag.EQ);
                 expression.setOperator(OperatorEnum.EQUALS);
                 expression.setRight(LeftRelationalExpression(), EqualityExpression());
             }
             case NE -> {
                 expression = new BinaryExpressionNode();
+                expression.setConcernedLine(this.currentToken.line());
                 analyseTerminal(Tag.NE);
                 expression.setOperator(OperatorEnum.NOT_EQUALS);
                 expression.setRight(LeftRelationalExpression(), EqualityExpression());
@@ -911,6 +920,7 @@ public class Parser {
                 ExpressionNode firstExpression = LeftAdditiveExpression();
                 BinaryExpressionNode secondExpression = RelationalExpression();
                 if (secondExpression != null) {
+                    secondExpression.setConcernedLine(this.currentToken.line());
                     secondExpression.setMostLeft(firstExpression);
                     return secondExpression;
                 } else {
@@ -935,24 +945,28 @@ public class Parser {
             }
             case LT -> {
                 expression = new BinaryExpressionNode();
+                expression.setConcernedLine(this.currentToken.line());
                 analyseTerminal(Tag.LT);
                 expression.setOperator(OperatorEnum.LESS_THAN);
                 expression.setRight(LeftAdditiveExpression(), RelationalExpression());
             }
             case LE -> {
                 expression = new BinaryExpressionNode();
+                expression.setConcernedLine(this.currentToken.line());
                 analyseTerminal(Tag.LE);
                 expression.setOperator(OperatorEnum.LESS_THAN_OR_EQUAL);
                 expression.setRight(LeftAdditiveExpression(), RelationalExpression());
             }
             case GT -> {
                 expression = new BinaryExpressionNode();
+                expression.setConcernedLine(this.currentToken.line());
                 analyseTerminal(Tag.GT);
                 expression.setOperator(OperatorEnum.GREATER_THAN);
                 expression.setRight(LeftAdditiveExpression(), RelationalExpression());
             }
             case GE -> {
                 expression = new BinaryExpressionNode();
+                expression.setConcernedLine(this.currentToken.line());
                 analyseTerminal(Tag.GE);
                 expression.setOperator(OperatorEnum.GREATER_THAN_OR_EQUAL);
                 expression.setRight(LeftAdditiveExpression(), RelationalExpression());
@@ -989,6 +1003,7 @@ public class Parser {
                 ExpressionNode firstExpression = LeftMultiplicativeExpression();
                 BinaryExpressionNode secondExpression = AdditiveExpression();
                 if (secondExpression != null) {
+                    secondExpression.setConcernedLine(this.currentToken.line());
                     secondExpression.setMostLeft(firstExpression);
                     return secondExpression;
                 } else {
@@ -1026,28 +1041,34 @@ public class Parser {
             }
             case PLUS -> {
                 expression = new BinaryExpressionNode();
+                expression.setConcernedLine(this.currentToken.line());
                 analyseTerminal(Tag.PLUS);
                 expression.setOperator(OperatorEnum.ADD);
                 ExpressionNode left = LeftMultiplicativeExpression();
                 BinaryExpressionNode right = AdditiveExpression();
                 if (right != null) {
+                    right.setConcernedLine(this.currentToken.line());
                     right.setMostLeft(left);
                     expression.setRight(right);
                 } else {
+                    expression.setConcernedLine(this.currentToken.line());
                     expression.setRight(left);
                 }
             }
             case MINUS -> {
                 expression = new BinaryExpressionNode();
+                expression.setConcernedLine(this.currentToken.line());
                 analyseTerminal(Tag.MINUS);
                 expression.setOperator(OperatorEnum.SUB);
                 ExpressionNode left = LeftMultiplicativeExpression();
                 BinaryExpressionNode right = AdditiveExpression();
                 if (right != null) {
+                    right.setConcernedLine(this.currentToken.line());
                     right.setMostLeft(left);
                     expression.setRight(right);
                     expression.definePriority("-", "+");
                 } else {
+                    expression.setConcernedLine(this.currentToken.line());
                     expression.setRight(left);
                 }
             }
@@ -1086,6 +1107,7 @@ public class Parser {
                 ExpressionNode firstExpression = minusExpression();
                 BinaryExpressionNode secondExpression = MultiplicativeExpression();
                 if (secondExpression != null) {
+                    secondExpression.setConcernedLine(this.currentToken.line());
                     secondExpression.setMostLeft(firstExpression);
                     return secondExpression;
                 } else {
@@ -1123,26 +1145,31 @@ public class Parser {
             }
             case MULTI -> {
                 expression = new BinaryExpressionNode();
+                expression.setConcernedLine(this.currentToken.line());
                 analyseTerminal(Tag.MULTI);
                 expression.setOperator(OperatorEnum.MULTIPLY);
                 expression.setRight(minusExpression(), MultiplicativeExpression());
             }
             case DIV -> {
                 expression = new BinaryExpressionNode();
+                expression.setConcernedLine(this.currentToken.line());
                 analyseTerminal(Tag.DIV);
                 expression.setOperator(OperatorEnum.DIVIDE);
                 ExpressionNode leftNode = minusExpression();
                 BinaryExpressionNode rightTree = MultiplicativeExpression();
                 if (rightTree != null) {
+                    rightTree.setConcernedLine(this.currentToken.line());
                     rightTree.setMostLeft(leftNode);
                     expression.setRight(rightTree);
                     expression.definePriority("/", "*");
                 } else {
+                    expression.setConcernedLine(this.currentToken.line());
                     expression.setRight(leftNode);
                 }
             }
             case REM -> {
                 expression = new BinaryExpressionNode();
+                expression.setConcernedLine(this.currentToken.line());
                 analyseTerminal(Tag.REM);
                 expression.setOperator(OperatorEnum.MODULO);
                 expression.setRight(minusExpression(), MultiplicativeExpression());
@@ -1184,6 +1211,7 @@ public class Parser {
             case MINUS -> {
                 expression = new UnaryExpressionNode();
                 OperatorNode operator = new OperatorNode();
+                operator.setConcernedLine(this.currentToken.line());
                 analyseTerminal(Tag.MINUS);
                 operator.setOperator(OperatorEnum.SUB);
                 ((UnaryExpressionNode) expression).setOperator(operator);
@@ -1228,30 +1256,36 @@ public class Parser {
             }
             case ENTIER -> {
                 expression = new LiteralNode();
+                ((LiteralNode) expression).setConcernedLine(this.currentToken.line());
                 ((LiteralNode) expression).setValue(Long.parseLong(analyseTerminal(Tag.ENTIER).getValue()));
             }
             case CARACTERE -> {
                 expression = new LiteralNode();
+                ((LiteralNode) expression).setConcernedLine(this.currentToken.line());
                 ((LiteralNode) expression).setValue(analyseTerminal(Tag.CARACTERE).getValue().charAt(0));
             }
             case TRUE -> {
                 expression = new LiteralNode();
+                ((LiteralNode) expression).setConcernedLine(this.currentToken.line());
                 analyseTerminal(Tag.TRUE);
                 ((LiteralNode) expression).setValue(true);
 
             }
             case FALSE -> {
                 expression = new LiteralNode();
+                ((LiteralNode) expression).setConcernedLine(this.currentToken.line());
                 analyseTerminal(Tag.FALSE);
                 ((LiteralNode) expression).setValue(false);
             }
             case NULL -> {
                 expression = new LiteralNode();
+                ((LiteralNode) expression).setConcernedLine(this.currentToken.line());
                 analyseTerminal(Tag.NULL);
                 ((LiteralNode) expression).setValue(null);
             }
             case NEW -> {
                 expression = new NewExpressionNode();
+                ((NewExpressionNode) expression).setConcernedLine(this.currentToken.line());
                 analyseTerminal(Tag.NEW);
                 ((NewExpressionNode) expression).setIdentifier(analyseTerminal(Tag.IDENT).getValue());
             }
@@ -1294,11 +1328,13 @@ public class Parser {
                 analyseTerminal(Tag.VAL);
                 analyseTerminal(Tag.OPEN_PAREN);
                 ((CharacterValExpressionNode) expression).setExpression(expression());
+                ((CharacterValExpressionNode) expression).setConcernedLine(this.currentToken.line());
                 analyseTerminal(Tag.CLOSE_PAREN);
             }
             default -> {
                 expression = identPrimary();
                 ((VariableReferenceNode) expression).setIdentifier(ident);
+                ((VariableReferenceNode) expression).setConcernedLine(this.currentToken.line());
             }
         }
         return expression;
@@ -1313,11 +1349,13 @@ public class Parser {
         switch (this.currentToken.tag()) {
             case SEMICOLON, COMMA, CLOSE_PAREN, OR, AND, THEN, NOT, EQ, NE, LT, LE, GT, GE, PLUS, MINUS, MULTI, DIV, REM, DOTDOT, LOOP, DOT -> {
                 expression = new VariableReferenceNode();
+                expression.setConcernedLine(this.currentToken.line());
                 expression.setNextExpression(acces());
             }
             case OPEN_PAREN -> {
                 analyseTerminal(Tag.OPEN_PAREN);
                 expression = new CallNode();
+                expression.setConcernedLine(this.currentToken.line());
                 ((CallNode) expression).setIsExpression(true);
                 ((CallNode) expression).setArguments(multipleExpressions());
                 analyseTerminal(Tag.CLOSE_PAREN);
@@ -1411,7 +1449,9 @@ public class Parser {
         switch (this.currentToken.tag()) {
             case SEMICOLON -> {
             }
-            case IDENT, OPEN_PAREN, MINUS, ENTIER, CARACTERE, TRUE, FALSE, NULL, NEW, CHARACTER, NOT -> expression = expression();
+            case IDENT, OPEN_PAREN, MINUS, ENTIER, CARACTERE, TRUE, FALSE, NULL, NEW, CHARACTER, NOT -> {
+                expression = expression();
+            }
             default -> this.errorService.registerSyntaxError(
                     new UnexpectedTokenListException(this.currentToken,
                             Token.generateExpectedToken(Tag.SEMICOLON, this.currentToken),
@@ -1448,6 +1488,7 @@ public class Parser {
             }
             case BEGIN -> {
                 statement = new BlockNode();
+                ((BlockNode) statement).setConcernedLine(this.currentToken.line());
                 analyseTerminal(Tag.BEGIN);
                 ((BlockNode) statement).addStatements(multipleStatements());
                 analyseTerminal(Tag.END);
@@ -1455,16 +1496,19 @@ public class Parser {
             }
             case RETURN -> {
                 statement = new ReturnStatementNode();
+                ((ReturnStatementNode) statement).setConcernedLine(this.currentToken.line());
                 analyseTerminal(Tag.RETURN);
                 ((ReturnStatementNode) statement).addExpression(hasExpression());
                 analyseTerminal(Tag.SEMICOLON);
             }
             case IF -> {
                 statement = new IfStatementNode();
+                ((IfStatementNode) statement).setConcernedLine(this.currentToken.line());
                 analyseTerminal(Tag.IF);
                 ((IfStatementNode) statement).setCondition(expression());
                 analyseTerminal(Tag.THEN);
                 BlockNode thenBranch = new BlockNode();
+                thenBranch.setConcernedLine(this.currentToken.line());
                 thenBranch.addStatements(multipleStatements());
                 ((IfStatementNode) statement).setThenBranch(thenBranch);
                 ((IfStatementNode) statement).setElseIfBranch(elifn());
@@ -1476,6 +1520,7 @@ public class Parser {
             // For var in reverse expr .. expr loop  end loop;
             case FOR -> {
                 statement = new LoopStatementNode();
+                ((LoopStatementNode) statement).setConcernedLine(this.currentToken.line());
                 analyseTerminal(Tag.FOR);
                 ((LoopStatementNode) statement).setIdentifier(analyseTerminal(Tag.IDENT).getValue());
                 analyseTerminal(Tag.IN);
@@ -1485,6 +1530,7 @@ public class Parser {
                 ((LoopStatementNode) statement).setEndExpression(expression());
                 analyseTerminal(Tag.LOOP);
                 BlockNode loopBody = new BlockNode();
+                loopBody.setConcernedLine(this.currentToken.line());
                 loopBody.addStatements(multipleStatements());
                 ((LoopStatementNode) statement).setBody(loopBody);
                 analyseTerminal(Tag.END);
@@ -1493,10 +1539,12 @@ public class Parser {
             }
             case WHILE -> {
                 statement = new WhileStatementNode();
+                ((WhileStatementNode) statement).setConcernedLine(this.currentToken.line());
                 analyseTerminal(Tag.WHILE);
                 ((WhileStatementNode) statement).setCondition(expression());
                 analyseTerminal(Tag.LOOP);
                 BlockNode loopBody = new BlockNode();
+                loopBody.setConcernedLine(this.currentToken.line());
                 loopBody.addStatements(multipleStatements());
                 ((WhileStatementNode) statement).setBody(loopBody);
                 analyseTerminal(Tag.END);
@@ -1526,21 +1574,25 @@ public class Parser {
 
             case SEMICOLON -> {
                 statement = new CallNode();
+                ((CallNode) statement).setConcernedLine(this.currentToken.line());
                 analyseTerminal(Tag.SEMICOLON);
             }
 
             case OPEN_PAREN -> {
                 statement = new CallNode();
+                ((CallNode) statement).setConcernedLine(this.currentToken.line());
                 analyseTerminal(Tag.OPEN_PAREN);
                 ((CallNode) statement).setArguments(multipleExpressions());
                 analyseTerminal(Tag.CLOSE_PAREN);
-                // TODO
+                // ignore
                 instr3();
                 hasassign();
                 analyseTerminal(Tag.SEMICOLON);
             }
             case ASSIGN, DOT -> {
                 statement = new AssignmentStatementNode();
+                ((AssignmentStatementNode) statement).setConcernedLine(this.currentToken.line());
+                ((AssignmentStatementNode) statement).getVariableReference().setConcernedLine(this.currentToken.line());
                 ((AssignmentStatementNode) statement).getVariableReference().setNextExpression(instr3());
                 analyseTerminal(Tag.ASSIGN);
                 ((AssignmentStatementNode) statement).setExpression(expression());
@@ -1566,6 +1618,7 @@ public class Parser {
             case DOT -> {
                 analyseTerminal(Tag.DOT);
                 accessReferenceNode = new VariableReferenceNode();
+                accessReferenceNode.setConcernedLine(this.currentToken.line());
                 accessReferenceNode.setIdentifier(analyseTerminal(Tag.IDENT).getValue());
                 accessReferenceNode.setNextExpression(instr3());
             }
@@ -1604,9 +1657,11 @@ public class Parser {
             case ELSIF -> {
                 analyseTerminal(Tag.ELSIF);
                 statement = new IfStatementNode();
+                statement.setConcernedLine(this.currentToken.line());
                 statement.setCondition(expression());
                 analyseTerminal(Tag.THEN);
                 BlockNode thenBranch = new BlockNode();
+                thenBranch.setConcernedLine(this.currentToken.line());
                 thenBranch.addStatements(multipleStatements());
                 statement.setThenBranch(thenBranch);
                 statement.setElseIfBranch(elifn());
@@ -1630,6 +1685,7 @@ public class Parser {
             case ELSE -> {
                 analyseTerminal(Tag.ELSE);
                 block = new BlockNode();
+                block.setConcernedLine(this.currentToken.line());
                 block.addStatements(multipleStatements());
             }
             default -> this.errorService.registerSyntaxError(
@@ -1729,6 +1785,7 @@ public class Parser {
             case DOT -> {
                 analyseTerminal(Tag.DOT);
                 variableReferenceNode = new VariableReferenceNode();
+                variableReferenceNode.setConcernedLine(this.currentToken.line());
                 variableReferenceNode.setIdentifier(analyseTerminal(Tag.IDENT).getValue());
                 variableReferenceNode.setNextExpression(acces());
             }
