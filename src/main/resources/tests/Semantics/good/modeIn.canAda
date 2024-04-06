@@ -1,7 +1,7 @@
 with Ada.Text_IO; use Ada.Text_IO;
 procedure TestIn is
 X : integer;
-Y : integer;
+Z : integer;
 function Get(X : in integer) return integer is
 Y : integer;
 begin
@@ -9,5 +9,5 @@ begin
     return Y;
 end Get;
 begin
-   Y := X; -- I can read X
+   Z := X; -- I can read X
 end TestIn;
