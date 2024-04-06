@@ -163,7 +163,7 @@ public final class ASMGenerator implements ASTNodeVisitor {
             }
         });
         this.output.append("""
-                \t SUB     r13, r13, #4 ; Save space for return value
+                \t SUB     R13, R13, #4 ; Save space for return value
                 \t BL      %s ; Branch link to %s (it will save the return address in LR)
                 """.formatted(symbol.getIdentifier(), symbol.getIdentifier()));
     }

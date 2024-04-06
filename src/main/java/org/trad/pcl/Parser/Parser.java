@@ -1066,7 +1066,7 @@ public class Parser {
                     right.setConcernedLine(this.currentToken.line());
                     right.setMostLeft(left);
                     expression.setRight(right);
-                    expression.definePriority("-", "+");
+                    expression.definePriority(OperatorEnum.SUB, OperatorEnum.ADD);
                 } else {
                     expression.setConcernedLine(this.currentToken.line());
                     expression.setRight(left);
@@ -1161,7 +1161,7 @@ public class Parser {
                     rightTree.setConcernedLine(this.currentToken.line());
                     rightTree.setMostLeft(leftNode);
                     expression.setRight(rightTree);
-                    expression.definePriority("/", "*");
+                    expression.definePriority(OperatorEnum.DIVIDE, OperatorEnum.MULTIPLY);
                 } else {
                     expression.setConcernedLine(this.currentToken.line());
                     expression.setRight(leftNode);

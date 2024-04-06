@@ -83,7 +83,7 @@ public final class BinaryExpressionNode extends ASTNode implements ExpressionNod
         this.operator = newParent.operator;
     }
 
-    public void definePriority(String MostPriorityOperator, String LeastPriorityOperator) {
+    public void definePriority(OperatorEnum MostPriorityOperator, OperatorEnum LeastPriorityOperator) {
         BinaryExpressionNode copy = this;
         while (copy.getOperatorNode().getOperator().equals(MostPriorityOperator) && (((BinaryExpressionNode) copy.getRight()).getOperatorNode().getOperator().equals(LeastPriorityOperator) || ((BinaryExpressionNode) copy.getRight()).getOperatorNode().getOperator().equals(MostPriorityOperator))) {
             copy.rotateLeft();
