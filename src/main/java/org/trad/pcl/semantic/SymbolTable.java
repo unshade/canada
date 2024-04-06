@@ -33,13 +33,9 @@ public class SymbolTable {
     }
 
     public void addSymbol(Symbol symbol, int shift) {
-        if (symbols.containsKey(symbol.getIdentifier())) {
-            errorService.registerSemanticError(new DuplicateSymbolException(symbol.getIdentifier()));
-        } else {
-            currentShift += shift;
-            symbol.setShift(currentShift);
-            symbols.put(symbol.getIdentifier(), symbol);
-        }
+        currentShift += shift;
+        symbol.setShift(currentShift);
+        symbols.put(symbol.getIdentifier(), symbol);
     }
 
     public Symbol findSymbol(String identifier) {
