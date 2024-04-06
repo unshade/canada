@@ -8,6 +8,8 @@ public class Context {
 
     private boolean isLeftOperand;
 
+    public int counter = 0;
+
     private int nonCallableDeclarationWriteLine;
     private Context() {
         callerName = "unknown, that's bad bruh";
@@ -44,5 +46,13 @@ public class Context {
 
     public void setLeftOperand(boolean leftOperand) {
         isLeftOperand = leftOperand;
+    }
+
+    public void setCounter(int counter) {
+        this.counter = counter;
+    }
+
+    public int getCounter() {
+        return counter;
     }
 }

@@ -3,10 +3,7 @@ package org.trad.pcl.asm;
 import org.trad.pcl.Exceptions.Semantic.UndefinedVariableException;
 import org.trad.pcl.ast.ParameterNode;
 import org.trad.pcl.ast.ProgramNode;
-import org.trad.pcl.ast.declaration.FunctionDeclarationNode;
-import org.trad.pcl.ast.declaration.ProcedureDeclarationNode;
-import org.trad.pcl.ast.declaration.TypeDeclarationNode;
-import org.trad.pcl.ast.declaration.VariableDeclarationNode;
+import org.trad.pcl.ast.declaration.*;
 import org.trad.pcl.ast.expression.*;
 import org.trad.pcl.ast.statement.*;
 import org.trad.pcl.ast.type.TypeNode;
@@ -14,6 +11,7 @@ import org.trad.pcl.semantic.ASTNodeVisitor;
 import org.trad.pcl.semantic.SymbolTable;
 import org.trad.pcl.semantic.symbol.Symbol;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public final class ASMGenerator implements ASTNodeVisitor {
@@ -31,16 +29,16 @@ public final class ASMGenerator implements ASTNodeVisitor {
         return this.output.toString();
     }
 
-    public Symbol findSymbolInScopes(String identifier) throws UndefinedVariableException {
+    public Symbol findSymbolInScopes(String identifier) {
 
         for (SymbolTable symbolTable : this.symbolTables) {
             Symbol symbol = symbolTable.findSymbol(identifier);
-            if (symbol != null) {
+            if (symbol != null){
                 return symbol;
             }
-        }
 
-        throw new UndefinedVariableException(identifier);
+        }
+        return null;
     }
 
     @Override
@@ -50,9 +48,11 @@ public final class ASMGenerator implements ASTNodeVisitor {
                 \t STMFD   R13!, {R11, LR} ; Save caller's (%s) frame pointer and return ASM address
                 \t MOV     R11, R13 ; Set up new frame pointer
                 """.formatted(Context.background().getCallerName()));
+        Context.background().setCounter(node.getParameters().size());
         node.getParameters().forEach(param -> {
             try {
                 param.accept(this);
+                Context.background().setCounter(Context.background().getCounter() - 1);
             } catch (Exception ex) {
                 throw new RuntimeException(ex);
             }
@@ -67,9 +67,11 @@ public final class ASMGenerator implements ASTNodeVisitor {
                 \t STMFD   R13!, {R11, LR} ; Save caller's (%s) frame pointer and return ASM address
                 \t MOV     R11, R13 ; Set up new frame pointer
                 """.formatted(Context.background().getCallerName()));
+        Context.background().setCounter(node.getParameters().size());
         node.getParameters().forEach(param -> {
             try {
                 param.accept(this);
+                Context.background().setCounter(Context.background().getCounter() - 1);
             } catch (Exception ex) {
                 throw new RuntimeException(ex);
             }
@@ -84,7 +86,7 @@ public final class ASMGenerator implements ASTNodeVisitor {
 
     @Override
     public void visit(VariableDeclarationNode node) throws Exception {
-        int lineToWrite = Context.background().getNonCallableDeclarationWriteLine();
+        /*int lineToWrite = Context.background().getNonCallableDeclarationWriteLine();
 
         String[] outputLines = this.output.toString().split("\\r?\\n");
         StringBuilder newOutput = new StringBuilder();
@@ -96,26 +98,35 @@ public final class ASMGenerator implements ASTNodeVisitor {
                 String formattedCode = String.format("\t SUB     R13, R13, #4 ; Save space for %s in stack-frame", node.getIdentifier());
                 newOutput.append(formattedCode).append("\n");
             }
-        }
+        }*/
+        String formattedCode = String.format("\t SUB     R13, R13, #4 ; Save space for %s in stack-frame", node.getIdentifier());
+        this.output.append(formattedCode).append("\n");
 
-        this.output = newOutput;
+        //TODO : assignement
+
+
+        //this.output = newOutput;
     }
 
 
     @Override
     public void visit(AssignmentStatementNode node) throws Exception {
-        node.getVariableReference().accept(this);
         node.getExpression().accept(this);
         this.output.append("""
-                \t STR     R0, [R11, #%s] ; Assign right expression (assuming result is in R0) to left variable %s
+                \t STR     R0, [R11, #-%s] ; Assign right expression (assuming result is in R0) to left variable %s
                 """.formatted(findSymbolInScopes(node.getVariableReference().getIdentifier()).getShift(), node.getVariableReference().getIdentifier()));
     }
 
     @Override
     public void visit(BlockNode node) {
+        List<DeclarationNode> tempDeclarations = new ArrayList<>();
         node.getDeclarations().forEach(declaration -> {
             try {
-                declaration.accept(this);
+                if (declaration instanceof ProcedureDeclarationNode || declaration instanceof FunctionDeclarationNode) {
+                   tempDeclarations.add(declaration);
+                } else {
+                    declaration.accept(this);
+                }
             } catch (Exception ex) {
                 throw new RuntimeException(ex);
             }
@@ -123,6 +134,14 @@ public final class ASMGenerator implements ASTNodeVisitor {
         node.getStatements().forEach(statement -> {
             try {
                 statement.accept(this);
+            } catch (Exception ex) {
+                throw new RuntimeException(ex);
+            }
+        });
+
+        tempDeclarations.forEach(declaration -> {
+            try {
+                declaration.accept(this);
             } catch (Exception ex) {
                 throw new RuntimeException(ex);
             }
@@ -135,11 +154,16 @@ public final class ASMGenerator implements ASTNodeVisitor {
         node.getArguments().forEach(arg -> {
             try {
                 arg.accept(this);
+                this.output.append(""" 
+                        \t STMFD   R13!, {R0} ; Save argument
+                        """);
+
             } catch (Exception ex) {
                 throw new RuntimeException(ex);
             }
         });
         this.output.append("""
+                \t SUB     r13, r13, #4 ; Save space for return value
                 \t BL      %s ; Branch link to %s (it will save the return address in LR)
                 """.formatted(symbol.getIdentifier(), symbol.getIdentifier()));
     }
@@ -162,9 +186,13 @@ public final class ASMGenerator implements ASTNodeVisitor {
         this.output.append("""
                 \t MOV     R0, #0 ; Clear R0
                 \t MOV     R5, #0 ; Clear R5
+                """);
+        node.getExpression().accept(this);
+        this.output.append("""
+                \t STR     R0, [R11, #4 * 2] ; Store return value for (%s) in stack-frame
                 \t MOV     R13, R11 ; Restore frame pointer
                 \t LDMFD   R13!, {R11, PC} ; Restore caller's (%s) frame pointer and return ASM address
-                """.formatted(Context.background().getCallerName()));
+                """.formatted(Context.background().getCallerName(), Context.background().getCallerName()));
     }
 
     @Override
@@ -200,7 +228,10 @@ public final class ASMGenerator implements ASTNodeVisitor {
 
     @Override
     public void visit(VariableReferenceNode node) throws Exception {
-
+        Symbol symbol = this.findSymbolInScopes(node.getIdentifier());
+        this.output.append("""
+                \t LDR     R0, [R11, #-%s] ; Load variable %s in R0
+                """.formatted(symbol.getShift(), node.getIdentifier()));
     }
 
     @Override
@@ -229,25 +260,53 @@ public final class ASMGenerator implements ASTNodeVisitor {
                 \t STMFD   R13!, {R11, LR} ; Main environment setup
                 \t MOV     R11, R13 ; Set up new frame pointer
                 """);
-            this.updateContextNonCallableDeclaration();
-            node.getRootProcedure().getBody().getStatements().forEach(statementNode -> {
+            //this.updateContextNonCallableDeclaration();
+           /* node.getRootProcedure().getBody().getStatements().forEach(statementNode -> {
                 try {
                     statementNode.accept(this);
                 } catch (Exception e) {
                     System.err.println(e.getMessage());
                     System.exit(1);
                 }
+            });*/
+            List<DeclarationNode> tempDeclarations = new ArrayList<>();
+            node.getRootProcedure().getBody().getDeclarations().forEach(declaration -> {
+                try {
+                    if (declaration instanceof ProcedureDeclarationNode || declaration instanceof FunctionDeclarationNode) {
+                        tempDeclarations.add(declaration);
+                    } else {
+                        declaration.accept(this);
+                    }
+                } catch (Exception ex) {
+                    throw new RuntimeException(ex);
+                }
+            });
+            node.getRootProcedure().getBody().getStatements().forEach(statement -> {
+                try {
+                    statement.accept(this);
+                } catch (Exception ex) {
+                    throw new RuntimeException(ex);
+                }
             });
             this.output.append("\t END     ; Program ends here\n");
-            node.getRootProcedure().getBody().getDeclarations().forEach(declarationNode -> {
+
+            tempDeclarations.forEach(declaration -> {
+                try {
+                    declaration.accept(this);
+                } catch (Exception ex) {
+                    throw new RuntimeException(ex);
+                }
+            });
+            /*node.getRootProcedure().getBody().getDeclarations().forEach(declarationNode -> {
                 try {
                     declarationNode.accept(this);
                 } catch (Exception e) {
                     System.err.println(e.getMessage());
                     System.exit(1);
                 }
-            });
+            });*/
         } catch (Exception e) {
+            e.printStackTrace();
             System.err.println(e.getMessage());
             System.exit(1);
         }
@@ -257,11 +316,11 @@ public final class ASMGenerator implements ASTNodeVisitor {
     @Override
     public void visit(ParameterNode node) throws Exception {
         node.getType().accept(this);
+        int shift = Context.background().getCounter()+2;
         this.output.append("""
-                \t LDR     R5, [R11, #%s] ; Load parameter %s in R5
-                \t SUB     R13, R13, #4 ; Save space for %s in stack-frame
-                \t STR     R5, [R13] ; Store parameter %s in stack-frame
-                """.formatted(findSymbolInScopes(node.getIdentifier()).getShift(), node.getIdentifier(), node.getIdentifier(), node.getIdentifier()));
+                \t LDR     R5, [R11, #4 * %s] ; Load parameter %s in R5
+                \t STMFD   R13!, {R5} ; Store parameter %s in stack-frame
+                """.formatted(shift, node.getIdentifier(), node.getIdentifier()));
     }
 
     private void updateContextNonCallableDeclaration() {
