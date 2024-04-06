@@ -42,13 +42,13 @@ public final class CallNode extends VariableReferenceNode {
 
     @Override
     public String getType() throws UndefinedVariableException {
-        Function function = (Function) SemanticAnalysisVisitor.findSymbolInScopes(this.getIdentifier());
+        Function function = (Function) SemanticAnalysisVisitor.findSymbolInScopes(this.getIdentifier(), this.getConcernedLine());
         String type = function.getReturnType();
 
         if (this.getNextExpression() != null) {
             VariableReferenceNode next = this.getNextExpression();
             while (next != null) {
-                Record recordType = (Record) SemanticAnalysisVisitor.findSymbolInScopes(type);
+                Record recordType = (Record) SemanticAnalysisVisitor.findSymbolInScopes(type, this.getConcernedLine());
                 type = recordType.getField(next.getIdentifier()).getType();
                 next = next.getNextExpression();
             }
@@ -57,26 +57,26 @@ public final class CallNode extends VariableReferenceNode {
     }
 
     public void checkParametersSize() throws Exception {
-        Procedure correspondingDeclaration = (Procedure) SemanticAnalysisVisitor.findSymbolInScopes(this.getIdentifier());
+        Procedure correspondingDeclaration = (Procedure) SemanticAnalysisVisitor.findSymbolInScopes(this.getIdentifier(), this.getConcernedLine());
 
         // Check if the number of arguments match the number of declared parameters
         // Check if arguments are null
         if (this.getArguments() != null) {
             if (this.getArguments().size() != correspondingDeclaration.getIndexedParametersTypes().size()) {
-                throw new IncorrectNumberOfArgumentsException(this.getIdentifier(), correspondingDeclaration.getIndexedParametersTypes().size(), this.getArguments().size());
+                throw new IncorrectNumberOfArgumentsException(this.getIdentifier(), correspondingDeclaration.getIndexedParametersTypes().size(), this.getArguments().size(), this.getConcernedLine());
             }
         }
     }
 
     public void checkParametersTypes() throws Exception {
         // Check if the types of the arguments match the types of the declared parameters
-        Procedure correspondingDeclaration = (Procedure) SemanticAnalysisVisitor.findSymbolInScopes(this.getIdentifier());
+        Procedure correspondingDeclaration = (Procedure) SemanticAnalysisVisitor.findSymbolInScopes(this.getIdentifier(), this.getConcernedLine());
         if (this.getArguments() != null) {
             for (int i = 0; i < this.getArguments().size(); i++) {
                 String argumentType = this.getArguments().get(i).getType();
                 String parameterType = correspondingDeclaration.getIndexedParametersTypes().get(i).toLowerCase(Locale.ROOT);
                 if (!argumentType.equals(parameterType)) {
-                    throw new ArgumentTypeMismatchException(correspondingDeclaration.getIndexedParametersTypes().get(i), argumentType);
+                    throw new ArgumentTypeMismatchException(correspondingDeclaration.getIndexedParametersTypes().get(i), argumentType, this.getConcernedLine());
                 }
             }
         }

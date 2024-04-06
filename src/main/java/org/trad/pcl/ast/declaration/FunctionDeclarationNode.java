@@ -61,7 +61,7 @@ public final class FunctionDeclarationNode extends ASTNode implements Declaratio
                 return;
             }
         }
-        ErrorService.getInstance().registerSemanticError(new MissingReturnStatementException(this.identifier));
+        ErrorService.getInstance().registerSemanticError(new MissingReturnStatementException(this.identifier, this.body.getConcernedLine()));
     }
 
     public void checkEndIdentifier(){
@@ -69,7 +69,7 @@ public final class FunctionDeclarationNode extends ASTNode implements Declaratio
             return;
         }
         if(!this.identifier.equals(this.endIdentifier)){
-            ErrorService.getInstance().registerSemanticError(new InvalidEndIdentifierException(this.identifier, this.endIdentifier));
+            ErrorService.getInstance().registerSemanticError(new InvalidEndIdentifierException(this.identifier, this.endIdentifier, this.body.getConcernedLine()));
         }
     }
 

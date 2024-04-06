@@ -5,9 +5,9 @@ import org.trad.pcl.Lexer.Tokens.Token;
 
 import static com.diogonunes.jcolor.Ansi.colorize;
 
-public class UndefinedVariableException extends Exception {
+public class UndefinedVariableException extends SemanticException {
 
-    public UndefinedVariableException(String var) {
-        super("The identifier " + colorize(var, Attribute.YELLOW_TEXT()) + " has not been declared");
+    public UndefinedVariableException(String var, int line) {
+        super("The identifier " + colorize(var, Attribute.YELLOW_TEXT()) + " has not been declared", line);
     }
 }

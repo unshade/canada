@@ -49,7 +49,7 @@ public final class IfStatementNode extends ASTNode implements StatementNode {
 
     public void checkConditionType() throws UndefinedVariableException {
         if (!condition.getType().equals(TypeEnum.BOOL.toString())) {
-            ErrorService.getInstance().registerSemanticError(new InvalidConditionTypeException(condition.getType()));
+            ErrorService.getInstance().registerSemanticError(new InvalidConditionTypeException(condition.getType(), this.getConcernedLine()));
         }
     }
 

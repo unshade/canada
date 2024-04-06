@@ -43,14 +43,14 @@ public class VariableReferenceNode extends ASTNode implements IdentifiableExpres
         VariableReferenceNode nextExpression = this.getNextExpression();
 
         while(nextExpression != null) {
-            Symbol type = findSymbolInScopes(typeIdent);
+            Symbol type = findSymbolInScopes(typeIdent, this.getConcernedLine());
             if (!(type instanceof Record)) {
-                throw new NonRecordTypeException(typeIdent);
+                throw new NonRecordTypeException(typeIdent, this.getConcernedLine());
             }
 
             Variable field = ((Record) type).getField(nextExpression.getIdentifier());
             if (field == null) {
-                throw new UndefinedFieldException(nextExpression.getIdentifier(), typeIdent);
+                throw new UndefinedFieldException(nextExpression.getIdentifier(), typeIdent, this.getConcernedLine());
             }
 
             nextExpression = nextExpression.getNextExpression();
@@ -61,7 +61,7 @@ public class VariableReferenceNode extends ASTNode implements IdentifiableExpres
 
     @Override
     public String getType() throws UndefinedVariableException {
-        Variable variableExpression = (Variable) findSymbolInScopes(this.getIdentifier());
+        Variable variableExpression = (Variable) findSymbolInScopes(this.getIdentifier(), this.getConcernedLine());
 
         String type = variableExpression.getType();
 
@@ -69,7 +69,7 @@ public class VariableReferenceNode extends ASTNode implements IdentifiableExpres
 
                 VariableReferenceNode next = this.nextExpression;
                 while (next != null) {
-                    Record recordType = (Record) findSymbolInScopes(type);
+                    Record recordType = (Record) findSymbolInScopes(type, this.getConcernedLine());
                     type = recordType.getField(next.getIdentifier()).getType();
                     next = next.getNextExpression();
                 }

@@ -102,7 +102,7 @@ public final class BinaryExpressionNode extends ASTNode implements ExpressionNod
     public void checkType() throws UndefinedVariableException {
 
         if (!left.getType().equals(right.getType()) || !left.getType().equals(operator.getType())) {
-            ErrorService.getInstance().registerSemanticError(new BinaryTypeMismatchException(left.getType(), right.getType(), operator.getType()));
+            ErrorService.getInstance().registerSemanticError(new BinaryTypeMismatchException(left.getType(), right.getType(), operator.getType(), this.getConcernedLine()));
         }
     }
     @Override

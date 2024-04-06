@@ -42,7 +42,7 @@ public class SemanticAnalysisVisitor implements ASTNodeVisitor {
         scopeStack.peek().addSymbol(put, 0);
     }
 
-    public static Symbol findSymbolInScopes(String identifier) throws UndefinedVariableException {
+    public static Symbol findSymbolInScopes(String identifier, int line) throws UndefinedVariableException {
 
         for (int i = scopeStack.size() - 1; i >= 0; i--) {
             Symbol s = scopeStack.get(i).findSymbol(identifier);
@@ -51,7 +51,7 @@ public class SemanticAnalysisVisitor implements ASTNodeVisitor {
             }
         }
 
-        throw new UndefinedVariableException(identifier);
+        throw new UndefinedVariableException(identifier, line);
     }
 
     @Override
@@ -62,7 +62,7 @@ public class SemanticAnalysisVisitor implements ASTNodeVisitor {
         node.checkEndIdentifier();
 
         // Add the function to the current scope
-        addSymbolInScopes(node.toSymbol());
+        addSymbolInScopes(node.toSymbol(), node.getConcernedLine());
 
         // Create a new scope
         enterScope(new SymbolTable(node.getIdentifier()));
@@ -86,7 +86,7 @@ public class SemanticAnalysisVisitor implements ASTNodeVisitor {
         node.checkEndIdentifier();
 
         // Add the procedure to the current scope
-        addSymbolInScopes(node.toSymbol());
+        addSymbolInScopes(node.toSymbol(), node.getConcernedLine());
         // Create a new scope
         enterScope(new SymbolTable(node.getIdentifier()));
 
@@ -118,7 +118,7 @@ public class SemanticAnalysisVisitor implements ASTNodeVisitor {
 
                 for (VariableDeclarationNode field : recordTypeNode.getFields()) {
                     if (identifiers.indexOf(field.getIdentifier()) != identifiers.lastIndexOf(field.getIdentifier())) {
-                        throw new DuplicateRecordFieldException(field.getIdentifier(), recordTypeNode.getIdentifier());
+                        throw new DuplicateRecordFieldException(field.getIdentifier(), recordTypeNode.getIdentifier(), field.getConcernedLine());
                     }
                     field.getType().accept(this);
                 }
@@ -126,14 +126,14 @@ public class SemanticAnalysisVisitor implements ASTNodeVisitor {
             case "TypeNode":
                 break;
         }
-        addSymbolInScopes(node.toSymbol());
+        addSymbolInScopes(node.toSymbol(), node.getConcernedLine());
     }
 
     @Override
     public void visit(VariableDeclarationNode node) throws Exception {
 
         node.getType().accept(this);
-        addSymbolInScopes(node.toSymbol());
+        addSymbolInScopes(node.toSymbol(), node.getConcernedLine());
         if (node.getAssignment() != null) {
             node.getAssignment().accept(this);
         }
@@ -171,15 +171,15 @@ public class SemanticAnalysisVisitor implements ASTNodeVisitor {
 
     @Override
     public void visit(CallNode node) throws Exception {
-        Symbol s = findSymbolInScopes(node.getIdentifier());
+        Symbol s = findSymbolInScopes(node.getIdentifier(), node.getConcernedLine());
         if (!(s instanceof Function) && node.getIsExpression()) {
-            throw new Exception("The identifier " + node.getIdentifier() + " is not a valid function");
+            throw new Exception("Line " + node.getConcernedLine() + ": " + "The identifier " + node.getIdentifier() + " is not a valid function");
         }
 
         if(s instanceof Function function) {
             node.checkVariableReferenceAccess(function.getReturnType());
         } else if (!(s instanceof Procedure)) {
-            throw new Exception("The identifier " + node.getIdentifier() + " is not a valid procedure or function");
+            throw new Exception("Line " + node.getConcernedLine() + ": " + "The identifier " + node.getIdentifier() + " is not a valid procedure or function");
         }
 
         if (node.getArguments() != null) { // Check if the function or procedure has arguments
@@ -218,22 +218,22 @@ public class SemanticAnalysisVisitor implements ASTNodeVisitor {
 
     @Override
     public void visit(ReturnStatementNode node) throws Exception {
-        Symbol s = findSymbolInScopes(scopeStack.peek().getScopeIdentifier());
+        Symbol s = findSymbolInScopes(scopeStack.peek().getScopeIdentifier(), node.getConcernedLine());
         switch (s.getClass().getSimpleName()) {
             case "Function" -> {
                 if (node.getExpression() == null) {
-                    throw new InvalidReturnTypeException(((Function) s).getReturnType(), TypeEnum.VOID.toString());
+                    throw new InvalidReturnTypeException(((Function) s).getReturnType(), TypeEnum.VOID.toString(), node.getConcernedLine());
                 }
 
                 node.getExpression().accept(this);
 
                 if (!node.getExpression().getType().equals(((Function) s).getReturnType())) {
-                    throw new InvalidReturnTypeException(((Function) s).getReturnType(), node.getExpression().getType());
+                    throw new InvalidReturnTypeException(((Function) s).getReturnType(), node.getExpression().getType(), node.getConcernedLine());
                 }
             }
             case "Procedure" -> {
                 if (node.getExpression() != null) {
-                    throw new InvalidReturnTypeException(TypeEnum.VOID.toString(), node.getExpression().getType());
+                    throw new InvalidReturnTypeException(TypeEnum.VOID.toString(), node.getExpression().getType(), node.getConcernedLine());
                 }
             }
         }
@@ -260,7 +260,7 @@ public class SemanticAnalysisVisitor implements ASTNodeVisitor {
         node.getExpression().accept(this);
         // Check if the expression is an integer
         if (!node.getExpression().getType().equals(TypeEnum.CHAR.toString())) {
-            throw new TypeMismatchException(TypeEnum.CHAR.toString(), node.getExpression().getType());
+            throw new TypeMismatchException(TypeEnum.CHAR.toString(), node.getExpression().getType(), node.getConcernedLine());
         }
     }
 
@@ -272,9 +272,9 @@ public class SemanticAnalysisVisitor implements ASTNodeVisitor {
     @Override
     public void visit(VariableReferenceNode node) throws Exception {
         // Check if the variable is defined
-        Symbol var = findSymbolInScopes(node.getIdentifier());
+        Symbol var = findSymbolInScopes(node.getIdentifier(), node.getConcernedLine());
         if (!(var instanceof Variable variable)) {
-            throw new InvalidVariableReferenceException(node.getIdentifier(), var.getClass().getSimpleName());
+            throw new InvalidVariableReferenceException(node.getIdentifier(), var.getClass().getSimpleName(), node.getConcernedLine());
         }
 
         node.checkVariableReferenceAccess(variable.getType());
@@ -283,22 +283,22 @@ public class SemanticAnalysisVisitor implements ASTNodeVisitor {
     @Override
     public void visit(NewExpressionNode node) throws UndefinedVariableException {
         // Check if the type is defined
-        Symbol s = findSymbolInScopes(node.getIdentifier());
+        Symbol s = findSymbolInScopes(node.getIdentifier(), node.getConcernedLine());
     }
 
     @Override
     public void visit(UnaryExpressionNode node) throws Exception {
         node.getOperand().accept(this);
         if (!node.getOperator().getType().equals(node.getOperand().getType())) {
-            throw new TypeMismatchException(node.getOperator().getType(), node.getOperand().getType());
+            throw new TypeMismatchException(node.getOperator().getType(), node.getOperand().getType(), node.getConcernedLine());
         }
     }
 
     @Override
     public void visit(TypeNode node) throws Exception {
-        Symbol s = findSymbolInScopes(node.getIdentifier());
+        Symbol s = findSymbolInScopes(node.getIdentifier(), node.getConcernedLine());
         if (!(s instanceof Type)) {
-            throw new Exception("The identifier " + node.getIdentifier() + " is not a valid type");
+            throw new Exception("Line " + node.getConcernedLine() + ": " + "The identifier " + node.getIdentifier() + " is not a valid type");
         }
     }
 
@@ -344,11 +344,11 @@ public class SemanticAnalysisVisitor implements ASTNodeVisitor {
         return symbolTables;
     }
 
-    public void addSymbolInScopes(Symbol symbol) throws DuplicateSymbolException {
+    public void addSymbolInScopes(Symbol symbol, int line) throws DuplicateSymbolException {
         for (int i = scopeStack.size() - 1; i >= 0; i--) {
             Symbol s = scopeStack.get(i).findSymbol(symbol.getIdentifier());
             if (s != null) {
-                throw new DuplicateSymbolException(symbol.getIdentifier());
+                throw new DuplicateSymbolException(symbol.getIdentifier(), line);
             }
         }
         scopeStack.peek().addSymbol(symbol, 4);

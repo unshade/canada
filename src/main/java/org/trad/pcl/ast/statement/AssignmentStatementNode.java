@@ -45,17 +45,17 @@ public final class AssignmentStatementNode extends ASTNode implements Identifiab
     }
 
     public void checkIfAssignable() throws UndefinedVariableException {
-        Variable reference = (Variable) SemanticAnalysisVisitor.findSymbolInScopes(this.variableReference.getIdentifier());
+        Variable reference = (Variable) SemanticAnalysisVisitor.findSymbolInScopes(this.variableReference.getIdentifier(), this.variableReference.getConcernedLine());
 
         if (reference instanceof Parameter) {
             if (((Parameter) reference).getMode().equals(ParameterMode.IN)) {
-                ErrorService.getInstance().registerSemanticError(new InParameterModificationException(this.getVariableReference().getIdentifier()));
+                ErrorService.getInstance().registerSemanticError(new InParameterModificationException(this.getVariableReference().getIdentifier(), this.getVariableReference().getConcernedLine()));
                 return;
             }
         }
 
         if (!this.variableReference.getType().equals(expression.getType())) {
-            ErrorService.getInstance().registerSemanticError(new TypeMismatchException(reference.getType(), expression.getType()));
+            ErrorService.getInstance().registerSemanticError(new TypeMismatchException(reference.getType(), expression.getType(), this.variableReference.getConcernedLine()));
         }
 
     }
