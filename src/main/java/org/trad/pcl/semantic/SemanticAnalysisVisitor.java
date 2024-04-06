@@ -62,7 +62,7 @@ public class SemanticAnalysisVisitor implements ASTNodeVisitor {
         node.checkEndIdentifier();
 
         // Add the function to the current scope
-        scopeStack.peek().addSymbol(node.toSymbol(), 0);
+        addSymbolInScopes(node.toSymbol());
 
         // Create a new scope
         enterScope(new SymbolTable(node.getIdentifier()));
@@ -86,7 +86,7 @@ public class SemanticAnalysisVisitor implements ASTNodeVisitor {
         node.checkEndIdentifier();
 
         // Add the procedure to the current scope
-        scopeStack.peek().addSymbol(node.toSymbol(), 0);
+        addSymbolInScopes(node.toSymbol());
         // Create a new scope
         enterScope(new SymbolTable(node.getIdentifier()));
 
@@ -126,14 +126,14 @@ public class SemanticAnalysisVisitor implements ASTNodeVisitor {
             case "TypeNode":
                 break;
         }
-        scopeStack.peek().addSymbol(node.toSymbol(), 4);
+        addSymbolInScopes(node.toSymbol());
     }
 
     @Override
     public void visit(VariableDeclarationNode node) throws Exception {
 
         node.getType().accept(this);
-        scopeStack.peek().addSymbol(node.toSymbol(), 4);
+        addSymbolInScopes(node.toSymbol());
         if (node.getAssignment() != null) {
             node.getAssignment().accept(this);
         }
@@ -343,4 +343,15 @@ public class SemanticAnalysisVisitor implements ASTNodeVisitor {
     public List<SymbolTable> getSymbolTables() {
         return symbolTables;
     }
+
+    public void addSymbolInScopes(Symbol symbol) throws DuplicateSymbolException {
+        for (int i = scopeStack.size() - 1; i >= 0; i--) {
+            Symbol s = scopeStack.get(i).findSymbol(symbol.getIdentifier());
+            if (s != null) {
+                throw new DuplicateSymbolException(symbol.getIdentifier());
+            }
+        }
+        scopeStack.peek().addSymbol(symbol, 4);
+    }
+
 }
