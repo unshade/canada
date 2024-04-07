@@ -234,7 +234,22 @@ public final class ASMGenerator implements ASTNodeVisitor {
 
     @Override
     public void visit(WhileStatementNode node) throws Exception {
+        //TODO move loop logic and condition inside their respective visits
+        String loopStartLabel = "loop_start_" + Context.background().getUniqueLabelId();
+        String loopEndLabel = "loop_end_" + Context.background().getUniqueLabelId();
 
+        output.append(loopStartLabel).append("\n");
+
+        node.getCondition().accept(this);
+
+        output.append("\t CMP     R0, #0\n");
+        output.append("\t BEQ     ").append(loopEndLabel).append("\n");
+
+        node.getBody().accept(this);
+
+        output.append("\t B       ").append(loopStartLabel).append("\n");
+
+        output.append(loopEndLabel).append("\n");
     }
 
     @Override

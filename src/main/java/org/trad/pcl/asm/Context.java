@@ -44,6 +44,12 @@ public class Context {
         return isLeftOperand;
     }
 
+    private int labelId = 0;
+
+    public int getUniqueLabelId() {
+        return labelId++;
+    }
+
     public void setLeftOperand(boolean leftOperand) {
         isLeftOperand = leftOperand;
     }

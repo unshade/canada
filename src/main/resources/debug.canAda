@@ -1,16 +1,9 @@
 with Ada.Text_IO; use Ada.Text_IO;
 procedure unDebut is
-
-function perimetreRectangle(larg : integer; long : integer) return integer is
-p : integer;
-begin
-    p := 1+2+3 ;
-return p ;
-end perimetreRectangle;
-
-    -- VARIABLES
 choix : integer ;
-    -- PROCEDURE PRINCIPALE
 begin
-choix := perimetreRectangle(5, 10);
+choix := 1+2;
+while choix > 0 loop
+choix := choix - 1;
+end loop;
 end unDebut ;
