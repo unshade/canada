@@ -28,18 +28,18 @@ public class SemanticAnalysisVisitor implements ASTNodeVisitor {
     }
 
     public void addPrimitiveTypes() {
-        Type integer = new Type(TypeEnum.INT.toString(), 4);
-        Type character = new Type(TypeEnum.CHAR.toString(), 1);
+        Type integer = new Type(TypeEnum.INT.toString(), 0);
+        Type character = new Type(TypeEnum.CHAR.toString(), 0);
 
-        scopeStack.peek().addSymbol(integer, 0);
-        scopeStack.peek().addSymbol(character, 0);
+        scopeStack.peek().addSymbol(integer);
+        scopeStack.peek().addSymbol(character);
     }
 
     public void addPredefinedFunctions() {
-        Procedure put = new Procedure("put",  4);
+        Procedure put = new Procedure("put",  0);
         put.addParameter(TypeEnum.CHAR.toString());
 
-        scopeStack.peek().addSymbol(put, 0);
+        scopeStack.peek().addSymbol(put);
     }
 
     public static Symbol findSymbolInScopes(String identifier, int line) throws UndefinedVariableException {
@@ -323,7 +323,7 @@ public class SemanticAnalysisVisitor implements ASTNodeVisitor {
     @Override
     public void visit(ParameterNode node) throws Exception {
 
-        scopeStack.peek().addSymbol(node.toSymbol(), 4);
+        scopeStack.peek().addSymbol(node.toSymbol());
         node.getType().accept(this);
     }
 
@@ -351,7 +351,7 @@ public class SemanticAnalysisVisitor implements ASTNodeVisitor {
                 throw new DuplicateSymbolException(symbol.getIdentifier(), line);
             }
         }
-        scopeStack.peek().addSymbol(symbol, symbol.getShift());
+        scopeStack.peek().addSymbol(symbol);
     }
 
 }

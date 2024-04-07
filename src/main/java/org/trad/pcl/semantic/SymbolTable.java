@@ -32,9 +32,8 @@ public class SymbolTable {
         this.scopeIdentifier = scopeIdentifier;
     }
 
-    public void addSymbol(Symbol symbol, int shift) {
-        currentShift += shift;
-        symbol.setShift(currentShift);
+    public void addSymbol(Symbol symbol) {
+        symbol.setShift(currentShift+=symbol.getShift());
         symbols.put(symbol.getIdentifier(), symbol);
     }
 
