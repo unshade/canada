@@ -102,7 +102,6 @@ public class Parser {
                 List<String> idents = multipleIdent();
                 analyseTerminal(Tag.COLON);
                 TypeNode typeNode = type();
-                typeNode.setConcernedLine(this.currentToken.line());
                 ExpressionNode assignNode = assignDeclarationExpression();
                 for (String ident : idents) {
                     VariableDeclarationNode variableDeclarationNode = new VariableDeclarationNode();
@@ -377,7 +376,7 @@ public class Parser {
             case IDENT -> {
                 type = new TypeNode();
                 type.setConcernedLine(this.currentToken.line());
-                ((TypeNode) type).setIdentifier(analyseTerminal(Tag.IDENT).getValue());
+                type.setIdentifier(analyseTerminal(Tag.IDENT).getValue());
             }
             default -> this.errorService.registerSyntaxError(
                     new UnexpectedTokenListException(this.currentToken,
