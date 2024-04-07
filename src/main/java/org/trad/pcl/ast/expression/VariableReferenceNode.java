@@ -76,4 +76,5 @@ public class VariableReferenceNode extends ASTNode implements IdentifiableExpres
         }
         return type;
     }
+
 }

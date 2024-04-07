@@ -62,6 +62,18 @@ public final class ASMGenerator implements ASTNodeVisitor {
         return null;
     }
 
+    public int findDepthInScopes(String identifier) {
+        for (int i = scopeStack.size() - 1; i >= 0; i--) {
+            Symbol s = scopeStack.get(i).findSymbol(identifier);
+            if (s != null) {
+                return scopeStack.size() - i - 1;
+            }
+        }
+
+        assert false : "Variable " + identifier + " not found in any scope";
+        return -1;
+    }
+
     public Integer findSymbolInScopes(String FunctionOrProcedureName, String identifier) {
         SymbolTable symbolTableFunction = this.findSymbolTable(FunctionOrProcedureName);
         return findSymbolInScopesRecursive(symbolTableFunction, identifier, 0);
@@ -103,9 +115,9 @@ public final class ASMGenerator implements ASTNodeVisitor {
         enterScope();
         Symbol symbol = this.findSymbolInScopes(node.getIdentifier());
         this.output.append(symbol.getIdentifier()).append("\n").append("""
-                \t STMFD   R13!, {R11, LR} ; Save caller's (%s) frame pointer and return ASM address
+                \t STMFD   R13!, {R11, LR} ; Save caller's frame pointer and return ASM address
                 \t MOV     R11, R13 ; Set up new frame pointer
-                """.formatted(Context.background().getCallerName()));
+                """);
         Context.background().setCounter(node.getParameters().size());
         node.getParameters().forEach(param -> {
             try {
@@ -115,7 +127,7 @@ public final class ASMGenerator implements ASTNodeVisitor {
                 throw new RuntimeException(ex);
             }
         });
-        Context.background().setCallerName(node.getIdentifier());
+        //Context.background().setCallerName(node.getIdentifier());
         node.getBody().accept(this);
         exitScope();
     }
@@ -125,9 +137,9 @@ public final class ASMGenerator implements ASTNodeVisitor {
         enterScope();
         Symbol symbol = this.findSymbolInScopes(node.getIdentifier());
         this.output.append(symbol.getIdentifier()).append("\n").append("""
-                \t STMFD   R13!, {R11, LR} ; Save caller's (%s) frame pointer and return ASM address
+                \t STMFD   R13!, {R11, LR} ; Save caller's frame pointer and return ASM address
                 \t MOV     R11, R13 ; Set up new frame pointer
-                """.formatted(Context.background().getCallerName()));
+                """);
         Context.background().setCounter(node.getParameters().size());
         node.getParameters().forEach(param -> {
             try {
@@ -137,7 +149,7 @@ public final class ASMGenerator implements ASTNodeVisitor {
                 throw new RuntimeException(ex);
             }
         });
-        Context.background().setCallerName(node.getIdentifier());
+        //Context.background().setCallerName(node.getIdentifier());
         node.getBody().accept(this);
         exitScope();
     }
@@ -174,10 +186,11 @@ public final class ASMGenerator implements ASTNodeVisitor {
 
     @Override
     public void visit(AssignmentStatementNode node) throws Exception {
-        node.getExpression().accept(this);
+        node.getExpression().accept(this); // store result in R0
+        this.findAdressVariable(node.getVariableReference().getIdentifier()); // store in address in R10
         this.output.append("""
-                \t STR     R0, [R11, #%s] ; Assign right expression (assuming result is in R0) to left variable %s
-                """.formatted(findSymbolInScopes(Context.background().getCallerName(), node.getVariableReference().getIdentifier()), node.getVariableReference().getIdentifier()));
+                \t STR     R0, [R10, #-%s] ; Assign right expression (assuming result is in R0) to left variable %s
+                """.formatted(findSymbolInScopes(node.getVariableReference().getIdentifier()).getShift(), node.getVariableReference().getIdentifier()));
     }
 
     @Override
@@ -228,8 +241,9 @@ public final class ASMGenerator implements ASTNodeVisitor {
         this.output.append("""
                 \t SUB     R13, R13, #4 ; Save space for return value
                 \t BL      %s ; Branch link to %s (it will save the return address in LR)
-                \t LDR     R0, [R13], #4 ; Load return value
-                """.formatted(symbol.getIdentifier(), symbol.getIdentifier()));
+                \t LDR     R0, [R13] ; Load return value
+                \t ADD     R13, R13, #4 * %s ; Remove arguments and return value from stack
+                """.formatted(symbol.getIdentifier(), symbol.getIdentifier(), node.getArguments().size() + 1));
     }
 
     @Override
@@ -270,10 +284,10 @@ public final class ASMGenerator implements ASTNodeVisitor {
                 """);
         node.getExpression().accept(this);
         this.output.append("""
-                \t STR     R0, [R11, #4 * 2] ; Store return value for (%s) in stack-frame
+                \t STR     R0, [R11, #4 * 2] ; Store return value for in stack-frame
                 \t MOV     R13, R11 ; Restore frame pointer
-                \t LDMFD   R13!, {R11, PC} ; Restore caller's (%s) frame pointer and return ASM address
-                """.formatted(Context.background().getCallerName(), Context.background().getCallerName()));
+                \t LDMFD   R13!, {R11, PC} ; Restore caller's frame pointer and return ASM address
+                """);
     }
 
     @Override
@@ -300,15 +314,21 @@ public final class ASMGenerator implements ASTNodeVisitor {
 
     @Override
     public void visit(BinaryExpressionNode node) throws Exception {
-        Context.background().setLeftOperand(false);
+        //Context.background().setLeftOperand(false);
         node.getRight().accept(this);
-        Context.background().setLeftOperand(true);
-        node.getLeft().accept(this);
+        this.output.append("""
+                \t STMFD   R13!, {R0} ; Store the right operand in the stack
+                """);
+        //Context.background().setLeftOperand(true);
+        node.getLeft().accept(this); // store in R0
+        this.output.append("""
+                \t LDMFD   R13!, {R1} ; Load the right operand in R1
+                """);
         switch (node.getOperatorNode().getOperator()) {
             case ADD -> output.append("\t ADD     R0, R0, R1 ; Add operands\n");
             case SUB -> output.append("\t SUB     R0, R0, R1 ; Sub operands\n");
         }
-    }
+    } // 1+2+3 -> Left : 1 Right : Left 2 Right 3
 
     @Override
     public void visit(CharacterValExpressionNode node) throws Exception {
@@ -317,20 +337,46 @@ public final class ASMGenerator implements ASTNodeVisitor {
 
     @Override
     public void visit(LiteralNode node) {
-        if (Context.background().isLeftOperand()) {
+       /* if (Context.background().isLeftOperand()) {
             this.output.append("\t MOV     R1, #%s ; Load literal value in R1\n".formatted(node.getValue()));
         } else {
             this.output.append("\t MOV     R0, #%s ; Load literal value in R0\n".formatted(node.getValue()));
-        }
+        }*/
+        this.output.append("\t MOV     R0, #%s ; Load literal value in R0\n".formatted(node.getValue()));
     }
 
     @Override
     public void visit(VariableReferenceNode node) throws Exception {
-        System.out.println("Context: " + Context.background().getCallerName());
-        Integer shift = this.findSymbolInScopes(Context.background().getCallerName(), node.getIdentifier());
+
+        this.findAdressVariable(node.getIdentifier());
         this.output.append("""
-                \t LDR     R0, [R11, #%s] ; Load variable %s in R0
-                """.formatted(shift, node.getIdentifier()));
+                \t LDR     R0, [R10, #-%s] ; Load variable %s in R0
+                """.formatted(findSymbolInScopes(node.getIdentifier()).getShift(), node.getIdentifier()));
+
+    }
+
+    /**
+     * Find the address of a variable in the scope and put it in R10
+     *
+     * @param identifier
+     */
+    public void findAdressVariable(String identifier) {
+        int depth = this.findDepthInScopes(identifier);
+        if (depth == 0) {
+            this.output.append("""
+                    \t MOV     R10, R11
+                    """);
+            return;
+        }
+
+        this.output.append("""
+                \t LDR     R10, [R11]
+                """);
+
+        // tkt c'est un for i < depth-1
+        this.output.append("""
+                \t LDR     R10, [R10]
+                """.repeat(Math.max(0, depth - 1)));
     }
 
     @Override
@@ -355,7 +401,7 @@ public final class ASMGenerator implements ASTNodeVisitor {
         // TODO Find a way to do this clearly and not to get var decl at the bottom
         try {
             Symbol symbol = this.findSymbolInScopes(node.getRootProcedure().getIdentifier());
-            Context.background().setCallerName(symbol.getIdentifier());
+            //Context.background().setCallerName(symbol.getIdentifier());
             this.output.append(symbol.getIdentifier()).append("\n").append("""
                     \t STMFD   R13!, {R11, LR} ; Main environment setup
                     \t MOV     R11, R13 ; Set up new frame pointer

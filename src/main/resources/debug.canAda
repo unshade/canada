@@ -4,32 +4,20 @@ procedure unDebut is
 
 choix : integer ;
 
-    function perimetreRectangle3(larg : integer; long : integer) return integer is
-    p : integer ;
+function perimetreRectangle(larg : integer; long : integer) return integer is
+
+    function perimetreRectangle2(larg : integer; long : integer) return integer is
     begin
-        choix := 1 ;
-    return choix ;
-    end perimetreRectangle3;
+      choix := 1 ;
+      return choix ;
+    end perimetreRectangle2;
 
-   function perimetreRectangle(larg : integer; long : integer) return integer is
-
-       p : integer ;
-       a : integer ;
-       b : integer ;
-       function perimetreRectangle2(larg : integer; long : integer) return integer is
-       begin
-           choix := 1 ;
-       return choix ;
-       end perimetreRectangle2;
-   begin
-        p := perimetreRectangle2(7, 8);
-        return p ;
-   end perimetreRectangle;
-
-
-    -- VARIABLES
+begin
+  choix := perimetreRectangle2(7, 8) + 1 ;
+  return choix ;
+end perimetreRectangle;
 
     -- PROCEDURE PRINCIPALE
 begin
-choix := perimetreRectangle(5, 10);
+choix := perimetreRectangle(5, 10) + 1 ;
 end unDebut;
