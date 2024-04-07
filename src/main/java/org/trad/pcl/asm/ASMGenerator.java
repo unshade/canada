@@ -278,10 +278,6 @@ public final class ASMGenerator implements ASTNodeVisitor {
 
     @Override
     public void visit(ReturnStatementNode node) throws Exception {
-        this.output.append("""
-                \t MOV     R0, #0 ; Clear R0
-                \t MOV     R5, #0 ; Clear R5
-                """);
         node.getExpression().accept(this);
         this.output.append("""
                 \t STR     R0, [R11, #4 * 2] ; Store return value for in stack-frame
