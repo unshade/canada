@@ -13,29 +13,52 @@ import org.trad.pcl.semantic.symbol.Symbol;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Stack;
 
 public final class ASMGenerator implements ASTNodeVisitor {
 
     private final List<SymbolTable> symbolTables;
+
+    private final Stack<SymbolTable> scopeStack;
+
+    private int currentTableIndex;
 
     private final StringBuilder output;
 
     public ASMGenerator(List<SymbolTable> symbolTables) {
         this.symbolTables = symbolTables;
         output = new StringBuilder();
+        scopeStack = new Stack<>();
+        scopeStack.push(symbolTables.get(0));
+        currentTableIndex = 1;
+
     }
 
     public String getOutput() {
         return this.output.toString();
     }
 
-    public Symbol findSymbolInScopes(String identifier) {
+    /*public Symbol findSymbolInScopes(String identifier) {
         for (SymbolTable symbolTable : this.symbolTables) {
             Symbol symbol = symbolTable.findSymbol(identifier);
             if (symbol != null) {
                 return symbol;
             }
         }
+        return null;
+    }*/
+
+    public Symbol findSymbolInScopes(String identifier) {
+
+        for (int i = scopeStack.size() - 1; i >= 0; i--) {
+            Symbol s = scopeStack.get(i).findSymbol(identifier);
+            if (s != null) {
+                return s;
+            }
+
+        }
+
+        assert false : "Variable " + identifier + " not found in any scope";
         return null;
     }
 
@@ -77,6 +100,7 @@ public final class ASMGenerator implements ASTNodeVisitor {
 
     @Override
     public void visit(FunctionDeclarationNode node) throws Exception {
+        enterScope();
         Symbol symbol = this.findSymbolInScopes(node.getIdentifier());
         this.output.append(symbol.getIdentifier()).append("\n").append("""
                 \t STMFD   R13!, {R11, LR} ; Save caller's (%s) frame pointer and return ASM address
@@ -93,10 +117,12 @@ public final class ASMGenerator implements ASTNodeVisitor {
         });
         Context.background().setCallerName(node.getIdentifier());
         node.getBody().accept(this);
+        exitScope();
     }
 
     @Override
     public void visit(ProcedureDeclarationNode node) throws Exception {
+        enterScope();
         Symbol symbol = this.findSymbolInScopes(node.getIdentifier());
         this.output.append(symbol.getIdentifier()).append("\n").append("""
                 \t STMFD   R13!, {R11, LR} ; Save caller's (%s) frame pointer and return ASM address
@@ -113,6 +139,7 @@ public final class ASMGenerator implements ASTNodeVisitor {
         });
         Context.background().setCallerName(node.getIdentifier());
         node.getBody().accept(this);
+        exitScope();
     }
 
     @Override
@@ -305,6 +332,7 @@ public final class ASMGenerator implements ASTNodeVisitor {
 
     @Override
     public void visit(ProgramNode node) {
+        enterScope();
         // TODO Find a way to do this clearly and not to get var decl at the bottom
         try {
             Symbol symbol = this.findSymbolInScopes(node.getRootProcedure().getIdentifier());
@@ -363,7 +391,7 @@ public final class ASMGenerator implements ASTNodeVisitor {
             System.err.println(e.getMessage());
             System.exit(1);
         }
-
+        exitScope();
     }
 
     @Override
@@ -376,7 +404,16 @@ public final class ASMGenerator implements ASTNodeVisitor {
                 """.formatted(shift, node.getIdentifier(), node.getIdentifier()));
     }
 
-    private void updateContextNonCallableDeclaration() {
-        Context.background().setNonCallableDeclarationWriteLine(this.output.toString().split("\n").length + 1);
+    public void enterScope() {
+        scopeStack.push(symbolTables.get(currentTableIndex));
+        currentTableIndex++;
     }
+
+    //sortir de la portée
+    public void exitScope() {
+        if (!scopeStack.isEmpty()) {
+            scopeStack.pop();
+        }
+    }
+
 }
