@@ -55,9 +55,9 @@ public class SymbolTable {
         StringBuilder sb = new StringBuilder();
         //System.out.println(colorize("Entering new scope", Attribute.GREEN_TEXT()) + " -> creating new SymbolTable for " + colorize(type + " ", Attribute.MAGENTA_TEXT()) + colorize(nodeIdentifier, Attribute.BLUE_TEXT()) + " : ");
         sb.append(colorize("Entering new scope", Attribute.GREEN_TEXT())).append(" -> creating new SymbolTable for ").append(colorize(scopeIdentifier + " ", Attribute.MAGENTA_TEXT())).append(" : \n");
-        Set<Map.Entry<String, Symbol>> entrySet = this.getSymbols().entrySet();
-        for (Map.Entry<String, Symbol> entry : entrySet) {
-            //System.out.println("\t" + colorize(entry.getKey(), Attribute.YELLOW_TEXT()) + " -> "+ entry.getValue());
+        List<Map.Entry<String, Symbol>> entryList = new ArrayList<>(this.getSymbols().entrySet());
+        entryList.sort(Comparator.comparingInt(e -> e.getValue().getShift()));
+        for (Map.Entry<String, Symbol> entry : entryList) {
             sb.append("\t").append(colorize(entry.getKey(), Attribute.YELLOW_TEXT())).append(" -> ").append(entry.getValue()).append("\n");
         }
         sb.append("\n");

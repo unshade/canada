@@ -40,14 +40,7 @@ public final class VariableDeclarationNode extends ASTNode implements Declaratio
     }
 
     public Variable toSymbol() {
-        int shift;
-        if (type.getIdentifier().equals("integer") || type.getIdentifier().equals("character")) {
-            shift = 4;
-        } else {
-            // TODO case of a structure, hardcode to 8 for now
-            shift = 8;
-        }
-        Variable variable = new Variable(this.identifier, shift);
+        Variable variable = new Variable(this.identifier, 4);
         variable.setType(type.getIdentifier());
         return variable;
     }

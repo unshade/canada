@@ -18,7 +18,7 @@ public final class ASMGenerator implements ASTNodeVisitor {
 
     private final List<SymbolTable> symbolTables;
 
-    private StringBuilder output;
+    private final StringBuilder output;
 
     public ASMGenerator(List<SymbolTable> symbolTables) {
         this.symbolTables = symbolTables;
@@ -30,13 +30,47 @@ public final class ASMGenerator implements ASTNodeVisitor {
     }
 
     public Symbol findSymbolInScopes(String identifier) {
-
         for (SymbolTable symbolTable : this.symbolTables) {
             Symbol symbol = symbolTable.findSymbol(identifier);
-            if (symbol != null){
+            if (symbol != null) {
                 return symbol;
             }
+        }
+        return null;
+    }
 
+    public Integer findSymbolInScopes(String FunctionOrProcedureName, String identifier) {
+        SymbolTable symbolTableFunction = this.findSymbolTable(FunctionOrProcedureName);
+        return findSymbolInScopesRecursive(symbolTableFunction, identifier, 0);
+    }
+
+    public Integer findSymbolInScopesRecursive(SymbolTable symbolTableFunction, String identifier, int shift) {
+        Symbol symbol = symbolTableFunction.findSymbol(identifier);
+        if (symbol == null) {
+            String scopeIdentifier = symbolTableFunction.getScopeIdentifier();
+            SymbolTable parentSymbolTable = findTableSymbol(scopeIdentifier);
+            shift += parentSymbolTable.findSymbol(scopeIdentifier).getShift();
+            shift = findSymbolInScopesRecursive(parentSymbolTable, identifier, shift);
+            return shift;
+        } else {
+            return shift - symbol.getShift();
+        }
+    }
+
+    private SymbolTable findSymbolTable(String functionOrProcedureName) {
+        for (SymbolTable symbolTable : this.symbolTables) {
+            if (symbolTable.getScopeIdentifier().equals(functionOrProcedureName)) {
+                return symbolTable;
+            }
+        }
+        return null;
+    }
+
+    private SymbolTable findTableSymbol(String SymbolIdentifier) {
+        for (SymbolTable symbolTable : this.symbolTables) {
+            if (symbolTable.findSymbol(SymbolIdentifier) != null) {
+                return symbolTable;
+            }
         }
         return null;
     }
@@ -57,6 +91,7 @@ public final class ASMGenerator implements ASTNodeVisitor {
                 throw new RuntimeException(ex);
             }
         });
+        Context.background().setCallerName(node.getIdentifier());
         node.getBody().accept(this);
     }
 
@@ -76,6 +111,7 @@ public final class ASMGenerator implements ASTNodeVisitor {
                 throw new RuntimeException(ex);
             }
         });
+        Context.background().setCallerName(node.getIdentifier());
         node.getBody().accept(this);
     }
 
@@ -113,8 +149,8 @@ public final class ASMGenerator implements ASTNodeVisitor {
     public void visit(AssignmentStatementNode node) throws Exception {
         node.getExpression().accept(this);
         this.output.append("""
-                \t STR     R0, [R11, #-%s] ; Assign right expression (assuming result is in R0) to left variable %s
-                """.formatted(findSymbolInScopes(node.getVariableReference().getIdentifier()).getShift(), node.getVariableReference().getIdentifier()));
+                \t STR     R0, [R11, #%s] ; Assign right expression (assuming result is in R0) to left variable %s
+                """.formatted(findSymbolInScopes(Context.background().getCallerName(), node.getVariableReference().getIdentifier()), node.getVariableReference().getIdentifier()));
     }
 
     @Override
@@ -123,7 +159,7 @@ public final class ASMGenerator implements ASTNodeVisitor {
         node.getDeclarations().forEach(declaration -> {
             try {
                 if (declaration instanceof ProcedureDeclarationNode || declaration instanceof FunctionDeclarationNode) {
-                   tempDeclarations.add(declaration);
+                    tempDeclarations.add(declaration);
                 } else {
                     declaration.accept(this);
                 }
@@ -228,10 +264,11 @@ public final class ASMGenerator implements ASTNodeVisitor {
 
     @Override
     public void visit(VariableReferenceNode node) throws Exception {
-        Symbol symbol = this.findSymbolInScopes(node.getIdentifier());
+        System.out.println("Context: " + Context.background().getCallerName());
+        Integer shift = this.findSymbolInScopes(Context.background().getCallerName(), node.getIdentifier());
         this.output.append("""
-                \t LDR     R0, [R11, #-%s] ; Load variable %s in R0
-                """.formatted(symbol.getShift(), node.getIdentifier()));
+                \t LDR     R0, [R11, #%s] ; Load variable %s in R0
+                """.formatted(shift, node.getIdentifier()));
     }
 
     @Override
@@ -257,9 +294,9 @@ public final class ASMGenerator implements ASTNodeVisitor {
             Symbol symbol = this.findSymbolInScopes(node.getRootProcedure().getIdentifier());
             Context.background().setCallerName(symbol.getIdentifier());
             this.output.append(symbol.getIdentifier()).append("\n").append("""
-                \t STMFD   R13!, {R11, LR} ; Main environment setup
-                \t MOV     R11, R13 ; Set up new frame pointer
-                """);
+                    \t STMFD   R13!, {R11, LR} ; Main environment setup
+                    \t MOV     R11, R13 ; Set up new frame pointer
+                    """);
             //this.updateContextNonCallableDeclaration();
            /* node.getRootProcedure().getBody().getStatements().forEach(statementNode -> {
                 try {
@@ -316,7 +353,7 @@ public final class ASMGenerator implements ASTNodeVisitor {
     @Override
     public void visit(ParameterNode node) throws Exception {
         node.getType().accept(this);
-        int shift = Context.background().getCounter()+2;
+        int shift = Context.background().getCounter() + 2;
         this.output.append("""
                 \t LDR     R5, [R11, #4 * %s] ; Load parameter %s in R5
                 \t STMFD   R13!, {R5} ; Store parameter %s in stack-frame

@@ -35,8 +35,14 @@ public final class RecordTypeNode extends TypeNode {
 
     public Symbol toSymbol() {
         Record record = new Record(getIdentifier(), 0);
-       // map this.fields to variable with toSymbol method
-        record.setFields(fields.stream().map(VariableDeclarationNode::toSymbol).toList());
+        List<Variable> symbols = new ArrayList<>();
+        for (VariableDeclarationNode field : fields) {
+            Variable var = field.toSymbol();
+            var.setShift(record.getShift() + var.getShift());
+            record.setShift(var.getShift());
+            symbols.add(var);
+        }
+        record.setFields(symbols);
         return record;
     }
 

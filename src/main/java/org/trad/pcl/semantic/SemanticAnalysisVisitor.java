@@ -351,7 +351,7 @@ public class SemanticAnalysisVisitor implements ASTNodeVisitor {
                 throw new DuplicateSymbolException(symbol.getIdentifier(), line);
             }
         }
-        scopeStack.peek().addSymbol(symbol, 4);
+        scopeStack.peek().addSymbol(symbol, symbol.getShift());
     }
 
 }

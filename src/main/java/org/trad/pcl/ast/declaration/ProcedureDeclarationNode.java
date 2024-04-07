@@ -77,7 +77,11 @@ public final class ProcedureDeclarationNode extends ASTNode implements Declarati
     }
 
     public Symbol toSymbol() {
-        return new Procedure(this.identifier, 0);
+        int shift = 0;
+        for (ParameterNode parameter : parameters) {
+            shift += parameter.toSymbol().getShift();
+        }
+        return new Procedure(this.identifier, shift);
     }
 
     public void checkEndIdentifier(){
