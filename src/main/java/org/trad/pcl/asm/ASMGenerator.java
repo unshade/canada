@@ -212,8 +212,10 @@ public final class ASMGenerator implements ASTNodeVisitor {
 
         node.getCondition().accept(this);
 
-        output.append("\t CMP     R0, #0\n");
-        output.append("\t BNE     ").append(ifTrueLabel).append("\n");
+        this.output.append("""
+                \t CMP     R0, #0 ; Compare condition
+                \t BEQ     %s ; Branch if condition is false
+                """.formatted(ifEndLabel));
 
         if (node.getElseBranch() != null) {
             node.getElseBranch().accept(this);
@@ -257,8 +259,10 @@ public final class ASMGenerator implements ASTNodeVisitor {
 
         node.getCondition().accept(this);
 
-        output.append("\t CMP     R0, #0\n");
-        output.append("\t BEQ     ").append(loopEndLabel).append("\n");
+        this.output.append("""
+                \t CMP     R0, #0 ; Compare condition
+                \t BEQ     %s ; Branch if condition is false
+                """.formatted(loopEndLabel));
 
         node.getBody().accept(this);
 
@@ -389,9 +393,5 @@ public final class ASMGenerator implements ASTNodeVisitor {
                 \t LDR     R5, [R11, #4 * %s] ; Load parameter %s in R5
                 \t STMFD   R13!, {R5} ; Store parameter %s in stack-frame
                 """.formatted(shift, node.getIdentifier(), node.getIdentifier()));
-    }
-
-    private void updateContextNonCallableDeclaration() {
-        Context.background().setNonCallableDeclarationWriteLine(this.output.toString().split("\n").length + 1);
     }
 }
