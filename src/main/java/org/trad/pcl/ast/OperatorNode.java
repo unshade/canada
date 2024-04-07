@@ -22,8 +22,8 @@ public final class OperatorNode extends ASTNode {
 
     public String getType() {
         return switch (operator) {
-            case AND, ANDTHEN, OR, ORELSE -> "boolean";
-            default -> "integer";
+            case  NOT, EQUALS, NOT_EQUALS, LESS_THAN, GREATER_THAN, LESS_THAN_OR_EQUAL, GREATER_THAN_OR_EQUAL, AND, ANDTHEN, OR, ORELSE -> TypeEnum.BOOL.toString();
+            default -> TypeEnum.INT.toString();
         };
     }
 }
