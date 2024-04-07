@@ -1,9 +1,15 @@
 with Ada.Text_IO; use Ada.Text_IO;
 procedure unDebut is
+
 choix : integer ;
 begin
-choix := 1+2;
-while choix > 0 loop
-choix := choix - 1;
-end loop;
+    choix := 1+2;
+
+    while choix > 0 loop
+        choix := choix - 1;
+    end loop;
+
+    if choix = 0 then
+        choix := 1;
+    end if;
 end unDebut ;

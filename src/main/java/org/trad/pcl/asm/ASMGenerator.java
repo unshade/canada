@@ -207,10 +207,25 @@ public final class ASMGenerator implements ASTNodeVisitor {
 
     @Override
     public void visit(IfStatementNode node) throws Exception {
+        String ifTrueLabel = "if_true_" + Context.background().getUniqueLabelId();
+        String ifEndLabel = "if_end_" + Context.background().getUniqueLabelId();
+
         node.getCondition().accept(this);
-        node.getElseBranch().accept(this);
-        node.getElseIfBranch().accept(this);
+
+        output.append("\t CMP     R0, #0\n");
+        output.append("\t BNE     ").append(ifTrueLabel).append("\n");
+
+        if (node.getElseBranch() != null) {
+            node.getElseBranch().accept(this);
+        }
+
+        output.append("\t B       ").append(ifEndLabel).append("\n");
+
+        output.append(ifTrueLabel).append("\n");
+
         node.getThenBranch().accept(this);
+
+        output.append(ifEndLabel).append("\n");
     }
 
     @Override
