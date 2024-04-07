@@ -1,6 +1,7 @@
 with Ada.Text_IO; use Ada.Text_IO;
 procedure unDebut is
 
+
 choix : integer ;
 
     function perimetreRectangle3(larg : integer; long : integer) return integer is
