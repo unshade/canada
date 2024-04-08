@@ -3,6 +3,8 @@ package org.trad.pcl.semantic;
 import com.diogonunes.jcolor.Attribute;
 import org.trad.pcl.Exceptions.Semantic.DuplicateSymbolException;
 import org.trad.pcl.Services.ErrorService;
+import org.trad.pcl.semantic.symbol.Function;
+import org.trad.pcl.semantic.symbol.Procedure;
 import org.trad.pcl.semantic.symbol.Symbol;
 
 import java.util.*;
@@ -33,7 +35,9 @@ public class SymbolTable {
     }
 
     public void addSymbol(Symbol symbol) {
-        symbol.setShift(currentShift+=symbol.getShift());
+        if (!(symbol instanceof Procedure)) {
+            symbol.setShift(currentShift+=symbol.getShift());
+        }
         symbols.put(symbol.getIdentifier(), symbol);
     }
 

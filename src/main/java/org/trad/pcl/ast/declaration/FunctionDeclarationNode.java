@@ -109,11 +109,10 @@ public final class FunctionDeclarationNode extends ASTNode implements Declaratio
     }*/
 
     public Symbol toSymbol() {
-        Function f = new Function(this.identifier, 12);
+        Function f = new Function(this.identifier, 0);
         f.setReturnType(this.returnType.getIdentifier());
         for (ParameterNode parameter : parameters) {
             f.addParameter(parameter.getType().getIdentifier());
-            f.setShift(f.getShift() + parameter.toSymbol().getShift());
         }
         return f;
     }

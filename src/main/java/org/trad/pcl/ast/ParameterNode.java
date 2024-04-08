@@ -40,8 +40,7 @@ public final class ParameterNode extends ASTNode {
         if (this.type.getIdentifier().equals("integer") || this.type.getIdentifier().equals("character")) {
             shift = 4;
         } else {
-            // TODO case of a structure, hardcode to 8 for now
-            shift = 8;
+            shift = 0;
         }
         Parameter parem = new Parameter(this.identifier, shift);
         parem.setMode(this.mode);
