@@ -1,11 +1,14 @@
 package org.trad.pcl.ast;
 
+import org.trad.pcl.Exceptions.Semantic.UndefinedVariableException;
 import org.trad.pcl.Helpers.ParameterMode;
 import org.trad.pcl.ast.declaration.VariableDeclarationNode;
 import org.trad.pcl.ast.type.TypeNode;
 import org.trad.pcl.semantic.ASTNodeVisitor;
+import org.trad.pcl.semantic.SemanticAnalysisVisitor;
 import org.trad.pcl.semantic.symbol.Parameter;
 import org.trad.pcl.semantic.symbol.Symbol;
+import org.trad.pcl.semantic.symbol.Type;
 
 import java.util.List;
 import java.util.Objects;
@@ -35,14 +38,9 @@ public final class ParameterNode extends ASTNode {
         return type;
     }
 
-    public Symbol toSymbol() {
-        int shift;
-        if (this.type.getIdentifier().equals("integer") || this.type.getIdentifier().equals("character")) {
-            shift = 4;
-        } else {
-            shift = 0;
-        }
-        Parameter parem = new Parameter(this.identifier, shift);
+    public Symbol toSymbol() throws UndefinedVariableException {
+        Type type = (Type) SemanticAnalysisVisitor.findSymbolInScopes(this.type.getIdentifier(), getConcernedLine());
+        Parameter parem = new Parameter(this.identifier, type.getSize());
         parem.setMode(this.mode);
         parem.setType(this.type.getIdentifier());
         return parem;

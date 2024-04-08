@@ -29,7 +29,9 @@ public class SemanticAnalysisVisitor implements ASTNodeVisitor {
 
     public void addPrimitiveTypes() {
         Type integer = new Type(TypeEnum.INT.toString(), 0);
+        integer.setSize(4);
         Type character = new Type(TypeEnum.CHAR.toString(), 0);
+        character.setSize(4);
 
         scopeStack.peek().addSymbol(integer);
         scopeStack.peek().addSymbol(character);
@@ -323,8 +325,8 @@ public class SemanticAnalysisVisitor implements ASTNodeVisitor {
     @Override
     public void visit(ParameterNode node) throws Exception {
 
-        scopeStack.peek().addSymbol(node.toSymbol());
         node.getType().accept(this);
+        scopeStack.peek().addSymbol(node.toSymbol());
     }
 
 

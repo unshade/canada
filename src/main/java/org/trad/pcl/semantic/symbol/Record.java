@@ -38,6 +38,7 @@ public class Record extends Type {
         return "Record { " +
                 "identifier = '" + colorize(identifier, Attribute.YELLOW_TEXT()) + '\'' +
                 ", fields = '" + colorize(fields.toString(), Attribute.YELLOW_TEXT()) + '\'' +
+                ", size = " + colorize(Integer.toString(getSize()), Attribute.RED_TEXT()) +
                 ", shift = " + colorize(Integer.toString(shift), Attribute.RED_TEXT()) +
                 " }";
     }

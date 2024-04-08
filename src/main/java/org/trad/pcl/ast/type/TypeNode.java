@@ -1,5 +1,6 @@
 package org.trad.pcl.ast.type;
 
+import org.trad.pcl.Exceptions.Semantic.UndefinedVariableException;
 import org.trad.pcl.ast.ASTNode;
 import org.trad.pcl.semantic.ASTNodeVisitor;
 import org.trad.pcl.semantic.symbol.Symbol;
@@ -21,7 +22,13 @@ public class TypeNode extends ASTNode {
         visitor.visit(this);
     }
 
-    public Symbol toSymbol() {
-        return new Type(identifier, 0);
+    public int getSize() {
+        return 4;
+    }
+
+    public Symbol toSymbol() throws UndefinedVariableException {
+        Type t=  new Type(identifier, 0);
+        t.setSize(getSize());
+        return t;
     }
 }

@@ -1,5 +1,6 @@
 package org.trad.pcl.ast.declaration;
 
+import org.trad.pcl.Exceptions.Semantic.UndefinedVariableException;
 import org.trad.pcl.ast.ASTNode;
 import org.trad.pcl.ast.type.TypeNode;
 import org.trad.pcl.semantic.ASTNodeVisitor;
@@ -19,10 +20,9 @@ public final class TypeDeclarationNode extends ASTNode implements DeclarationNod
         return type;
     }
 
-    public Symbol toSymbol() {
+    public Symbol toSymbol() throws UndefinedVariableException {
         return type.toSymbol();
     }
-
 
     @Override
     public void accept(ASTNodeVisitor visitor) throws Exception {

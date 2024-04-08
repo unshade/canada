@@ -2,7 +2,7 @@ package org.trad.pcl.semantic.symbol;
 
 import org.trad.pcl.Helpers.TypeEnum;
 
-public class Access extends Symbol {
+public class Access extends Type {
 
     private String typeAccess;
 

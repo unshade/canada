@@ -2,22 +2,18 @@ with Ada.Text_IO; use Ada.Text_IO;
 procedure unDebut is
 
 
-choix : integer ;
+type point is record
+x, y : integer;
+end record;
 
-function perimetreRectangle(larg : integer; long : integer) return integer is
-
-    function perimetreRectangle2(larg : integer; long : integer) return integer is
-    begin
-      choix := 1 ;
-      return choix ;
-    end perimetreRectangle2;
-
+function distance (p1 : point; x : integer) return integer is
 begin
-  choix := perimetreRectangle2(7, 8) + 1 ;
-  return choix ;
-end perimetreRectangle;
+return x;
+end distance;
+
+choix : point;
 
     -- PROCEDURE PRINCIPALE
 begin
-choix := perimetreRectangle(5, 10) + 1 ;
+choix.x := 5;
 end unDebut;

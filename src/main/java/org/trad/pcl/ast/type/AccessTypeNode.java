@@ -17,9 +17,14 @@ public final class AccessTypeNode extends TypeNode {
         return baseType;
     }
 
+    public int getSize() {
+        return baseType.getSize();
+    }
+
     public Symbol toSymbol() {
         Access access = new Access(getIdentifier(), 0);
         access.setTypeAccess(baseType.getIdentifier());
+        access.setSize(getSize());
         return access;
     }
 
