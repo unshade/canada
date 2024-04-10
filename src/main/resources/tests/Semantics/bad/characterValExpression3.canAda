@@ -1,6 +1,6 @@
 with Ada.Text_IO; use Ada.Text_IO;
 procedure ExampleProcedure is
-   X : character;
+   X : integer;
 begin
-    X := character'val('e'); -- Error: type mismatch
+    X := character'val(30); -- Error: type mismatch
 end ExampleProcedure;

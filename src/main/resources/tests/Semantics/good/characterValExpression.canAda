@@ -1,6 +1,6 @@
 with Ada.Text_IO; use Ada.Text_IO;
 procedure ExampleProcedure is
-   X : integer;
+   X : character;
 begin
-    X := character'val('A');
+    X := character'val(60);
 end ExampleProcedure;

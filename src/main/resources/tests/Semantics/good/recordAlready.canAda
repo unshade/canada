@@ -1,6 +1,6 @@
 with Ada.Text_IO; use Ada.Text_IO;
-X : integer;
 procedure UseRecord is
+   X : integer;
    type RecordTest is record
       Field1 : integer;
    end record;

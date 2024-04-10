@@ -6,7 +6,7 @@ procedure ExampleProcedure is
  X : recordTest ;
 function ExampleFunction (X : recordTest) return recordTest is
 begin
-   return X + 1;
+   return X;
 end ExampleFunction;
 begin
    X := ExampleFunction (X); -- Call the function with X as the argument which is a integer
