@@ -6,5 +6,5 @@ procedure ExampleProcedure is
        return X;
    end AnotherProcedure;
 begin
-    X;
+    put('e');
 end ExampleProcedure;
