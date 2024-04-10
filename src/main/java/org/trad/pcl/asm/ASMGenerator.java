@@ -260,27 +260,62 @@ public final class ASMGenerator implements ASTNodeVisitor {
     @Override
     public void visit(IfStatementNode node) throws Exception {
         String ifTrueLabel = "if_true_" + Context.background().getUniqueLabelId();
+        String ifFalseLabel = "if_false_" + Context.background().getUniqueLabelId();
         String ifEndLabel = "if_end_" + Context.background().getUniqueLabelId();
 
         node.getCondition().accept(this);
 
         this.output.append("""
-                \t CMP     R0, #0 ; Compare condition
-                \t BNE    %s ; Branch if condition is true
-                """.formatted(ifTrueLabel));
+            \t CMP     R0, #1 ; Compare condition
+            \t BEQ    %s ; Branch if condition is true
+            """.formatted(ifTrueLabel));
 
-        if (node.getElseBranch() != null) {
-            node.getElseBranch().accept(this);
+        if (!node.getElseIfBranches().isEmpty()) {
+            output.append("\t B       ").append(ifFalseLabel).append("\n");
         }
-
-        output.append("\t B       ").append(ifEndLabel).append("\n");
 
         output.append(ifTrueLabel).append("\n");
 
         node.getThenBranch().accept(this);
 
+        output.append("\t B       ").append(ifEndLabel).append("\n");
+
+        output.append(ifFalseLabel).append("\n");
+
+        for (ElseIfStatementNode elseIfNode : node.getElseIfBranches()) {
+            elseIfNode.getCondition().accept(this);
+
+            String elseIfTrueLabel = "elsif_true_" + Context.background().getUniqueLabelId();
+            String elseIfFalseLabel = "elsif_false_" + Context.background().getUniqueLabelId();
+
+            output.append("""
+                    \t CMP     R0, #1 ; Compare condition
+                    \t BEQ    %s ; Branch if condition is true
+                    \t B       %s ; Branch if condition is false
+                    """.formatted(elseIfTrueLabel, elseIfFalseLabel));
+
+            output.append(elseIfTrueLabel).append("\n");
+
+            elseIfNode.getThenBranch().accept(this);
+
+            output.append("\t B       ").append(ifEndLabel).append("\n");
+
+            output.append(elseIfFalseLabel).append("\n");
+        }
+
+        if (node.getElseBranch() != null) {
+            node.getElseBranch().accept(this);
+        }
+
         output.append(ifEndLabel).append("\n");
     }
+
+    @Override
+    public void visit(ElseIfStatementNode elseIfStatementNode) throws Exception {
+
+    }
+
+
 
     @Override
     public void visit(LoopStatementNode node) throws Exception {
