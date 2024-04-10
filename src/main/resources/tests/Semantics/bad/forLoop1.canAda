@@ -1,0 +1,10 @@
+with Ada.Text_IO; use Ada.Text_IO;
+procedure TestLoops is
+   variable1 : Integer;
+   variable2 : Character;
+begin
+   -- Test for loop with errors
+   for variable1 in 1 .. 0 loop -- Error: range should not be empty
+      put(variable1);
+   end loop;
+end TestLoops;

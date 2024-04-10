@@ -1,0 +1,10 @@
+with Ada.Text_IO; use Ada.Text_IO;
+procedure TestLoops is
+   variable2 : integer;
+begin
+   -- Test while loop
+   variable2 := 1;
+   while variable2 <= 10 loop
+      variable2 := variable2 + 1;
+   end loop;
+end TestLoops;

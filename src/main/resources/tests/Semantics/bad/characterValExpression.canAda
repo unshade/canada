@@ -1,0 +1,6 @@
+with Ada.Text_IO; use Ada.Text_IO;
+procedure ExampleProcedure is
+   X : integer;
+begin
+    X := character'val('e'); -- Error: type mismatch
+end ExampleProcedure;

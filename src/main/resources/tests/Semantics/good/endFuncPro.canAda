@@ -1,0 +1,9 @@
+with Ada.Text_IO; use Ada.Text_IO;
+procedure ExampleProcedure is
+function ExampleFunction (X : integer) return integer is
+begin
+   return X + 1;
+end ExampleFunction;
+begin
+   ExampleFunction (3);
+end ExampleProcedure;

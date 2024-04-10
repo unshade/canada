@@ -1,0 +1,10 @@
+with Ada.Text_IO; use Ada.Text_IO;
+X : integer;
+procedure UseRecord is
+   type RecordTest is record
+      Field1 : integer;
+   end record;
+   Var1 : RecordTest;
+begin
+   X := 10;
+end UseRecord;

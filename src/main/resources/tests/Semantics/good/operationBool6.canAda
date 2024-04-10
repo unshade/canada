@@ -1,0 +1,6 @@
+with Ada.Text_IO; use Ada.Text_IO;
+procedure ExampleProcedure is
+X : boolean;
+begin
+   X := true or else false;
+end ExampleProcedure;

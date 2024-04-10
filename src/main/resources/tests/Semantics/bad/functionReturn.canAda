@@ -1,0 +1,11 @@
+with Ada.Text_IO; use Ada.Text_IO;
+procedure ExampleProcedure is
+X : integer;
+function ExampleFunction (X : integer) return integer is
+Y : integer;
+begin
+   Y := X + 1;
+end ExampleFunction; -- Error: missing return statement
+begin
+   X := ExampleFunction (2);
+end ExampleProcedure;

@@ -1,0 +1,11 @@
+with Ada.Text_IO; use Ada.Text_IO;
+procedure TestLoops is
+   variable1 : integer;
+   variable2 : character;
+begin
+
+   for variable1 in 1.5 .. 10 loop -- Error: range should be integer
+      put(variable1);
+   end loop;
+
+end TestLoops;

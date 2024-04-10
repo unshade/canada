@@ -1,0 +1,10 @@
+with Ada.Text_IO; use Ada.Text_IO;
+
+procedure UseRecord is
+   Var1 : RecordTest; -- Correct si RecordTest est bien défini avant cette déclaration.
+   type RecordTest is record
+      Field1 : integer;
+   end record;
+begin
+    put(Var1);
+end UseRecord;

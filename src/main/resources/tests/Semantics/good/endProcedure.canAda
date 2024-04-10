@@ -1,0 +1,6 @@
+with Ada.Text_IO; use Ada.Text_IO;
+procedure AnotherProcedure is
+   X : integer := 0;
+begin
+    X := X + 1;
+end AnotherProcedure;

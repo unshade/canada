@@ -1,0 +1,6 @@
+with Ada.Text_IO; use Ada.Text_IO;
+procedure ExampleProcedure is
+   X : recordTest; -- Déclaration d'un type non enregistré
+begin
+    X; -- Erreur de compilation
+end ExampleProcedure;

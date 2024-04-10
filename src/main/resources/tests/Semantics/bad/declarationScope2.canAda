@@ -1,0 +1,13 @@
+with Ada.Text_IO; use Ada.Text_IO;
+procedure Main is
+
+procedure NestedProcedure is
+begin
+  -- Ici, Var1 fait référence à la variable déclarée après NestedProcedure. -> Erreur de compilation.
+  Var1 := 5;
+end NestedProcedure;
+
+begin
+   Var1 := 10; -- Non déclarée dans Main.
+   NestedProcedure;
+end Main;

@@ -1,0 +1,10 @@
+with Ada.Text_IO; use Ada.Text_IO;
+procedure ExampleProcedure is
+X : integer := 0;
+function ExampleFunction (X : integer) return integer is
+begin
+   return X + 1;
+end ExampleFunction;
+begin
+   X := ExampleFunction (2); -- Call the function with good parameter
+end ExampleProcedure;

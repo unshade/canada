@@ -1,0 +1,13 @@
+with Ada.Text_IO; use Ada.Text_IO;
+procedure ExampleProcedure is
+ type recordTest is record
+       Field1 : integer;
+    end record;
+ X : recordTest ;
+function ExampleFunction (X : recordTest) return recordTest is
+begin
+   return X + 1;
+end ExampleFunction;
+begin
+   X := ExampleFunction (X); -- Call the function with X as the argument which is a integer
+end ExampleProcedure;

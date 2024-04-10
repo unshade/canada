@@ -1,0 +1,5 @@
+with Ada.Text_IO; use Ada.Text_IO;
+procedure ExampleProcedure is
+begin
+   put(2); -- Error: put expects a character
+end ExampleProcedure;

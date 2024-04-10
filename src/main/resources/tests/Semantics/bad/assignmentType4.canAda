@@ -1,0 +1,6 @@
+with Ada.Text_IO; use Ada.Text_IO;
+procedure ExampleProcedure is
+   X : character := true;
+begin
+    X;
+end ExampleProcedure;

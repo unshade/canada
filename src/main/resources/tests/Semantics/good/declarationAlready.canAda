@@ -1,0 +1,6 @@
+with Ada.Text_IO; use Ada.Text_IO;
+procedure UniqueIdentifiers is
+   A : integer;
+begin
+   A := 1;
+end UniqueIdentifiers;
