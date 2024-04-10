@@ -115,7 +115,10 @@ public final class ASMGenerator implements ASTNodeVisitor {
         enterScope();
         Symbol symbol = this.findSymbolInScopes(node.getIdentifier());
         this.output.append(symbol.getIdentifier()).append("\n").append("""
-                \t STMFD   R13!, {R11, LR} ; Save caller's frame pointer and return ASM address
+                \t STMFD   R13!, {R10, LR} ; Save caller's frame pointer and return ASM address
+                \t MOV     R10, R9 ; Set up new static link
+                \t SUB     R13, R13, #4
+                \t STR     R11, [R13]
                 \t MOV     R11, R13 ; Set up new frame pointer
                 """);
         Context.background().setCounter(node.getParameters().size());
@@ -137,9 +140,12 @@ public final class ASMGenerator implements ASTNodeVisitor {
         enterScope();
         Symbol symbol = this.findSymbolInScopes(node.getIdentifier());
         this.output.append(symbol.getIdentifier()).append("\n").append("""
-                \t STMFD   R13!, {R11, LR} ; Save caller's frame pointer and return ASM address
-                \t MOV     R11, R13 ; Set up new frame pointer
-                """);
+               \t STMFD   R13!, {R10, LR} ; Save caller's frame pointer and return ASM address
+               \t MOV     R10, R9 ; Set up new static link
+               \t SUB     R13, R13, #4
+               \t STR     R11, [R13]
+               \t MOV     R11, R13 ; Set up new frame pointer
+               """);
         Context.background().setCounter(node.getParameters().size());
         node.getParameters().forEach(param -> {
             try {
@@ -187,9 +193,9 @@ public final class ASMGenerator implements ASTNodeVisitor {
     @Override
     public void visit(AssignmentStatementNode node) throws Exception {
         node.getExpression().accept(this); // store result in R0
-        this.findAdressVariable(node.getVariableReference().getIdentifier()); // store in address in R10
-        this.output.append("""
-                \t STR     R0, [R10, #-%s] ; Assign right expression (assuming result is in R0) to left variable %s
+        this.findVariableAddress(node.getVariableReference().getIdentifier()); // store in address in R9
+        this.output.append("""   
+                \t STR     R0, [R9, #-%s] ; Assign right expression (assuming result is in R0) to left variable %s
                 """.formatted(findSymbolInScopes(node.getVariableReference().getIdentifier()).getShift(), node.getVariableReference().getIdentifier()));
     }
 
@@ -240,6 +246,11 @@ public final class ASMGenerator implements ASTNodeVisitor {
         });
         this.output.append("""
                 \t SUB     R13, R13, #4 ; Save space for return value
+                """);
+
+        this.findAddress(node.getIdentifier());
+
+        this.output.append("""
                 \t BL      %s ; Branch link to %s (it will save the return address in LR)
                 \t LDR     R0, [R13] ; Load return value
                 \t ADD     R13, R13, #4 * %s ; Remove arguments and return value from stack
@@ -282,7 +293,7 @@ public final class ASMGenerator implements ASTNodeVisitor {
         this.output.append("""
                 \t STR     R0, [R11, #4 * 2] ; Store return value for in stack-frame
                 \t MOV     R13, R11 ; Restore frame pointer
-                \t LDMFD   R13!, {R11, PC} ; Restore caller's frame pointer and return ASM address
+                \t LDMFD   R13!, {R10, R11, PC} ; Restore caller's frame pointer and return ASM address
                 """);
     }
 
@@ -344,9 +355,9 @@ public final class ASMGenerator implements ASTNodeVisitor {
     @Override
     public void visit(VariableReferenceNode node) throws Exception {
 
-        this.findAdressVariable(node.getIdentifier());
+        this.findVariableAddress(node.getIdentifier());
         this.output.append("""
-                \t LDR     R0, [R10, #-%s] ; Load variable %s in R0
+                \t LDR     R0, [R9, #-%s] ; Load variable %s in R0
                 """.formatted(findSymbolInScopes(node.getIdentifier()).getShift(), node.getIdentifier()));
 
     }
@@ -356,23 +367,46 @@ public final class ASMGenerator implements ASTNodeVisitor {
      *
      * @param identifier
      */
-    public void findAdressVariable(String identifier) {
+    public void findAddress(String identifier) {
         int depth = this.findDepthInScopes(identifier);
         if (depth == 0) {
             this.output.append("""
-                    \t MOV     R10, R11
+                    \t MOV     R9, R10
                     """);
             return;
         }
 
         this.output.append("""
-                \t LDR     R10, [R11]
+                \t LDR     R9, [R11, #4]
                 """);
 
         // tkt c'est un for i < depth-1
         this.output.append("""
-                \t LDR     R10, [R10]
+                \t LDR     R9, [R9]
                 """.repeat(Math.max(0, depth - 1)));
+    }
+
+    public void findVariableAddress(String identifier) {
+        int depth = this.findDepthInScopes(identifier);
+        if (depth == 0) {
+            this.output.append("""
+                    \t MOV     R9, R11
+                    """);
+            return;
+        }
+
+        this.output.append("""
+                \t LDR     R9, [R11, #4]
+                """);
+
+        // tkt c'est un for i < depth-1
+        this.output.append("""
+                \t LDR     R9, [R9]
+                """.repeat(Math.max(0, depth - 1)));
+
+        this.output.append("""
+                 \t SUB     R9, R9, #4
+                """);
     }
 
     @Override
@@ -399,7 +433,10 @@ public final class ASMGenerator implements ASTNodeVisitor {
             Symbol symbol = this.findSymbolInScopes(node.getRootProcedure().getIdentifier());
             //Context.background().setCallerName(symbol.getIdentifier());
             this.output.append(symbol.getIdentifier()).append("\n").append("""
-                    \t STMFD   R13!, {R11, LR} ; Main environment setup
+                    \t STMFD   R13!, {R10, LR} ; Save caller's frame pointer and return ASM address
+                    \t MOV     R10, R13 ; Set up new static link
+                    \t SUB     R13, R13, #4
+                    \t STR     R11, [R13]
                     \t MOV     R11, R13 ; Set up new frame pointer
                     """);
             //this.updateContextNonCallableDeclaration();
@@ -458,7 +495,7 @@ public final class ASMGenerator implements ASTNodeVisitor {
     @Override
     public void visit(ParameterNode node) throws Exception {
         node.getType().accept(this);
-        int shift = Context.background().getCounter() + 2;
+        int shift = Context.background().getCounter() + 3;
         this.output.append("""
                 \t LDR     R5, [R11, #4 * %s] ; Load parameter %s in R5
                 \t STMFD   R13!, {R5} ; Store parameter %s in stack-frame
