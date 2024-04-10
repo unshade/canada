@@ -266,8 +266,8 @@ public final class ASMGenerator implements ASTNodeVisitor {
 
         this.output.append("""
                 \t CMP     R0, #0 ; Compare condition
-                \t BEQ     %s ; Branch if condition is false
-                """.formatted(ifEndLabel));
+                \t BNE    %s ; Branch if condition is true
+                """.formatted(ifTrueLabel));
 
         if (node.getElseBranch() != null) {
             node.getElseBranch().accept(this);
