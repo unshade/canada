@@ -334,6 +334,16 @@ public final class ASMGenerator implements ASTNodeVisitor {
         switch (node.getOperatorNode().getOperator()) {
             case ADD -> output.append("\t ADD     R0, R0, R1 ; Add operands\n");
             case SUB -> output.append("\t SUB     R0, R0, R1 ; Sub operands\n");
+            case EQUALS -> output.append("""
+                    \t CMP     R0, R1 ; Compare operands
+                    \t MOVEQ   R0, #1 ; Set R0 to 1 if operands are equal
+                    \t MOVNE   R0, #0 ; Set R0 to 0 if operands are not equal
+                    """);
+            case NOT_EQUALS -> output.append("""
+                    \t CMP     R0, R1 ; Compare operands
+                    \t MOVNE   R0, #1 ; Set R0 to 1 if operands are not equal
+                    \t MOVEQ   R0, #0 ; Set R0 to 0 if operands are equal
+                    """);
         }
     } // 1+2+3 -> Left : 1 Right : Left 2 Right 3
 
