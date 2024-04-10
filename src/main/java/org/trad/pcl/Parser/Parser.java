@@ -28,11 +28,17 @@ public class Parser {
     private final ErrorService errorService;
     Lexer lexer;
     private Token currentToken;
+    private final boolean isLogger;
 
-    public Parser(Lexer lexer) {
+    public Parser(Lexer lexer, boolean isLogger) {
         this.lexer = lexer;
         this.errorService = ErrorService.getInstance();
         this.currentToken = lexer.nextToken();
+        this.isLogger = isLogger;
+    }
+
+    public Parser(Lexer lexer) {
+        this(lexer, false);
     }
 
     public ProgramNode parse() {
@@ -251,7 +257,7 @@ public class Parser {
             case SEMICOLON -> {
             }
             case IDENT -> {
-                ident =(analyseTerminal(Tag.IDENT).getValue());
+                ident = (analyseTerminal(Tag.IDENT).getValue());
             }
             default -> this.errorService.registerSyntaxError(
                     new UnexpectedTokenListException(this.currentToken,
@@ -306,7 +312,7 @@ public class Parser {
     private List<VariableDeclarationNode> field() {
         List<VariableDeclarationNode> declarations = new ArrayList<>();
         if (this.currentToken.tag() == Tag.IDENT) {
-            List<String> idents =  multipleIdent();
+            List<String> idents = multipleIdent();
             analyseTerminal(Tag.COLON);
             TypeNode type = type();
             for (String ident : idents) {
@@ -1317,7 +1323,7 @@ public class Parser {
     }
 
     @PrintMethodName
-    private ExpressionNode characterMethod(){
+    private ExpressionNode characterMethod() {
         ExpressionNode expression = null;
         String ident = analyseTerminal(Tag.IDENT).getValue();
         switch (this.currentToken.tag()) {
@@ -1818,7 +1824,9 @@ public class Parser {
 
     @PrintMethodName
     private Token analyseTerminal(Tag tag) {
-        System.out.println("\t\t↪️ " + this.currentToken);
+        if (isLogger) {
+            System.out.println("\t\t↪️ " + this.currentToken);
+        }
         if (!(this.currentToken.tag() == tag)) {
             Token expectedToken = new Token(tag, this.currentToken.line(), TagHelper.getTagString(tag));
             if (expectedToken.tag() == Tag.SEMICOLON) {
@@ -1839,5 +1847,4 @@ public class Parser {
     public void setCurrentToken(Token token) {
         this.currentToken = token;
     }
-
 }

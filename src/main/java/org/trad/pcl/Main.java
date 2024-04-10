@@ -9,6 +9,7 @@ import org.trad.pcl.Lexer.Lexer;
 import org.trad.pcl.Parser.Parser;
 import org.trad.pcl.Services.ErrorService;
 import org.trad.pcl.Services.PythonRunner;
+import org.trad.pcl.annotation.MethodLoggerAspect;
 import org.trad.pcl.asm.ASMGenerator;
 import org.trad.pcl.ast.ProgramNode;
 import org.trad.pcl.semantic.SemanticAnalysisVisitor;
@@ -46,7 +47,13 @@ public final class Main {
         if (args.length > 1 && "-t".equals(args[1])) {
             lexer.displayAllTokens();
         } else {
-            Parser parser = new Parser(lexer);
+            Parser parser;
+            if (args.length > 2 && "-p".equals(args[2])) {
+                MethodLoggerAspect.setLogger(true);
+                parser = new Parser(lexer, true);
+            } else {
+                parser = new Parser(lexer);
+            }
             System.out.println("🔍 " + colorize("STARTING PARSING PHASE", new AnsiFormat(Attribute.WHITE_TEXT(), Attribute.BLUE_BACK(), Attribute.BOLD())));
             ProgramNode AST = parser.parse();
             if (errorService.hasNoErrors()) {
