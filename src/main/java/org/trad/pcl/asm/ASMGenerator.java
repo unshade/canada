@@ -270,9 +270,9 @@ public final class ASMGenerator implements ASTNodeVisitor {
             \t BEQ    %s ; Branch if condition is true
             """.formatted(ifTrueLabel));
 
-        if (!node.getElseIfBranches().isEmpty()) {
-            output.append("\t B       ").append(ifFalseLabel).append("\n");
-        }
+
+        output.append("\t B       ").append(ifFalseLabel).append("\n");
+
 
         output.append(ifTrueLabel).append("\n");
 
