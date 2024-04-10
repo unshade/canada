@@ -32,9 +32,12 @@ public class SemanticAnalysisVisitor implements ASTNodeVisitor {
         integer.setSize(4);
         Type character = new Type(TypeEnum.CHAR.toString(), 0);
         character.setSize(4);
+        Type bool = new Type(TypeEnum.BOOL.toString(), 0);
+        bool.setSize(4);
 
         scopeStack.peek().addSymbol(integer);
         scopeStack.peek().addSymbol(character);
+        scopeStack.peek().addSymbol(bool);
     }
 
     public void addPredefinedFunctions() {
@@ -261,8 +264,9 @@ public class SemanticAnalysisVisitor implements ASTNodeVisitor {
         // Check if the expression is valid
         node.getExpression().accept(this);
         // Check if the expression is an integer
-        if (!node.getExpression().getType().equals(TypeEnum.CHAR.toString())) {
-            throw new TypeMismatchException(TypeEnum.CHAR.toString(), node.getExpression().getType(), node.getConcernedLine());
+        System.out.println(node.getExpression().getType());
+        if (!node.getExpression().getType().equals(TypeEnum.INT.toString())) {
+            throw new TypeMismatchException(TypeEnum.INT.toString(), node.getExpression().getType(), node.getConcernedLine());
         }
     }
 
