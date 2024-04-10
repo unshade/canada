@@ -53,6 +53,31 @@ public final class IfStatementNode extends ASTNode implements StatementNode {
         }
     }
 
+    public boolean hasReturn() {
+        boolean hasReturn = false;
+
+
+        hasReturn = thenBranch.hasReturn();
+
+        // Vérifier si la branche else a un return
+        if (!hasReturn && elseBranch != null) {
+            hasReturn = elseBranch.hasReturn();
+        }
+
+        // Vérifier si la branche elseif a un return
+        if (!hasReturn && elseIfBranch != null) {
+            IfStatementNode currentElseIf = elseIfBranch;
+            while (currentElseIf != null) {
+                hasReturn = currentElseIf.thenBranch.hasReturn();
+                currentElseIf = currentElseIf.elseIfBranch;
+            }
+
+        }
+
+        return hasReturn;
+    }
+
+
     @Override
     public void accept(ASTNodeVisitor visitor) throws Exception {
         visitor.visit(this);
