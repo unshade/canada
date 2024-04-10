@@ -74,7 +74,7 @@ public final class CallNode extends VariableReferenceNode {
         if (this.getArguments() != null) {
             for (int i = 0; i < this.getArguments().size(); i++) {
                 String argumentType = this.getArguments().get(i).getType();
-                String parameterType = correspondingDeclaration.getIndexedParametersTypes().get(i).toLowerCase(Locale.ROOT);
+                String parameterType = correspondingDeclaration.getIndexedParametersTypes().get(i);
                 if (!argumentType.equals(parameterType)) {
                     throw new ArgumentTypeMismatchException(correspondingDeclaration.getIndexedParametersTypes().get(i), argumentType, this.getConcernedLine());
                 }
