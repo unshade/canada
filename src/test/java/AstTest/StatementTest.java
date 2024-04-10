@@ -244,7 +244,7 @@ public class StatementTest {
         assertInstanceOf(AssignmentStatementNode.class, ifStatement.getThenBranch().getStatements().get(0));
 
         assertNull(ifStatement.getElseBranch());
-        assertNull(ifStatement.getElseIfBranch());
+        assertNull(ifStatement.getElseIfBranches());
 
     }
 
@@ -292,13 +292,13 @@ public class StatementTest {
         IfStatementNode ifStatement = (IfStatementNode) ifStatementNode;
         assertNotNull(ifStatement.getCondition());
         assertNotNull(ifStatement.getThenBranch());
-        assertNotNull(ifStatement.getElseIfBranch());
+        assertNotNull(ifStatement.getElseIfBranches());
         assertNull(ifStatement.getElseBranch());
 
-        assertNotNull(ifStatement.getElseIfBranch().getCondition());
-        assertNotNull(ifStatement.getElseIfBranch().getThenBranch());
-        assertNotNull(ifStatement.getElseIfBranch().getElseIfBranch());
-        assertNull(ifStatement.getElseIfBranch().getElseBranch());
+        assertNotNull(ifStatement.getElseIfBranches().getCondition());
+        assertNotNull(ifStatement.getElseIfBranches().getThenBranch());
+        assertNotNull(ifStatement.getElseIfBranches().getElseIfBranch());
+        assertNull(ifStatement.getElseIfBranches().getElseBranch());
 
     }
 

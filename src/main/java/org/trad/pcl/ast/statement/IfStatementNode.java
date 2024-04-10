@@ -9,11 +9,18 @@ import org.trad.pcl.ast.ASTNode;
 import org.trad.pcl.ast.expression.ExpressionNode;
 import org.trad.pcl.semantic.ASTNodeVisitor;
 
+import java.util.ArrayList;
+import java.util.List;
+
 public final class IfStatementNode extends ASTNode implements StatementNode {
     private ExpressionNode condition;
     private BlockNode thenBranch;
     private BlockNode elseBranch;
-    private IfStatementNode elseIfBranch;
+    private List<ElseIfStatementNode> elseIfBranch;
+
+    public IfStatementNode() {
+        this.elseIfBranch = new ArrayList<>();
+    }
 
     public void setCondition(ExpressionNode condition) {
         this.condition = condition;
@@ -27,9 +34,10 @@ public final class IfStatementNode extends ASTNode implements StatementNode {
         this.elseBranch = elseBranch;
     }
 
-    public void setElseIfBranch(IfStatementNode elseIfBranch) {
+    public void setElseIfBranch(List<ElseIfStatementNode> elseIfBranch) {
         this.elseIfBranch = elseIfBranch;
     }
+
 
     public ExpressionNode getCondition() {
         return condition;
@@ -43,7 +51,7 @@ public final class IfStatementNode extends ASTNode implements StatementNode {
         return elseBranch;
     }
 
-    public IfStatementNode getElseIfBranch() {
+    public List<ElseIfStatementNode> getElseIfBranches() {
         return elseIfBranch;
     }
 
@@ -65,13 +73,13 @@ public final class IfStatementNode extends ASTNode implements StatementNode {
         }
 
         // Vérifier si la branche elseif a un return
-        if (!hasReturn && elseIfBranch != null) {
-            IfStatementNode currentElseIf = elseIfBranch;
-            while (currentElseIf != null) {
-                hasReturn = currentElseIf.thenBranch.hasReturn();
-                currentElseIf = currentElseIf.elseIfBranch;
+        if (!hasReturn && !elseIfBranch.isEmpty()) {
+            for (ElseIfStatementNode elseIfStatementNode : elseIfBranch) {
+                hasReturn = elseIfStatementNode.hasReturn();
+                if (!hasReturn) {
+                    break;
+                }
             }
-
         }
 
         return hasReturn;

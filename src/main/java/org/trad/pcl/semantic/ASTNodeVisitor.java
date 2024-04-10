@@ -23,7 +23,6 @@ public interface ASTNodeVisitor {
 
 
     void visit(VariableDeclarationNode node) throws Exception;
-
     // StatementNode
 
     void visit(AssignmentStatementNode node) throws Exception;
@@ -65,10 +64,5 @@ public interface ASTNodeVisitor {
     void visit(ParameterNode node) throws Exception;
 
 
-
-
-
-
-
-
+    void visit(ElseIfStatementNode elseIfStatementNode) throws Exception;
 }
