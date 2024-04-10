@@ -5,6 +5,6 @@ procedure TestLoops is
 begin
 
    for variable1 in 'a' .. 'z' loop -- Error: range should be integer or character
-      put(variable1);
+      put('E');
    end loop;
 end TestLoops;

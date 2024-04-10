@@ -1,6 +1,0 @@
-with Ada.Text_IO; use Ada.Text_IO;
-procedure ExampleProcedure is
-   X : integer;
-begin
-    X; -- Doit générer une erreur car X n'est pas initialisé
-end ExampleProcedure;

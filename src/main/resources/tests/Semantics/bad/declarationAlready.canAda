@@ -3,5 +3,5 @@ procedure UniqueIdentifiers is
    A : integer;
    A : integer; -- Doit générer une erreur de compilation car 'A' est déjà déclaré.
 begin
-   put(A);
+   put('E');
 end UniqueIdentifiers;
