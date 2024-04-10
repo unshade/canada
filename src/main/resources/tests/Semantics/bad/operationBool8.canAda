@@ -2,5 +2,5 @@ with Ada.Text_IO; use Ada.Text_IO;
 procedure ExampleProcedure is
 X : boolean;
 begin
-   X := 'true' and false;
+   X := 'e' and false;
 end ExampleProcedure;

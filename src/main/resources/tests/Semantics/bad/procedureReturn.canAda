@@ -1,5 +1,5 @@
 with Ada.Text_IO; use Ada.Text_IO;
-procedure Procedure is
+procedure ExampleProcedure is
    X : integer := 0;
    procedure AnotherProcedure is
    begin
@@ -7,4 +7,4 @@ procedure Procedure is
    end AnotherProcedure;
 begin
     X;
-end Procedure;
+end ExampleProcedure;
