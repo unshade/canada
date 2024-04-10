@@ -218,6 +218,14 @@ public class SemanticAnalysisVisitor implements ASTNodeVisitor {
     public void visit(LoopStatementNode node) throws Exception {
             node.getStartExpression().accept(this);
             node.getEndExpression().accept(this);
+            if (!node.getStartExpression().getType().equals(TypeEnum.INT.toString()) || !node.getEndExpression().getType().equals(TypeEnum.INT.toString())) {
+                if (!node.getStartExpression().getType().equals(TypeEnum.INT.toString())) {
+                    throw new TypeMismatchException(TypeEnum.INT.toString(), node.getStartExpression().getType(), node.getConcernedLine());
+                }
+                if (!node.getEndExpression().getType().equals(TypeEnum.INT.toString())) {
+                    throw new TypeMismatchException(TypeEnum.INT.toString(), node.getEndExpression().getType(), node.getConcernedLine());
+                }
+            }
             node.getBody().accept(this);
     }
 
@@ -248,6 +256,9 @@ public class SemanticAnalysisVisitor implements ASTNodeVisitor {
     @Override
     public void visit(WhileStatementNode node) throws Exception {
         node.getCondition().accept(this);
+        if (!node.getCondition().getType().equals(TypeEnum.BOOL.toString())) {
+            throw new TypeMismatchException(TypeEnum.BOOL.toString(), node.getCondition().getType(), node.getConcernedLine());
+        }
         node.getBody().accept(this);
     }
 
