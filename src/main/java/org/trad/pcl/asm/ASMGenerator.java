@@ -328,7 +328,9 @@ public final class ASMGenerator implements ASTNodeVisitor {
         this.output.append("""
                 \t STR     R0, [R11, #4 * 3] ; Store return value for in stack-frame
                 \t MOV     R13, R11 ; Restore frame pointer
-                \t LDMFD   R13!, {R10, R11, PC} ; Restore caller's frame pointer and return ASM address
+                \t LDR     R11, [R13] ; Restore caller's frame pointer
+                \t ADD     R13, R13, #4 ; Remove return value from stack
+                \t LDMFD   R13!, {R10, PC} ; Restore caller's frame pointer and return ASM address
                 """);
     }
 
