@@ -1,7 +1,6 @@
 package org.trad.pcl.semantic;
 
 import org.trad.pcl.Exceptions.Semantic.*;
-import org.trad.pcl.Helpers.StringFormatHelper;
 import org.trad.pcl.Helpers.TypeEnum;
 import org.trad.pcl.Services.ErrorService;
 import org.trad.pcl.ast.ParameterNode;
@@ -203,8 +202,11 @@ public class SemanticAnalysisVisitor implements ASTNodeVisitor {
 
             node.getThenBranch().accept(this);
 
-            if (node.getElseIfBranch() != null) {
-                node.getElseIfBranch().accept(this);
+            if (!node.getElseIfBranches().isEmpty()) {
+                for (ElseIfStatementNode elseIfStatementNode : node.getElseIfBranches()) {
+                    elseIfStatementNode.accept(this);
+                }
+
             }
 
             if (node.getElseBranch() != null) {
@@ -212,6 +214,12 @@ public class SemanticAnalysisVisitor implements ASTNodeVisitor {
             }
 
             node.checkConditionType();
+    }
+
+    public void visit(ElseIfStatementNode node) throws Exception {
+        node.getCondition().accept(this);
+        node.getThenBranch().accept(this);
+        node.checkConditionType();
     }
 
     @Override
