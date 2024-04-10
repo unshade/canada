@@ -1654,22 +1654,23 @@ public class Parser {
     }
 
     @PrintMethodName
-    private IfStatementNode elifn() {
-        IfStatementNode statement = null;
+    private List<ElseIfStatementNode> elifn() {
+        List<ElseIfStatementNode> elseIfStatementNodes = new ArrayList<>();
         switch (this.currentToken.tag()) {
             case END, ELSE -> {
             }
             case ELSIF -> {
                 analyseTerminal(Tag.ELSIF);
-                statement = new IfStatementNode();
-                statement.setConcernedLine(this.currentToken.line());
-                statement.setCondition(expression());
+                ElseIfStatementNode elseIfStatementNode = new ElseIfStatementNode();
+                elseIfStatementNode.setConcernedLine(this.currentToken.line());
+                elseIfStatementNode.setCondition(expression());
                 analyseTerminal(Tag.THEN);
                 BlockNode thenBranch = new BlockNode();
                 thenBranch.setConcernedLine(this.currentToken.line());
                 thenBranch.addStatements(multipleStatements());
-                statement.setThenBranch(thenBranch);
-                statement.setElseIfBranch(elifn());
+                elseIfStatementNode.setThenBranch(thenBranch);
+                elseIfStatementNodes.add(elseIfStatementNode);
+                elseIfStatementNodes.addAll(elifn());
             }
             default -> this.errorService.registerSyntaxError(
                     new UnexpectedTokenListException(this.currentToken,
@@ -1678,7 +1679,7 @@ public class Parser {
                             Token.generateExpectedToken(Tag.ELSE, this.currentToken))
             );
         }
-        return statement;
+        return elseIfStatementNodes;
     }
 
     @PrintMethodName
