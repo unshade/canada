@@ -326,7 +326,7 @@ public final class ASMGenerator implements ASTNodeVisitor {
     public void visit(ReturnStatementNode node) throws Exception {
         node.getExpression().accept(this);
         this.output.append("""
-                \t STR     R0, [R11, #4 * 2] ; Store return value for in stack-frame
+                \t STR     R0, [R11, #4 * 3] ; Store return value for in stack-frame
                 \t MOV     R13, R11 ; Restore frame pointer
                 \t LDMFD   R13!, {R10, R11, PC} ; Restore caller's frame pointer and return ASM address
                 """);
