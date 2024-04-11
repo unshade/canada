@@ -10,7 +10,7 @@ begin
   else
     return a + sum(a-1);
   end if;
-end f2;
+end sum;
 
 begin
   x := sum(10);
