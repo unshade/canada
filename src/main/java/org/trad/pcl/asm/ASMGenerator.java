@@ -319,6 +319,40 @@ public final class ASMGenerator implements ASTNodeVisitor {
 
     @Override
     public void visit(LoopStatementNode node) throws Exception {
+    String loopStartLabel = "loop_start_" + Context.background().getUniqueLabelId();
+        String loopEndLabel = "loop_end_" + Context.background().getUniqueLabelId();
+
+        node.getStartExpression().accept(this); // store result in R0
+
+        this.findVariableAddress(node.getIdentifier()); // store in address in R9
+
+        this.output.append("""   
+                \t STR     R0, [R9, #-%s] ; Assign start expression (assuming result is in R0) to loop variable %s
+                """.formatted(findSymbolInScopes(node.getIdentifier()).getShift(), node.getIdentifier()));
+
+        output.append(loopStartLabel).append("\n");
+        this.output.append("""
+                \t LDR     R1, [R9, #-%s] ; Load variable %s in R0
+                """.formatted(findSymbolInScopes(node.getIdentifier()).getShift(), node.getIdentifier()));
+        node.getEndExpression().accept(this); // store result in R0
+
+        this.output.append("""
+                \t CMP     R1, R0 ; Compare loop variable to end expression
+                \t BGT     %s ; Branch if loop variable is greater than end expression
+                """.formatted(loopEndLabel));
+
+        node.getBody().accept(this);
+
+        this.findVariableAddress(node.getIdentifier()); // store in address in R9
+        this.output.append("""
+                \t LDR     R0, [R9, #-%s] ; Load variable %s in R0
+                \t ADD     R0, R0, #1 ; Increment loop variable
+                \t STR     R0, [R9, #-%s] ; Assign incremented loop variable to loop variable %s
+                """.formatted(findSymbolInScopes(node.getIdentifier()).getShift(), node.getIdentifier(), findSymbolInScopes(node.getIdentifier()).getShift(), node.getIdentifier()));
+
+        output.append("\t B       ").append(loopStartLabel).append("\n");
+
+        output.append(loopEndLabel).append("\n");
 
     }
 
