@@ -642,18 +642,33 @@ public final class ASMGenerator implements ASTNodeVisitor {
         String multiplyLoopLabel = "multiply_loop_" + Context.background().getUniqueLabelId();
         String multiplyEndLabel = "multiply_end_" + Context.background().getUniqueLabelId();
 
+        output.append("""
+                \t MOV     R3, #0  ; Initialize R3 to 0 (to store the sign)
+                \t MOV     R0, #0  ; Initialize the result to 0
+                \t CMP     R1, #0  ; Check if the left operand is negative
+                \t RSBMI   R1, R1, #0  ; Take the absolute value of the left operand (N=1)
+                \t ADDMI   R3, R3, #1  ; Set R3 to 1 to indicate a negative result (N=1)
+                \t CMP     R2, #0  ; Check if the right operand is negative
+                \t RSBMI   R2, R2, #0  ; Take the absolute value of the right operand (N=1)
+                \t ADDMI   R3, R3, #1  ; Set R3 to 1 to indicate a negative result (if it's not already set) (N=1)
+                """);
+
         output.append(multiplyLoopLabel).append("\n");
 
         output.append("""
-                \t CMP     R1, #0 ; Compare R1 to 0
-                \t BEQ     %s ; Branch if R1 is 0
-                \t ADD     R0, R0, R2 ; Add R0 to R2
-                \t SUB     R1, R1, #1 ; Decrement R1
+                \t CMP     R2, #0 ; Compare R2 to 0
+                \t BEQ     %s ; Branch if R2 is 0
+                \t ADD     R0, R0, R1 ; Add R0 to R1
+                \t SUB     R2, R2, #1 ; Decrement R2
                 \t B       %s ; Branch to loop start
                 """.formatted(multiplyEndLabel, multiplyLoopLabel));
 
         output.append(multiplyEndLabel).append("\n");
 
+        output.append("""
+                        \t CMP     R3, #1 ; Check if the result should be negative
+                        \t RSBEQ   R0, R0, #0 ; Negate the result if the condition is met
+                """);
     }
 
     public void createDivideLoop() {
