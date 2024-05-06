@@ -496,8 +496,16 @@ public final class ASMGenerator implements ASTNodeVisitor {
 
     @Override
     public void visit(UnaryExpressionNode node) throws Exception {
-        node.getOperator().accept(this);
         node.getOperand().accept(this);
+        switch (node.getOperatorNode().getOperator()) {
+            case NOT -> this.output.append("""
+                    \t EOR     R0, R0, #1 ; Logical NOT operand
+                    """);
+            case SUB -> this.output.append("""
+                    \t RSBS    R0, R0, #0 ; Negate operand
+                    """);
+        }
+
     }
 
     @Override

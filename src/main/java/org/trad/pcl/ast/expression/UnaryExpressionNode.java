@@ -35,4 +35,9 @@ public final class UnaryExpressionNode extends ASTNode implements ExpressionNode
     public String getType() throws UndefinedVariableException {
         return operand.getType();
     }
+
+    public OperatorNode getOperatorNode() {
+        return operator;
+    }
+
 }
