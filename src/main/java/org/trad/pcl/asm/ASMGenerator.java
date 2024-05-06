@@ -407,8 +407,15 @@ public final class ASMGenerator implements ASTNodeVisitor {
                     \t MOVGE   R0, #1 ; Set R0 to 1 if R0 is greater than or equal to R1
                     \t MOVLT   R0, #0 ; Set R0 to 0 if R0 is less than R1
                     """);
+            case MULTIPLY -> {
+                output.append("""
+                        \t MOV     R2, R0 ; Move R0 to R2
+                        \t MOV     R0, #0 ; Clear R0
+                        """);
+                createMultiplyLoop();
+            }
         }
-    } // 1+2+3 -> Left : 1 Right : Left 2 Right 3
+    }
 
     @Override
     public void visit(CharacterValExpressionNode node) throws Exception {
@@ -573,6 +580,24 @@ public final class ASMGenerator implements ASTNodeVisitor {
                 \t LDR     R5, [R11, #4 * %s] ; Load parameter %s in R5
                 \t STMFD   R13!, {R5} ; Store parameter %s in stack-frame
                 """.formatted(shift, node.getIdentifier(), node.getIdentifier()));
+    }
+
+    public void createMultiplyLoop() {
+        String multiplyLoopLabel = "multiply_loop_" + Context.background().getUniqueLabelId();
+        String multiplyEndLabel = "multiply_end_" + Context.background().getUniqueLabelId();
+
+        output.append(multiplyLoopLabel).append("\n");
+
+        output.append("""
+                \t CMP     R1, #0 ; Compare R1 to 0
+                \t BEQ     %s ; Branch if R1 is 0
+                \t ADD     R0, R0, R2 ; Add R0 to R2
+                \t SUB     R1, R1, #1 ; Decrement R1
+                \t B       %s ; Branch to loop start
+                """.formatted(multiplyEndLabel, multiplyLoopLabel));
+
+        output.append(multiplyEndLabel).append("\n");
+
     }
 
     public void enterScope() {
