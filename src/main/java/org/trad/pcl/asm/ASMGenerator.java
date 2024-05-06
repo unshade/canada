@@ -381,6 +381,12 @@ public final class ASMGenerator implements ASTNodeVisitor {
                     \t MOVNE   R0, #1 ; Set R0 to 1 if operands are not equal
                     \t MOVEQ   R0, #0 ; Set R0 to 0 if operands are equal
                     """);
+            case OR -> output.append("""
+                    \t ORR     R0, R0, R1 ; Logical OR operands
+                    """);
+            case AND -> output.append("""
+                    \t AND     R0, R0, R1 ; Logical AND operands
+                    """);
         }
     } // 1+2+3 -> Left : 1 Right : Left 2 Right 3
 
