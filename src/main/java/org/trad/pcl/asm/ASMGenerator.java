@@ -387,6 +387,26 @@ public final class ASMGenerator implements ASTNodeVisitor {
             case AND -> output.append("""
                     \t AND     R0, R0, R1 ; Logical AND operands
                     """);
+            case LESS_THAN -> output.append("""
+                    \t CMP     R0, R1 ; Compare operands
+                    \t MOVLT   R0, #1 ; Set R0 to 1 if R0 is less than R1
+                    \t MOVGE   R0, #0 ; Set R0 to 0 if R0 is greater than or equal to R1
+                    """);
+            case GREATER_THAN -> output.append("""
+                    \t CMP     R0, R1 ; Compare operands
+                    \t MOVGT   R0, #1 ; Set R0 to 1 if R0 is greater than R1
+                    \t MOVLE   R0, #0 ; Set R0 to 0 if R0 is less than or equal to R1
+                    """);
+            case LESS_THAN_OR_EQUAL -> output.append("""
+                    \t CMP     R0, R1 ; Compare operands
+                    \t MOVLE   R0, #1 ; Set R0 to 1 if R0 is less than or equal to R1
+                    \t MOVGT   R0, #0 ; Set R0 to 0 if R0 is greater than R1
+                    """);
+            case GREATER_THAN_OR_EQUAL -> output.append("""
+                    \t CMP     R0, R1 ; Compare operands
+                    \t MOVGE   R0, #1 ; Set R0 to 1 if R0 is greater than or equal to R1
+                    \t MOVLT   R0, #0 ; Set R0 to 0 if R0 is less than R1
+                    """);
         }
     } // 1+2+3 -> Left : 1 Right : Left 2 Right 3
 
