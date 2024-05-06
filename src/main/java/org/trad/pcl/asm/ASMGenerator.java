@@ -20,10 +20,8 @@ public final class ASMGenerator implements ASTNodeVisitor {
     private final List<SymbolTable> symbolTables;
 
     private final Stack<SymbolTable> scopeStack;
-
-    private int currentTableIndex;
-
     private final StringBuilder output;
+    private int currentTableIndex;
 
     public ASMGenerator(List<SymbolTable> symbolTables) {
         this.symbolTables = symbolTables;
@@ -140,12 +138,12 @@ public final class ASMGenerator implements ASTNodeVisitor {
         enterScope();
         Symbol symbol = this.findSymbolInScopes(node.getIdentifier());
         this.output.append(symbol.getIdentifier()).append("\n").append("""
-               \t STMFD   R13!, {R10, LR} ; Save caller's frame pointer and return ASM address
-               \t MOV     R10, R9 ; Set up new static link
-               \t SUB     R13, R13, #4
-               \t STR     R11, [R13]
-               \t MOV     R11, R13 ; Set up new frame pointer
-               """);
+                \t STMFD   R13!, {R10, LR} ; Save caller's frame pointer and return ASM address
+                \t MOV     R10, R9 ; Set up new static link
+                \t SUB     R13, R13, #4
+                \t STR     R11, [R13]
+                \t MOV     R11, R13 ; Set up new frame pointer
+                """);
         Context.background().setCounter(node.getParameters().size());
         node.getParameters().forEach(param -> {
             try {
@@ -266,9 +264,9 @@ public final class ASMGenerator implements ASTNodeVisitor {
         node.getCondition().accept(this);
 
         this.output.append("""
-            \t CMP     R0, #1 ; Compare condition
-            \t BEQ    %s ; Branch if condition is true
-            """.formatted(ifTrueLabel));
+                \t CMP     R0, #1 ; Compare condition
+                \t BEQ    %s ; Branch if condition is true
+                """.formatted(ifTrueLabel));
 
 
         output.append("\t B       ").append(ifFalseLabel).append("\n");
@@ -316,10 +314,9 @@ public final class ASMGenerator implements ASTNodeVisitor {
     }
 
 
-
     @Override
     public void visit(LoopStatementNode node) throws Exception {
-    String loopStartLabel = "loop_start_" + Context.background().getUniqueLabelId();
+        String loopStartLabel = "loop_start_" + Context.background().getUniqueLabelId();
         String loopEndLabel = "loop_end_" + Context.background().getUniqueLabelId();
 
         node.getStartExpression().accept(this); // store result in R0
@@ -447,6 +444,23 @@ public final class ASMGenerator implements ASTNodeVisitor {
                         \t MOV     R0, #0 ; Clear R0
                         """);
                 createMultiplyLoop();
+            }
+            case DIVIDE -> {
+                output.append("""
+                        \t MOV     R2, R0 ; Move R0 to R2
+                        \t MOV     R0, #0 ; Clear R0
+                        """);
+                createDivideLoop();
+            }
+            case MODULO -> {
+                output.append("""
+                        \t MOV     R2, R0 ; Move R0 to R2
+                        \t MOV     R0, #0 ; Clear R0
+                        """);
+                createDivideLoop();
+                output.append("""
+                        \t MOV     R0, R2 ; Move R2 to R0
+                        """);
             }
         }
     }
@@ -641,6 +655,40 @@ public final class ASMGenerator implements ASTNodeVisitor {
         output.append(multiplyEndLabel).append("\n");
 
     }
+
+    public void createDivideLoop() {
+        String divideLoopLabel = "divide_loop_" + Context.background().getUniqueLabelId();
+        String divideEndLabel = "divide_end_" + Context.background().getUniqueLabelId();
+
+        output.append("""
+                \t MOV     R3, #0  ; Initialize R3 to 0 (to store the sign)
+                \t MOV     R0, #0  ; Initialize the result to 0
+                \t CMP     R2, #0  ; Check if the left operand is negative
+                \t RSBMI   R2, R2, #0  ; Take the absolute value of the left operand (N=1)
+                \t ADDMI   R3, R3, #1  ; Set R3 to 1 to indicate a negative result (N=1)
+                \t CMP     R1, #0  ; Check if the right operand is negative
+                \t RSBMI   R1, R1, #0  ; Take the absolute value of the right operand (N=1)
+                \t ADDMI   R3, R3, #1  ; Set R3 to 1 to indicate a negative result (if it's not already set) (N=1)
+                """);
+
+        output.append(divideLoopLabel).append("\n");
+
+        output.append("""
+                \t CMP     R2, R1 ; Compare R1 to R2
+                \t BLT     %s ; Branch if R1 < R2
+                \t SUB     R2, R2, R1 ; Subtract R2 from R1
+                \t ADD     R0, R0, #1 ; Increment the result
+                \t B       %s ; Branch to loop start
+                """.formatted(divideEndLabel, divideLoopLabel));
+
+        output.append(divideEndLabel).append("\n");
+
+        output.append("""
+                \t CMP     R3, #1 ; Check if the result should be negative
+                \t RSBEQ   R0, R0, #0 ; Negate the result if the condition is met
+                """);
+    }
+
 
     public void enterScope() {
         scopeStack.push(symbolTables.get(currentTableIndex));
