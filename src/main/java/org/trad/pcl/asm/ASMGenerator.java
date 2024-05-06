@@ -457,10 +457,7 @@ public final class ASMGenerator implements ASTNodeVisitor {
                         \t MOV     R2, R0 ; Move R0 to R2
                         \t MOV     R0, #0 ; Clear R0
                         """);
-                createDivideLoop();
-                output.append("""
-                        \t MOV     R0, R2 ; Move R2 to R0
-                        """);
+                createRemLoop();
             }
         }
     }
@@ -644,7 +641,6 @@ public final class ASMGenerator implements ASTNodeVisitor {
 
         output.append("""
                 \t MOV     R3, #0  ; Initialize R3 to 0 (to store the sign)
-                \t MOV     R0, #0  ; Initialize the result to 0
                 \t CMP     R1, #0  ; Check if the left operand is negative
                 \t RSBMI   R1, R1, #0  ; Take the absolute value of the left operand (N=1)
                 \t ADDMI   R3, R3, #1  ; Set R3 to 1 to indicate a negative result (N=1)
@@ -677,7 +673,6 @@ public final class ASMGenerator implements ASTNodeVisitor {
 
         output.append("""
                 \t MOV     R3, #0  ; Initialize R3 to 0 (to store the sign)
-                \t MOV     R0, #0  ; Initialize the result to 0
                 \t CMP     R2, #0  ; Check if the left operand is negative
                 \t RSBMI   R2, R2, #0  ; Take the absolute value of the left operand (N=1)
                 \t ADDMI   R3, R3, #1  ; Set R3 to 1 to indicate a negative result (N=1)
@@ -701,6 +696,36 @@ public final class ASMGenerator implements ASTNodeVisitor {
         output.append("""
                 \t CMP     R3, #1 ; Check if the result should be negative
                 \t RSBEQ   R0, R0, #0 ; Negate the result if the condition is met
+                """);
+    }
+
+    public void createRemLoop() {
+        String remLoopLabel = "rem_loop_" + Context.background().getUniqueLabelId();
+        String remEndLabel = "rem_end_" + Context.background().getUniqueLabelId();
+
+        output.append("""
+                \t CMP     R2, #0  ; Check if the left operand is negative
+                \t RSBMI   R2, R2, #0  ; Take the absolute value of the left operand (N=1)
+                \t MOVMI   R0, #1  ; Set R0 to 1 to indicate a negative result (N=1)
+                \t CMP     R1, #0  ; Check if the right operand is negative
+                \t RSBMI   R1, R1, #0  ; Take the absolute value of the right operand (N=1)
+                """);
+
+        output.append(remLoopLabel).append("\n");
+
+        output.append("""
+                \t CMP     R2, R1 ; Compare R1 to R2
+                \t BLT     %s ; Branch if R1 < R2
+                \t SUB     R2, R2, R1 ; Subtract R2 from R1
+                \t B       %s ; Branch to loop start
+                """.formatted(remEndLabel, remLoopLabel));
+
+        output.append(remEndLabel).append("\n");
+
+        output.append("""
+                \t CMP     R0, #1 ; Check if the result should be negative
+                \t RSBEQ   R0, R2, #0 ; Negate the result if the condition is met
+                \t MOVNE   R0, R2 ; Move the remainder to R0
                 """);
     }
 
