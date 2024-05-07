@@ -85,6 +85,14 @@ public final class Main {
 
                     Files.write(Paths.get("out.s"), output.getBytes());
                     Files.newOutputStream(Paths.get("out.s")).close();
+
+                    System.out.println("▶️ " + colorize("RUNNING BINARY VIA HEADLESS VISUAL", new AnsiFormat(Attribute.WHITE_TEXT(), Attribute.BLUE_BACK(), Attribute.BOLD())));
+
+                    ProcessBuilder pb = new ProcessBuilder("java", "-jar", "pcl.jar", "out.s");
+                    pb.redirectOutput(ProcessBuilder.Redirect.INHERIT);
+                    pb.redirectError(ProcessBuilder.Redirect.INHERIT);
+                    pb.start();
+
                 } else {
                     AnsiFormat fWarning2 = new AnsiFormat(Attribute.WHITE_TEXT(), Attribute.RED_BACK(), Attribute.BOLD());
                     System.out.println("\n❌ " + colorize("SEMANTIC ANALYSIS PHASE FAILED", fWarning2));
