@@ -5,6 +5,7 @@ function perimetreRectangle(larg : integer; long : integer) return integer is
 p : integer;
 begin
     p := 1+2+3 ;
+    put('c');
 return p ;
 end perimetreRectangle;
 

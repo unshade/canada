@@ -15,8 +15,12 @@ import org.trad.pcl.ast.ProgramNode;
 import org.trad.pcl.semantic.SemanticAnalysisVisitor;
 import org.trad.pcl.semantic.SymbolTable;
 
+import java.io.BufferedWriter;
 import java.io.File;
+import java.io.FileWriter;
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.List;
 import java.util.Objects;
 
@@ -79,7 +83,11 @@ public final class Main {
                     System.out.println("🔍 " + colorize("STARTING ASM GENERATION PHASE", new AnsiFormat(Attribute.WHITE_TEXT(), Attribute.BLUE_BACK(), Attribute.BOLD())));
                     ASMGenerator asmGenerator = new ASMGenerator(symbolTables);
                     asmGenerator.visit(AST);
-                    System.out.println(asmGenerator.getOutput());
+                    String output = asmGenerator.getOutput();
+                    System.out.println(output);
+
+                    // create out.s text file and write the generated assembly code
+                    Files.write(Paths.get("out.s"), output.getBytes());
                 } else {
                     AnsiFormat fWarning2 = new AnsiFormat(Attribute.WHITE_TEXT(), Attribute.RED_BACK(), Attribute.BOLD());
                     System.out.println("\n❌ " + colorize("SEMANTIC ANALYSIS PHASE FAILED", fWarning2));

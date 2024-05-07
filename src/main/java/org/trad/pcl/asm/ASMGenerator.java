@@ -599,6 +599,60 @@ public final class ASMGenerator implements ASTNodeVisitor {
             // INIT ALEX LIB
             this.output.append("STR_OUT      FILL    0x1000\n");
 
+            Symbol symbol = this.findSymbolInScopes(node.getRootProcedure().getIdentifier());
+            //Context.background().setCallerName(symbol.getIdentifier());
+            this.output.append(symbol.getIdentifier()).append("\n").append("""
+                    \t STMFD   R13!, {R10, LR} ; Save caller's frame pointer and return ASM address
+                    \t MOV     R10, R13 ; Set up new static link
+                    \t SUB     R13, R13, #4
+                    \t STR     R11, [R13]
+                    \t MOV     R11, R13 ; Set up new frame pointer
+                    """);
+            //this.updateContextNonCallableDeclaration();
+           /* node.getRootProcedure().getBody().getStatements().forEach(statementNode -> {
+                try {
+                    statementNode.accept(this);
+                } catch (Exception e) {
+                    System.err.println(e.getMessage());
+                    System.exit(1);
+                }
+            });*/
+            List<DeclarationNode> tempDeclarations = new ArrayList<>();
+            node.getRootProcedure().getBody().getDeclarations().forEach(declaration -> {
+                try {
+                    if (declaration instanceof ProcedureDeclarationNode || declaration instanceof FunctionDeclarationNode) {
+                        tempDeclarations.add(declaration);
+                    } else {
+                        declaration.accept(this);
+                    }
+                } catch (Exception ex) {
+                    throw new RuntimeException(ex);
+                }
+            });
+            node.getRootProcedure().getBody().getStatements().forEach(statement -> {
+                try {
+                    statement.accept(this);
+                } catch (Exception ex) {
+                    throw new RuntimeException(ex);
+                }
+            });
+            this.output.append("\t END     ; Program ends here\n");
+
+            tempDeclarations.forEach(declaration -> {
+                try {
+                    declaration.accept(this);
+                } catch (Exception ex) {
+                    throw new RuntimeException(ex);
+                }
+            });
+            /*node.getRootProcedure().getBody().getDeclarations().forEach(declarationNode -> {
+                try {
+                    declarationNode.accept(this);
+                } catch (Exception e) {
+                    System.err.println(e.getMessage());
+                    System.exit(1);
+                }
+            });*/
             this.output.append("""
                     println
                     \t STMFD   SP!, {LR, R0-R3}
@@ -710,61 +764,6 @@ public final class ASMGenerator implements ASTNodeVisitor {
                     \t ADDEQ   R1, R1, R4
                     \t LDMFD   SP!, {PC, R2-R5}
                     """);
-
-            Symbol symbol = this.findSymbolInScopes(node.getRootProcedure().getIdentifier());
-            //Context.background().setCallerName(symbol.getIdentifier());
-            this.output.append(symbol.getIdentifier()).append("\n").append("""
-                    \t STMFD   R13!, {R10, LR} ; Save caller's frame pointer and return ASM address
-                    \t MOV     R10, R13 ; Set up new static link
-                    \t SUB     R13, R13, #4
-                    \t STR     R11, [R13]
-                    \t MOV     R11, R13 ; Set up new frame pointer
-                    """);
-            //this.updateContextNonCallableDeclaration();
-           /* node.getRootProcedure().getBody().getStatements().forEach(statementNode -> {
-                try {
-                    statementNode.accept(this);
-                } catch (Exception e) {
-                    System.err.println(e.getMessage());
-                    System.exit(1);
-                }
-            });*/
-            List<DeclarationNode> tempDeclarations = new ArrayList<>();
-            node.getRootProcedure().getBody().getDeclarations().forEach(declaration -> {
-                try {
-                    if (declaration instanceof ProcedureDeclarationNode || declaration instanceof FunctionDeclarationNode) {
-                        tempDeclarations.add(declaration);
-                    } else {
-                        declaration.accept(this);
-                    }
-                } catch (Exception ex) {
-                    throw new RuntimeException(ex);
-                }
-            });
-            node.getRootProcedure().getBody().getStatements().forEach(statement -> {
-                try {
-                    statement.accept(this);
-                } catch (Exception ex) {
-                    throw new RuntimeException(ex);
-                }
-            });
-            this.output.append("\t END     ; Program ends here\n");
-
-            tempDeclarations.forEach(declaration -> {
-                try {
-                    declaration.accept(this);
-                } catch (Exception ex) {
-                    throw new RuntimeException(ex);
-                }
-            });
-            /*node.getRootProcedure().getBody().getDeclarations().forEach(declarationNode -> {
-                try {
-                    declarationNode.accept(this);
-                } catch (Exception e) {
-                    System.err.println(e.getMessage());
-                    System.exit(1);
-                }
-            });*/
         } catch (Exception e) {
             e.printStackTrace();
             System.err.println(e.getMessage());
