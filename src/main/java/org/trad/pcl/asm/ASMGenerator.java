@@ -590,6 +590,121 @@ public final class ASMGenerator implements ASTNodeVisitor {
         enterScope();
         // TODO Find a way to do this clearly and not to get var decl at the bottom
         try {
+            // INIT ALEX LIB
+            this.output.append("STR_OUT      FILL    0x1000\n");
+
+            this.output.append("""
+                    println
+                    \t STMFD   SP!, {LR, R0-R3}
+                    \t MOV     R3, R0
+                    \t LDR     R1, =STR_OUT ; address of the output buffer
+                    PRINTLN_LOOP
+                    \t LDRB    R2, [R0], #1
+                    \t STRB    R2, [R1], #1
+                    \t TST     R2, R2
+                    \t BNE     PRINTLN_LOOP
+                    \t MOV     R2, #10
+                    \t STRB    R2, [R1, #-1]
+                    \t MOV     R2, #0
+                    \t STRB    R2, [R1]
+                                        
+                    ;  we need to clear the output buffer
+                    \t LDR     R1, =STR_OUT
+                    \t MOV     R0, R3
+                    CLEAN
+                    \t LDRB    R2, [R0], #1
+                    \t MOV     R3, #0
+                    \t STRB    R3, [R1], #1
+                    \t TST     R2, R2
+                    \t BNE     CLEAN
+                    ;  clear 3 more
+                    \t STRB    R3, [R1], #1
+                    \t STRB    R3, [R1], #1
+                    \r STRB    R3, [R1], #1
+                                        
+                    \t LDMFD   SP!, {PC, R0-R3}
+                    """);
+
+            this.output.append("""
+                    to_ascii
+                    \t STMFD   SP!, {LR, R4-R7}
+                    \t ; make it positive
+                    \t MOV R7, R0
+                    \t CMP     R0, #0
+                    \t MOVGE   R6, R0
+                    \t RSBLT   R6, R0, #0
+                    \t MOV     R0, R6
+                                        
+                    \t MOV     R4, #0 ; Initialize digit counter
+                                        
+                    to_ascii_loop 
+                    \t MOV     R1, R0
+                    \t MOV     R2, #10
+                    \t BL      div32 ; R0 = R0 / 10, R1 = R0 % 10
+                    \t ADD     R1, R1, #48 ; Convert digit to ASCII
+                    \t STRB    R1, [R3, R4] ; Store the ASCII digit
+                    \t ADD     R4, R4, #1 ; Increment digit counter
+                    \t CMP     R0, #0
+                    \t BNE     to_ascii_loop
+                                        
+                    \t ; add the sign if it was negative
+                    \t CMP     R7, #0
+                    \t MOVGE   R1, #0	
+                    \t MOVLT   R1, #45
+                    \t STRB    R1, [R3, R4]
+                    \t ADD     R4, R4, #1
+                            
+                    \t LDMFD   SP!, {PC, R4-R7}
+                                        
+                    """);
+
+            this.output.append("""
+                    ;       Integer division routine
+                    ;       Arguments:
+                    ;       R1 = Dividend
+                    ;       R2 = Divisor
+                    ;       Returns:
+                    ;       R0 = Quotient
+                    ;       R1 = Remainder
+                    div32
+                    \t STMFD   SP!, {LR, R2-R5}
+                    \t MOV     R0, #0
+                    \t MOV     R3, #0
+                    \t CMP     R1, #0
+                    \t RSBLT   R1, R1, #0
+                    \t EORLT   R3, R3, #1
+                    \t CMP     R2, #0
+                    \t RSBLT   R2, R2, #0
+                    \t EORLT   R3, R3, #1
+                    \t MOV     R4, R2
+                    \t MOV     R5, #1
+                    div_max
+                    \t LSL     R4, R4, #1
+                    \t LSL     R5, R5, #1
+                    \t CMP     R4, R1
+                    \t BLE     div_max
+                    div_loop
+                    \t LSR     R4, R4, #1
+                    \t LSR     R5, R5, #1
+                    \t CMP     R4,R1
+                    \t BGT     div_loop
+                    \t ADD     R0, R0, R5
+                    \t SUB     R1, R1, R4
+                    \t CMP     R1, R2
+                    \t BGE     div_loop
+                    \t CMP     R3, #1
+                    \t BNE     div_exit
+                    \t CMP     R1, #0
+                    \t ADDNE   R0, R0, #1
+                    \t RSB     R0, R0, #0
+                    \t RSB     R1, R1, #0
+                    \t ADDNE   R1, R1, R2
+                    div_exit
+                    \t CMP     R0, #0
+                    \t ADDEQ   R1, R1, R4
+                    \t LDMFD   SP!, {PC, R2-R5}
+                    """);
+
             Symbol symbol = this.findSymbolInScopes(node.getRootProcedure().getIdentifier());
             //Context.background().setCallerName(symbol.getIdentifier());
             this.output.append(symbol.getIdentifier()).append("\n").append("""
