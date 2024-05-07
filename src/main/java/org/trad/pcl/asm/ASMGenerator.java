@@ -563,6 +563,40 @@ public final class ASMGenerator implements ASTNodeVisitor {
         enterScope();
         // TODO Find a way to do this clearly and not to get var decl at the bottom
         try {
+            // INIT ALEX LIB
+            this.output.append("STR_OUT      FILL    0x1000\n");
+
+            this.output.append("""
+                    println      STMFD   SP!, {LR, R0-R3}
+                                 MOV     R3, R0
+                                 LDR     R1, =STR_OUT ; address of the output buffer
+                    PRINTLN_LOOP LDRB    R2, [R0], #1
+                                 STRB    R2, [R1], #1
+                                 TST     R2, R2
+                                 BNE     PRINTLN_LOOP
+                                 MOV     R2, #10
+                                 STRB    R2, [R1, #-1]
+                                 MOV     R2, #0
+                                 STRB    R2, [R1]
+                                        
+                                        
+                                 ;       we need to clear the output buffer
+                                 LDR     R1, =STR_OUT
+                                 MOV     R0, R3
+                    CLEAN        LDRB    R2, [R0], #1
+                                 MOV     R3, #0
+                                 STRB    R3, [R1], #1
+                                 TST     R2, R2
+                                 BNE     CLEAN
+                                 ;       clear 3 more
+                                 STRB    R3, [R1], #1
+                                 STRB    R3, [R1], #1
+                                 STRB    R3, [R1], #1
+                                        
+                                 LDMFD   SP!, {PC, R0-R3}
+                                        
+                    """);
+
             Symbol symbol = this.findSymbolInScopes(node.getRootProcedure().getIdentifier());
             //Context.background().setCallerName(symbol.getIdentifier());
             this.output.append(symbol.getIdentifier()).append("\n").append("""
