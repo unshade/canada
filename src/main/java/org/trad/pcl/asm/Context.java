@@ -10,6 +10,8 @@ public class Context {
 
     public int counter = 0;
 
+    private boolean isPutChar = false;
+
     private int nonCallableDeclarationWriteLine;
     private Context() {
         callerName = "unknown, that's bad bruh";
@@ -22,6 +24,14 @@ public class Context {
             instance = new Context();
         }
         return instance;
+    }
+
+    public boolean getPutChar() {
+        return isPutChar;
+    }
+
+    public void setPutChar(boolean putChar) {
+        isPutChar = putChar;
     }
 
     public void setCallerName(String callerName) {
