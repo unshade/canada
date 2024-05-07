@@ -119,7 +119,7 @@
 
     \subsection{Étapes de transformation de la Grammaire}\label{subsec:etapes-de-transformation-de-la-grammaire}
 
-    \subsubection{Grammaire originale en BNF}\label{subsec:grammaire-originale-en-bnf}
+    \subsubsection{Grammaire originale en BNF}\label{subsec:grammaire-originale-en-bnf}
 
     La grammaire initiale du langage \textit{canAda}, avant sa transformation en grammaire LL(1), se présente comme suit en BNF sans les regex:
 
@@ -687,6 +687,20 @@
     L'AST joue un rôle central dans le processus de compilation.
     Après l'analyse syntaxique, le programme source est transformé en un AST, qui est ensuite utilisé pour les étapes de vérification sémantique, d'optimisation, et de génération de code.
     Cette représentation permet une manipulation plus aisée et plus efficace du programme source.
+
+    \section{Symbol Tables et Controles sémantiques}
+
+    \section{Génération de Code}
+    Une fois l'AST, les Symbol Tables et les contrôles sémantiques complétés, la phase de génération de code peut commencer. Nous utilisons l'AST ainsi que les informations contenues dans les noeuds et dans les Symbol Tables pour générer le code final en ASM UAL ARM 32 bits.
+
+    \subsection{Parcours de l'AST}
+    Pour générer le code, nous parcourons l'AST dans la classe \textit{ASMGenerator}. Nous partons du root node et nous descendons au fur et à mesure dans l'arbre grâce à un pattern de Double Dispatch : Visitor. Pour chaque type de noeud, nous générons le code correspondant. Chaque noeud est responsable uniquement de la génération de son propre code. Nous utilisons également une petite classe \textit{Context}, celle-ci nous permet de stocker des informations sur le contexte actuel de génération de code, comme le nom de la fonction actuelle, le nombre de variables locales, etc. Bien qu'assez petite, \textit{Context} est importante au niveau des opérations, en effet c'est elle qui nous permet de savoir dans quel registre enregistrer le résultat d'une opération (par exemple, une addition $3+9+1$ : 1 va dans R0, 9 dans R1, leur résultat va dans R0, 3 est stocké dans R1 puis R0 et R1 sont ADD dans R0). \\
+    
+
+
+    \subsection{Quelques schémas de traduction}
+
+
 
     \section{Tests et Validation}\label{sec:tests-et-validation}
 
