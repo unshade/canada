@@ -44,11 +44,14 @@ public final class RecordTypeNode extends TypeNode {
     public Symbol toSymbol() throws UndefinedVariableException {
         Record record = new Record(getIdentifier(), 0);
         List<Variable> symbols = new ArrayList<>();
+        int shift = 0;
         for (VariableDeclarationNode field : fields) {
             Variable var = field.toSymbol();
-            var.setShift(record.getShift() + var.getShift());
+            int temp = var.getShift();
+            var.setShift(record.getShift() + shift);
             //  record.setShift(var.getShift());
             symbols.add(var);
+            shift += temp;
         }
         record.setSize(getSize());
         record.setFields(symbols);
