@@ -512,7 +512,12 @@ public final class ASMGenerator implements ASTNodeVisitor {
         } else {
             this.output.append("\t MOV     R0, #%s ; Load literal value in R0\n".formatted(node.getValue()));
         }*/
-        this.output.append("\t MOV     R0, #%s ; Load literal value in R0\n".formatted(node.getValue()));
+        if (node.getType().equalsIgnoreCase("character"))  {
+
+            this.output.append("\t MOV     R0, #%s ; Load literal value in R0\n".formatted((int) String.valueOf(node.getValue()).charAt(0)));
+        } else {
+            this.output.append("\t MOV     R0, #%s ; Load literal value in R0\n".formatted(node.getValue()));
+        }
     }
 
     @Override

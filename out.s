@@ -16,7 +16,8 @@ unDebut
 	 LDR     R0, [R13] ; Load return value
 	 ADD     R13, R13, #4 * 3 ; Remove arguments and return value from stack
 	 MOV     R9, R11
-	 STR     R0, [R9, #-4] ; Assign right expression (assuming result is in R0) to left variable choix
+	 SUB     R9, R9, #4
+	 STR     R0, [R9] ; Assign right expression (assuming result is in R0) to left variable choix
 	 END     ; Program ends here
 perimetreRectangle
 	 STMFD   R13!, {R10, LR} ; Save caller's frame pointer and return ASM address
@@ -39,8 +40,9 @@ perimetreRectangle
 	 LDMFD   R13!, {R1} ; Load the right operand in R1
 	 ADD     R0, R0, R1 ; Add operands
 	 MOV     R9, R11
-	 STR     R0, [R9, #-12] ; Assign right expression (assuming result is in R0) to left variable p
-	 MOV     R0, #8 ; Load literal value in R0
+	 SUB     R9, R9, #12
+	 STR     R0, [R9] ; Assign right expression (assuming result is in R0) to left variable p
+	 MOV     R0, #65 ; Load literal value in R0
 	 SUB SP, SP, #4   ; réservez 4 octets pour le 0
 	 MOV R1, #0
 	 STR R1, [SP]
@@ -50,7 +52,8 @@ perimetreRectangle
 	 BL println
 	 ADD SP, SP, #8   ; libérez la pile
 	 MOV     R9, R11
-	 LDR     R0, [R9, #-12] ; Load variable p in R0
+	 SUB     R9, R9, #12
+	 LDR     R0, [R9] ; Load variable p in R0
 	 STR     R0, [R11, #4 * 3] ; Store return value for in stack-frame
 	 MOV     R13, R11 ; Restore frame pointer
 	 LDR     R11, [R13] ; Restore caller's frame pointer

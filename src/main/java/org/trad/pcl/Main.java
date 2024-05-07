@@ -15,10 +15,7 @@ import org.trad.pcl.ast.ProgramNode;
 import org.trad.pcl.semantic.SemanticAnalysisVisitor;
 import org.trad.pcl.semantic.SymbolTable;
 
-import java.io.BufferedWriter;
-import java.io.File;
-import java.io.FileWriter;
-import java.io.IOException;
+import java.io.*;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.List;
@@ -86,7 +83,6 @@ public final class Main {
                     String output = asmGenerator.getOutput();
                     System.out.println(output);
 
-                    // create out.s text file and write the generated assembly code
                     Files.write(Paths.get("out.s"), output.getBytes());
                 } else {
                     AnsiFormat fWarning2 = new AnsiFormat(Attribute.WHITE_TEXT(), Attribute.RED_BACK(), Attribute.BOLD());
