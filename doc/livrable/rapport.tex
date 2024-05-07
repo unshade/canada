@@ -750,6 +750,76 @@
 
     On peut voir la façon dont on descend dans l'arbre (\texttt{node.getExpression().accept(this)}) et comment on génère le code correspondant à ce noeud. Bien que simple, ce code est représentatif de la manière dont nous générons le code pour chaque noeud de l'AST.
 
+    \subsection{Schémas de traduction}
+    \subsubsection{Appels de fonctions}
+
+    Dans un premier temps, les appels de fonctions ont été un problème au niveau de la sortie ASM. En effet ADA permet de déclarer des fonctions dans des fonctions et ainsi de suite, cependant cette structure ne correspond pas à la structure d'un programme en ASM (Chaque fonction aura son étiquette et sera isolée des autres). \\
+    Afin de résoudre ce soucis nous avons décidé de trier les déclarations, de ne traduire que ce qui n'est pas une déclaration de fonction ou procédure, puis traduire la fonction (ou procédure) courrante et enfin les déclarations de fonctions ou procédure en dernier. Ceci permet de garder une structure ASM ou chaque nouvelle fonction est bien a part des autres. \\
+
+    Une fois ce soucis mineur réglé, nous avons pu nous concentrer sur la traduction des appels de fonctions.
+    Voici le code permettant de traduire une fonction :
+    \begin{lstlisting}
+@Override
+public void visit(FunctionDeclarationNode node) throws Exception {
+    enterScope();
+    Symbol symbol = this.findSymbolInScopes(node.getIdentifier());
+    this.output.append(symbol.getIdentifier()).append("\n").append("""
+            \t STMFD   R13!, {R11, LR} ; Save caller's frame pointer and return ASM address
+            \t MOV     R11, R13 ; Set up new frame pointer
+            """);
+    Context.background().setCounter(node.getParameters().size());
+    node.getParameters().forEach(param -> {
+        try {
+            param.accept(this);
+            Context.background().setCounter(Context.background().getCounter() - 1);
+        } catch (Exception ex) {
+            throw new RuntimeException(ex);
+        }
+    });
+    node.getBody().accept(this);
+    exitScope();
+}
+    \end{lstlisting}
+
+    On peut ici voir dans un premier temps la sauvegarde du frame pointer et de l'adresse de retour, puis la gestion des paramètres, et enfin la génération du code pour le corps de la fonction. \\
+    On peut également voir que chaque node est bien responsable uniquement de la génération de son propre code, ici la fonction ne génère que le code pour sa propre déclaration, les paramètres et le corps de la fonction sont générés par les noeuds correspondants. \\
+    Nous pouvons également utiliser les fonctions de manière récursive, grâce à l'implémentation d'un chainage statique et dynamique. \\
+    \subsubsection{Conditionnelles imbriquées}
+
+    Les conditionnelles imbriquées ont été gérées de manière naturelle. Chaque if se voit attribuer une étiquette unique basée sur un ID. Ainsi, chaque if est isolé des autres et peut être traité de manière indépendante. L'imbrication de ceux ci ne pose donc aucun soucis. Voici le code pour la génération de code pour les conditionnelles :
+
+    \begin{lstlisting}
+@Override
+public void visit(IfStatementNode node) throws Exception {
+    String ifTrueLabel = "if_true_" + Context.background().getUniqueLabelId();
+    String ifEndLabel = "if_end_" + Context.background().getUniqueLabelId();
+
+    node.getCondition().accept(this);
+
+    this.output.append("""
+            \t CMP     R0, #0 ; Compare condition
+            \t BEQ     %s ; Branch if condition is false
+            """.formatted(ifEndLabel));
+
+    if (node.getElseBranch() != null) {
+        node.getElseBranch().accept(this);
+    }
+
+    output.append("\t B       ").append(ifEndLabel).append("\n");
+
+    output.append(ifTrueLabel).append("\n");
+
+    node.getThenBranch().accept(this);
+
+    output.append(ifEndLabel).append("\n");
+}
+    \end{lstlisting}
+
+    On remarque au début la génération des étiquettes uniques pour chaque if, puis la génération du code pour la condition, le branchement si la condition est fausse, le traitement du else si il existe, et enfin le traitement du then et la fin du if. Dans le cas où une conditionnelle est imbriquée le code de l'imbriquée sera simplement généré entre le branchement du then et la fin de l'if, et se verra attribuer une étiquette unique.
+
+    \subsubsection{Records}
+
+
     \section{Tests et Validation}\label{sec:tests-et-validation}
 
     \subsection{Pour un code source valide}\label{subsec:pour-un-code-source-valide}
