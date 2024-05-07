@@ -12,20 +12,32 @@ import static com.diogonunes.jcolor.Ansi.colorize;
 @Aspect
 public class MethodLoggerAspect {
 
+    private static boolean isLogger;
+
+    public MethodLoggerAspect() {
+        isLogger = false;
+    }
+
     @Pointcut("@annotation(org.trad.pcl.annotation.PrintMethodName) && execution(* *(..))")
     public void log() {
     }
 
     @Before("log()")
     public void logMethod(JoinPoint jp) {
-        System.out.println("\t↪️ " + colorize("Parser rule ", Attribute.GREEN_TEXT()) + colorize(jp.getSignature().getName(), Attribute.MAGENTA_TEXT()) + colorize(" called", Attribute.GREEN_TEXT()));
+        if (isLogger) {
+            System.out.println("\t↪️ " + colorize("Parser rule ", Attribute.GREEN_TEXT()) + colorize(jp.getSignature().getName(), Attribute.MAGENTA_TEXT()) + colorize(" called", Attribute.GREEN_TEXT()));
+        }
     }
-
 
     @After("log()")
     public void lg(JoinPoint jp) {
-        System.out.println("\t↪️ " + colorize("Parser rule ", Attribute.GREEN_TEXT()) + colorize(jp.getSignature().getName(), Attribute.MAGENTA_TEXT()) + colorize(" returned", Attribute.GREEN_TEXT()));
+        if (isLogger) {
+            System.out.println("\t↪️ " + colorize("Parser rule ", Attribute.GREEN_TEXT()) + colorize(jp.getSignature().getName(), Attribute.MAGENTA_TEXT()) + colorize(" returned", Attribute.GREEN_TEXT()));
+        }
     }
 
+    public static void setLogger(boolean logger) {
+        isLogger = logger;
+    }
 }
 

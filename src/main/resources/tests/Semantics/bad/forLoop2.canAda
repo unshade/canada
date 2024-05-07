@@ -4,8 +4,7 @@ procedure TestLoops is
    variable2 : character;
 begin
 
-   for variable1 in 1.5 .. 10 loop -- Error: range should be integer
-      put(variable1);
+   for variable1 in true .. false loop -- Error: range should be integer or character
+      put('E');
    end loop;
-
 end TestLoops;

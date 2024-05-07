@@ -7,6 +7,7 @@ import org.trad.pcl.Services.ErrorService;
 import org.trad.pcl.ast.ASTNode;
 import org.trad.pcl.ast.ParameterNode;
 import org.trad.pcl.ast.statement.BlockNode;
+import org.trad.pcl.ast.statement.IfStatementNode;
 import org.trad.pcl.ast.statement.ReturnStatementNode;
 import org.trad.pcl.ast.statement.StatementNode;
 import org.trad.pcl.ast.type.TypeNode;
@@ -56,10 +57,8 @@ public final class FunctionDeclarationNode extends ASTNode implements Declaratio
     }
 
     public void checkHasReturn() {
-        for (StatementNode statement : body.getStatements()) {
-            if (statement instanceof ReturnStatementNode) {
-                return;
-            }
+        if (this.body.hasReturn()) {
+            return;
         }
         ErrorService.getInstance().registerSemanticError(new MissingReturnStatementException(this.identifier, this.body.getConcernedLine()));
     }

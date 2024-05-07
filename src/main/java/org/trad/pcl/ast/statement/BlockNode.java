@@ -1,6 +1,8 @@
 package org.trad.pcl.ast.statement;
 
 
+import org.trad.pcl.Exceptions.Semantic.MissingReturnStatementException;
+import org.trad.pcl.Services.ErrorService;
 import org.trad.pcl.ast.ASTNode;
 import org.trad.pcl.ast.declaration.DeclarationNode;
 import org.trad.pcl.ast.statement.StatementNode;
@@ -58,6 +60,20 @@ public class BlockNode extends ASTNode implements StatementNode {
         for (StatementNode statement : statements) {
             addStatement(statement);
         }
+    }
+
+    public boolean hasReturn() {
+        for (StatementNode statement : getStatements()) {
+            if (statement instanceof ReturnStatementNode) {
+                return true;
+            }
+            if (statement instanceof IfStatementNode) {
+                if (((IfStatementNode) statement).hasReturn()) {
+                    return true;
+                }
+            }
+        }
+        return false;
     }
 
     public List<DeclarationNode> getDeclarations() {

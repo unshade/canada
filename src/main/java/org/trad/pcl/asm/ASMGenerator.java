@@ -20,10 +20,8 @@ public final class ASMGenerator implements ASTNodeVisitor {
     private final List<SymbolTable> symbolTables;
 
     private final Stack<SymbolTable> scopeStack;
-
-    private int currentTableIndex;
-
     private final StringBuilder output;
+    private int currentTableIndex;
 
     public ASMGenerator(List<SymbolTable> symbolTables) {
         this.symbolTables = symbolTables;
@@ -115,7 +113,10 @@ public final class ASMGenerator implements ASTNodeVisitor {
         enterScope();
         Symbol symbol = this.findSymbolInScopes(node.getIdentifier());
         this.output.append(symbol.getIdentifier()).append("\n").append("""
-                \t STMFD   R13!, {R11, LR} ; Save caller's frame pointer and return ASM address
+                \t STMFD   R13!, {R10, LR} ; Save caller's frame pointer and return ASM address
+                \t MOV     R10, R9 ; Set up new static link
+                \t SUB     R13, R13, #4
+                \t STR     R11, [R13]
                 \t MOV     R11, R13 ; Set up new frame pointer
                 """);
         Context.background().setCounter(node.getParameters().size());
@@ -137,7 +138,10 @@ public final class ASMGenerator implements ASTNodeVisitor {
         enterScope();
         Symbol symbol = this.findSymbolInScopes(node.getIdentifier());
         this.output.append(symbol.getIdentifier()).append("\n").append("""
-                \t STMFD   R13!, {R11, LR} ; Save caller's frame pointer and return ASM address
+                \t STMFD   R13!, {R10, LR} ; Save caller's frame pointer and return ASM address
+                \t MOV     R10, R9 ; Set up new static link
+                \t SUB     R13, R13, #4
+                \t STR     R11, [R13]
                 \t MOV     R11, R13 ; Set up new frame pointer
                 """);
         Context.background().setCounter(node.getParameters().size());
@@ -187,9 +191,9 @@ public final class ASMGenerator implements ASTNodeVisitor {
     @Override
     public void visit(AssignmentStatementNode node) throws Exception {
         node.getExpression().accept(this); // store result in R0
-        this.findAdressVariable(node.getVariableReference().getIdentifier()); // store in address in R10
-        this.output.append("""
-                \t STR     R0, [R10, #-%s] ; Assign right expression (assuming result is in R0) to left variable %s
+        this.findVariableAddress(node.getVariableReference().getIdentifier()); // store in address in R9
+        this.output.append("""   
+                \t STR     R0, [R9, #-%s] ; Assign right expression (assuming result is in R0) to left variable %s
                 """.formatted(findSymbolInScopes(node.getVariableReference().getIdentifier()).getShift(), node.getVariableReference().getIdentifier()));
     }
 
@@ -240,6 +244,11 @@ public final class ASMGenerator implements ASTNodeVisitor {
         });
         this.output.append("""
                 \t SUB     R13, R13, #4 ; Save space for return value
+                """);
+
+        this.findAddress(node.getIdentifier());
+
+        this.output.append("""
                 \t BL      %s ; Branch link to %s (it will save the return address in LR)
                 \t LDR     R0, [R13] ; Load return value
                 \t ADD     R13, R13, #4 * %s ; Remove arguments and return value from stack
@@ -249,30 +258,98 @@ public final class ASMGenerator implements ASTNodeVisitor {
     @Override
     public void visit(IfStatementNode node) throws Exception {
         String ifTrueLabel = "if_true_" + Context.background().getUniqueLabelId();
+        String ifFalseLabel = "if_false_" + Context.background().getUniqueLabelId();
         String ifEndLabel = "if_end_" + Context.background().getUniqueLabelId();
 
         node.getCondition().accept(this);
 
         this.output.append("""
-                \t CMP     R0, #0 ; Compare condition
-                \t BEQ     %s ; Branch if condition is false
-                """.formatted(ifEndLabel));
+                \t CMP     R0, #1 ; Compare condition
+                \t BEQ    %s ; Branch if condition is true
+                """.formatted(ifTrueLabel));
 
-        if (node.getElseBranch() != null) {
-            node.getElseBranch().accept(this);
-        }
 
-        output.append("\t B       ").append(ifEndLabel).append("\n");
+        output.append("\t B       ").append(ifFalseLabel).append("\n");
+
 
         output.append(ifTrueLabel).append("\n");
 
         node.getThenBranch().accept(this);
 
+        output.append("\t B       ").append(ifEndLabel).append("\n");
+
+        output.append(ifFalseLabel).append("\n");
+
+        for (ElseIfStatementNode elseIfNode : node.getElseIfBranches()) {
+            elseIfNode.getCondition().accept(this);
+
+            String elseIfTrueLabel = "elsif_true_" + Context.background().getUniqueLabelId();
+            String elseIfFalseLabel = "elsif_false_" + Context.background().getUniqueLabelId();
+
+            output.append("""
+                    \t CMP     R0, #1 ; Compare condition
+                    \t BEQ    %s ; Branch if condition is true
+                    \t B       %s ; Branch if condition is false
+                    """.formatted(elseIfTrueLabel, elseIfFalseLabel));
+
+            output.append(elseIfTrueLabel).append("\n");
+
+            elseIfNode.getThenBranch().accept(this);
+
+            output.append("\t B       ").append(ifEndLabel).append("\n");
+
+            output.append(elseIfFalseLabel).append("\n");
+        }
+
+        if (node.getElseBranch() != null) {
+            node.getElseBranch().accept(this);
+        }
+
         output.append(ifEndLabel).append("\n");
     }
 
     @Override
+    public void visit(ElseIfStatementNode elseIfStatementNode) throws Exception {
+
+    }
+
+
+    @Override
     public void visit(LoopStatementNode node) throws Exception {
+        String loopStartLabel = "loop_start_" + Context.background().getUniqueLabelId();
+        String loopEndLabel = "loop_end_" + Context.background().getUniqueLabelId();
+
+        node.getStartExpression().accept(this); // store result in R0
+
+        this.findVariableAddress(node.getIdentifier()); // store in address in R9
+
+        this.output.append("""   
+                \t STR     R0, [R9, #-%s] ; Assign start expression (assuming result is in R0) to loop variable %s
+                """.formatted(findSymbolInScopes(node.getIdentifier()).getShift(), node.getIdentifier()));
+
+        output.append(loopStartLabel).append("\n");
+        this.output.append("""
+                \t LDR     R1, [R9, #-%s] ; Load variable %s in R0
+                """.formatted(findSymbolInScopes(node.getIdentifier()).getShift(), node.getIdentifier()));
+        node.getEndExpression().accept(this); // store result in R0
+
+        this.output.append("""
+                \t CMP     R1, R0 ; Compare loop variable to end expression
+                \t BGT     %s ; Branch if loop variable is greater than end expression
+                """.formatted(loopEndLabel));
+
+        node.getBody().accept(this);
+
+        this.findVariableAddress(node.getIdentifier()); // store in address in R9
+        this.output.append("""
+                \t LDR     R0, [R9, #-%s] ; Load variable %s in R0
+                \t ADD     R0, R0, #1 ; Increment loop variable
+                \t STR     R0, [R9, #-%s] ; Assign incremented loop variable to loop variable %s
+                """.formatted(findSymbolInScopes(node.getIdentifier()).getShift(), node.getIdentifier(), findSymbolInScopes(node.getIdentifier()).getShift(), node.getIdentifier()));
+
+        output.append("\t B       ").append(loopStartLabel).append("\n");
+
+        output.append(loopEndLabel).append("\n");
 
     }
 
@@ -280,9 +357,11 @@ public final class ASMGenerator implements ASTNodeVisitor {
     public void visit(ReturnStatementNode node) throws Exception {
         node.getExpression().accept(this);
         this.output.append("""
-                \t STR     R0, [R11, #4 * 2] ; Store return value for in stack-frame
+                \t STR     R0, [R11, #4 * 3] ; Store return value for in stack-frame
                 \t MOV     R13, R11 ; Restore frame pointer
-                \t LDMFD   R13!, {R11, PC} ; Restore caller's frame pointer and return ASM address
+                \t LDR     R11, [R13] ; Restore caller's frame pointer
+                \t ADD     R13, R13, #4 ; Remove return value from stack
+                \t LDMFD   R13!, {R10, PC} ; Restore caller's frame pointer and return ASM address
                 """);
     }
 
@@ -323,8 +402,65 @@ public final class ASMGenerator implements ASTNodeVisitor {
         switch (node.getOperatorNode().getOperator()) {
             case ADD -> output.append("\t ADD     R0, R0, R1 ; Add operands\n");
             case SUB -> output.append("\t SUB     R0, R0, R1 ; Sub operands\n");
+            case EQUALS -> output.append("""
+                    \t CMP     R0, R1 ; Compare operands
+                    \t MOVEQ   R0, #1 ; Set R0 to 1 if operands are equal
+                    \t MOVNE   R0, #0 ; Set R0 to 0 if operands are not equal
+                    """);
+            case NOT_EQUALS -> output.append("""
+                    \t CMP     R0, R1 ; Compare operands
+                    \t MOVNE   R0, #1 ; Set R0 to 1 if operands are not equal
+                    \t MOVEQ   R0, #0 ; Set R0 to 0 if operands are equal
+                    """);
+            case OR -> output.append("""
+                    \t ORR     R0, R0, R1 ; Logical OR operands
+                    """);
+            case AND -> output.append("""
+                    \t AND     R0, R0, R1 ; Logical AND operands
+                    """);
+            case LESS_THAN -> output.append("""
+                    \t CMP     R0, R1 ; Compare operands
+                    \t MOVLT   R0, #1 ; Set R0 to 1 if R0 is less than R1
+                    \t MOVGE   R0, #0 ; Set R0 to 0 if R0 is greater than or equal to R1
+                    """);
+            case GREATER_THAN -> output.append("""
+                    \t CMP     R0, R1 ; Compare operands
+                    \t MOVGT   R0, #1 ; Set R0 to 1 if R0 is greater than R1
+                    \t MOVLE   R0, #0 ; Set R0 to 0 if R0 is less than or equal to R1
+                    """);
+            case LESS_THAN_OR_EQUAL -> output.append("""
+                    \t CMP     R0, R1 ; Compare operands
+                    \t MOVLE   R0, #1 ; Set R0 to 1 if R0 is less than or equal to R1
+                    \t MOVGT   R0, #0 ; Set R0 to 0 if R0 is greater than R1
+                    """);
+            case GREATER_THAN_OR_EQUAL -> output.append("""
+                    \t CMP     R0, R1 ; Compare operands
+                    \t MOVGE   R0, #1 ; Set R0 to 1 if R0 is greater than or equal to R1
+                    \t MOVLT   R0, #0 ; Set R0 to 0 if R0 is less than R1
+                    """);
+            case MULTIPLY -> {
+                output.append("""
+                        \t MOV     R2, R0 ; Move R0 to R2
+                        \t MOV     R0, #0 ; Clear R0
+                        """);
+                createMultiplyLoop();
+            }
+            case DIVIDE -> {
+                output.append("""
+                        \t MOV     R2, R0 ; Move R0 to R2
+                        \t MOV     R0, #0 ; Clear R0
+                        """);
+                createDivideLoop();
+            }
+            case MODULO -> {
+                output.append("""
+                        \t MOV     R2, R0 ; Move R0 to R2
+                        \t MOV     R0, #0 ; Clear R0
+                        """);
+                createRemLoop();
+            }
         }
-    } // 1+2+3 -> Left : 1 Right : Left 2 Right 3
+    }
 
     @Override
     public void visit(CharacterValExpressionNode node) throws Exception {
@@ -344,9 +480,9 @@ public final class ASMGenerator implements ASTNodeVisitor {
     @Override
     public void visit(VariableReferenceNode node) throws Exception {
 
-        this.findAdressVariable(node.getIdentifier());
+        this.findVariableAddress(node.getIdentifier());
         this.output.append("""
-                \t LDR     R0, [R10, #-%s] ; Load variable %s in R0
+                \t LDR     R0, [R9, #-%s] ; Load variable %s in R0
                 """.formatted(findSymbolInScopes(node.getIdentifier()).getShift(), node.getIdentifier()));
 
     }
@@ -356,23 +492,46 @@ public final class ASMGenerator implements ASTNodeVisitor {
      *
      * @param identifier
      */
-    public void findAdressVariable(String identifier) {
+    public void findAddress(String identifier) {
         int depth = this.findDepthInScopes(identifier);
         if (depth == 0) {
             this.output.append("""
-                    \t MOV     R10, R11
+                    \t MOV     R9, R10
                     """);
             return;
         }
 
         this.output.append("""
-                \t LDR     R10, [R11]
+                \t LDR     R9, [R11, #4]
                 """);
 
         // tkt c'est un for i < depth-1
         this.output.append("""
-                \t LDR     R10, [R10]
+                \t LDR     R9, [R9]
                 """.repeat(Math.max(0, depth - 1)));
+    }
+
+    public void findVariableAddress(String identifier) {
+        int depth = this.findDepthInScopes(identifier);
+        if (depth == 0) {
+            this.output.append("""
+                    \t MOV     R9, R11
+                    """);
+            return;
+        }
+
+        this.output.append("""
+                \t LDR     R9, [R11, #4]
+                """);
+
+        // tkt c'est un for i < depth-1
+        this.output.append("""
+                \t LDR     R9, [R9]
+                """.repeat(Math.max(0, depth - 1)));
+
+        this.output.append("""
+                 \t SUB     R9, R9, #4
+                """);
     }
 
     @Override
@@ -382,8 +541,16 @@ public final class ASMGenerator implements ASTNodeVisitor {
 
     @Override
     public void visit(UnaryExpressionNode node) throws Exception {
-        node.getOperator().accept(this);
         node.getOperand().accept(this);
+        switch (node.getOperatorNode().getOperator()) {
+            case NOT -> this.output.append("""
+                    \t EOR     R0, R0, #1 ; Logical NOT operand
+                    """);
+            case SUB -> this.output.append("""
+                    \t RSBS    R0, R0, #0 ; Negate operand
+                    """);
+        }
+
     }
 
     @Override
@@ -399,7 +566,10 @@ public final class ASMGenerator implements ASTNodeVisitor {
             Symbol symbol = this.findSymbolInScopes(node.getRootProcedure().getIdentifier());
             //Context.background().setCallerName(symbol.getIdentifier());
             this.output.append(symbol.getIdentifier()).append("\n").append("""
-                    \t STMFD   R13!, {R11, LR} ; Main environment setup
+                    \t STMFD   R13!, {R10, LR} ; Save caller's frame pointer and return ASM address
+                    \t MOV     R10, R13 ; Set up new static link
+                    \t SUB     R13, R13, #4
+                    \t STR     R11, [R13]
                     \t MOV     R11, R13 ; Set up new frame pointer
                     """);
             //this.updateContextNonCallableDeclaration();
@@ -458,12 +628,107 @@ public final class ASMGenerator implements ASTNodeVisitor {
     @Override
     public void visit(ParameterNode node) throws Exception {
         node.getType().accept(this);
-        int shift = Context.background().getCounter() + 2;
+        int shift = Context.background().getCounter() + 3;
         this.output.append("""
                 \t LDR     R5, [R11, #4 * %s] ; Load parameter %s in R5
                 \t STMFD   R13!, {R5} ; Store parameter %s in stack-frame
                 """.formatted(shift, node.getIdentifier(), node.getIdentifier()));
     }
+
+    public void createMultiplyLoop() {
+        String multiplyLoopLabel = "multiply_loop_" + Context.background().getUniqueLabelId();
+        String multiplyEndLabel = "multiply_end_" + Context.background().getUniqueLabelId();
+
+        output.append("""
+                \t MOV     R3, #0  ; Initialize R3 to 0 (to store the sign)
+                \t CMP     R1, #0  ; Check if the left operand is negative
+                \t RSBMI   R1, R1, #0  ; Take the absolute value of the left operand (N=1)
+                \t ADDMI   R3, R3, #1  ; Set R3 to 1 to indicate a negative result (N=1)
+                \t CMP     R2, #0  ; Check if the right operand is negative
+                \t RSBMI   R2, R2, #0  ; Take the absolute value of the right operand (N=1)
+                \t ADDMI   R3, R3, #1  ; Set R3 to 1 to indicate a negative result (if it's not already set) (N=1)
+                """);
+
+        output.append(multiplyLoopLabel).append("\n");
+
+        output.append("""
+                \t CMP     R2, #0 ; Compare R2 to 0
+                \t BEQ     %s ; Branch if R2 is 0
+                \t ADD     R0, R0, R1 ; Add R0 to R1
+                \t SUB     R2, R2, #1 ; Decrement R2
+                \t B       %s ; Branch to loop start
+                """.formatted(multiplyEndLabel, multiplyLoopLabel));
+
+        output.append(multiplyEndLabel).append("\n");
+
+        output.append("""
+                        \t CMP     R3, #1 ; Check if the result should be negative
+                        \t RSBEQ   R0, R0, #0 ; Negate the result if the condition is met
+                """);
+    }
+
+    public void createDivideLoop() {
+        String divideLoopLabel = "divide_loop_" + Context.background().getUniqueLabelId();
+        String divideEndLabel = "divide_end_" + Context.background().getUniqueLabelId();
+
+        output.append("""
+                \t MOV     R3, #0  ; Initialize R3 to 0 (to store the sign)
+                \t CMP     R2, #0  ; Check if the left operand is negative
+                \t RSBMI   R2, R2, #0  ; Take the absolute value of the left operand (N=1)
+                \t ADDMI   R3, R3, #1  ; Set R3 to 1 to indicate a negative result (N=1)
+                \t CMP     R1, #0  ; Check if the right operand is negative
+                \t RSBMI   R1, R1, #0  ; Take the absolute value of the right operand (N=1)
+                \t ADDMI   R3, R3, #1  ; Set R3 to 1 to indicate a negative result (if it's not already set) (N=1)
+                """);
+
+        output.append(divideLoopLabel).append("\n");
+
+        output.append("""
+                \t CMP     R2, R1 ; Compare R1 to R2
+                \t BLT     %s ; Branch if R1 < R2
+                \t SUB     R2, R2, R1 ; Subtract R2 from R1
+                \t ADD     R0, R0, #1 ; Increment the result
+                \t B       %s ; Branch to loop start
+                """.formatted(divideEndLabel, divideLoopLabel));
+
+        output.append(divideEndLabel).append("\n");
+
+        output.append("""
+                \t CMP     R3, #1 ; Check if the result should be negative
+                \t RSBEQ   R0, R0, #0 ; Negate the result if the condition is met
+                """);
+    }
+
+    public void createRemLoop() {
+        String remLoopLabel = "rem_loop_" + Context.background().getUniqueLabelId();
+        String remEndLabel = "rem_end_" + Context.background().getUniqueLabelId();
+
+        output.append("""
+                \t CMP     R2, #0  ; Check if the left operand is negative
+                \t RSBMI   R2, R2, #0  ; Take the absolute value of the left operand (N=1)
+                \t MOVMI   R0, #1  ; Set R0 to 1 to indicate a negative result (N=1)
+                \t CMP     R1, #0  ; Check if the right operand is negative
+                \t RSBMI   R1, R1, #0  ; Take the absolute value of the right operand (N=1)
+                """);
+
+        output.append(remLoopLabel).append("\n");
+
+        output.append("""
+                \t CMP     R2, R1 ; Compare R1 to R2
+                \t BLT     %s ; Branch if R1 < R2
+                \t SUB     R2, R2, R1 ; Subtract R2 from R1
+                \t B       %s ; Branch to loop start
+                """.formatted(remEndLabel, remLoopLabel));
+
+        output.append(remEndLabel).append("\n");
+
+        output.append("""
+                \t CMP     R0, #1 ; Check if the result should be negative
+                \t RSBEQ   R0, R2, #0 ; Negate the result if the condition is met
+                \t MOVNE   R0, R2 ; Move the remainder to R0
+                """);
+    }
+
 
     public void enterScope() {
         scopeStack.push(symbolTables.get(currentTableIndex));

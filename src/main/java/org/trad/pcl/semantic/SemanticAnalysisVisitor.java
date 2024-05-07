@@ -1,7 +1,6 @@
 package org.trad.pcl.semantic;
 
 import org.trad.pcl.Exceptions.Semantic.*;
-import org.trad.pcl.Helpers.StringFormatHelper;
 import org.trad.pcl.Helpers.TypeEnum;
 import org.trad.pcl.Services.ErrorService;
 import org.trad.pcl.ast.ParameterNode;
@@ -32,9 +31,12 @@ public class SemanticAnalysisVisitor implements ASTNodeVisitor {
         integer.setSize(4);
         Type character = new Type(TypeEnum.CHAR.toString(), 0);
         character.setSize(4);
+        Type bool = new Type(TypeEnum.BOOL.toString(), 0);
+        bool.setSize(4);
 
         scopeStack.peek().addSymbol(integer);
         scopeStack.peek().addSymbol(character);
+        scopeStack.peek().addSymbol(bool);
     }
 
     public void addPredefinedFunctions() {
@@ -200,8 +202,11 @@ public class SemanticAnalysisVisitor implements ASTNodeVisitor {
 
             node.getThenBranch().accept(this);
 
-            if (node.getElseIfBranch() != null) {
-                node.getElseIfBranch().accept(this);
+            if (!node.getElseIfBranches().isEmpty()) {
+                for (ElseIfStatementNode elseIfStatementNode : node.getElseIfBranches()) {
+                    elseIfStatementNode.accept(this);
+                }
+
             }
 
             if (node.getElseBranch() != null) {
@@ -211,10 +216,24 @@ public class SemanticAnalysisVisitor implements ASTNodeVisitor {
             node.checkConditionType();
     }
 
+    public void visit(ElseIfStatementNode node) throws Exception {
+        node.getCondition().accept(this);
+        node.getThenBranch().accept(this);
+        node.checkConditionType();
+    }
+
     @Override
     public void visit(LoopStatementNode node) throws Exception {
             node.getStartExpression().accept(this);
             node.getEndExpression().accept(this);
+            if (!node.getStartExpression().getType().equals(TypeEnum.INT.toString()) || !node.getEndExpression().getType().equals(TypeEnum.INT.toString())) {
+                if (!node.getStartExpression().getType().equals(TypeEnum.INT.toString())) {
+                    throw new TypeMismatchException(TypeEnum.INT.toString(), node.getStartExpression().getType(), node.getConcernedLine());
+                }
+                if (!node.getEndExpression().getType().equals(TypeEnum.INT.toString())) {
+                    throw new TypeMismatchException(TypeEnum.INT.toString(), node.getEndExpression().getType(), node.getConcernedLine());
+                }
+            }
             node.getBody().accept(this);
     }
 
@@ -245,6 +264,9 @@ public class SemanticAnalysisVisitor implements ASTNodeVisitor {
     @Override
     public void visit(WhileStatementNode node) throws Exception {
         node.getCondition().accept(this);
+        if (!node.getCondition().getType().equals(TypeEnum.BOOL.toString())) {
+            throw new TypeMismatchException(TypeEnum.BOOL.toString(), node.getCondition().getType(), node.getConcernedLine());
+        }
         node.getBody().accept(this);
     }
 
@@ -261,8 +283,9 @@ public class SemanticAnalysisVisitor implements ASTNodeVisitor {
         // Check if the expression is valid
         node.getExpression().accept(this);
         // Check if the expression is an integer
-        if (!node.getExpression().getType().equals(TypeEnum.CHAR.toString())) {
-            throw new TypeMismatchException(TypeEnum.CHAR.toString(), node.getExpression().getType(), node.getConcernedLine());
+        System.out.println(node.getExpression().getType());
+        if (!node.getExpression().getType().equals(TypeEnum.INT.toString())) {
+            throw new TypeMismatchException(TypeEnum.INT.toString(), node.getExpression().getType(), node.getConcernedLine());
         }
     }
 

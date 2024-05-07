@@ -2,5 +2,5 @@ with Ada.Text_IO; use Ada.Text_IO;
 procedure ExampleProcedure is
    X : boolean := 'a';
 begin
-    X;
+    put('E');
 end ExampleProcedure;

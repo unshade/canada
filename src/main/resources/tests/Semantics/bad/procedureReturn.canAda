@@ -1,10 +1,10 @@
 with Ada.Text_IO; use Ada.Text_IO;
-procedure Procedure is
+procedure ExampleProcedure is
    X : integer := 0;
    procedure AnotherProcedure is
    begin
        return X;
    end AnotherProcedure;
 begin
-    X;
-end Procedure;
+    put('e');
+end ExampleProcedure;

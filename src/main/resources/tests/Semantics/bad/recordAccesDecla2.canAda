@@ -6,5 +6,5 @@ procedure UseRecord is
       Field1 : integer;
    end record;
 begin
-    put(Var1);
+    put('e');
 end UseRecord;
