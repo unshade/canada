@@ -597,6 +597,84 @@ public final class ASMGenerator implements ASTNodeVisitor {
                                         
                     """);
 
+            this.output.append("""
+                    to_ascii      STMFD   SP!, {LR, R4-R7}
+                                  ; make it positive
+                                  MOV R7, R0
+                                  CMP     R0, #0	
+                                  MOVGE   R6, R0	
+                                  RSBLT   R6, R0, #0
+                                  MOV     R0, R6
+                                        
+                                  MOV     R4, #0 ; Initialize digit counter
+                                        
+                    to_ascii_loop MOV     R1, R0
+                                  MOV     R2, #10
+                                  BL      div32 ; R0 = R0 / 10, R1 = R0 % 10
+                                  ADD     R1, R1, #48 ; Convert digit to ASCII
+                                  STRB    R1, [R3, R4] ; Store the ASCII digit
+                                  ADD     R4, R4, #1 ; Increment digit counter
+                                  CMP     R0, #0
+                                  BNE     to_ascii_loop
+                                        
+                                  ; add the sign if it was negative
+                                  CMP     R7, #0
+                                  MOVGE   R1, #0	
+                                  MOVLT   R1, #45
+                                  STRB    R1, [R3, R4]
+                                  ADD     R4, R4, #1
+                                        
+                                  LDMFD   SP!, {PC, R4-R7}
+                                        
+                    """);
+
+            this.output.append("""
+                    ;       Integer division routine
+                    ;       Arguments:
+                    ;       R1 = Dividend
+                    ;       R2 = Divisor
+                    ;       Returns:
+                    ;       R0 = Quotient
+                    ;       R1 = Remainder
+                    div32
+                    \t STMFD   SP!, {LR, R2-R5}
+                    \t MOV     R0, #0
+                    \t MOV     R3, #0
+                    \t CMP     R1, #0
+                    \t RSBLT   R1, R1, #0
+                    \t EORLT   R3, R3, #1
+                    \t CMP     R2, #0
+                    \t RSBLT   R2, R2, #0
+                    \t EORLT   R3, R3, #1
+                    \t MOV     R4, R2
+                    \t MOV     R5, #1
+                    div_max
+                    \t LSL     R4, R4, #1
+                    \t LSL     R5, R5, #1
+                    \t CMP     R4, R1
+                    \t BLE     div_max
+                    div_loop
+                    \t LSR     R4, R4, #1
+                    \t LSR     R5, R5, #1
+                    \t CMP     R4,R1
+                    \t BGT     div_loop
+                    \t ADD     R0, R0, R5
+                    \t SUB     R1, R1, R4
+                    \t CMP     R1, R2
+                    \t BGE     div_loop
+                    \t CMP     R3, #1
+                    \t BNE     div_exit
+                    \t CMP     R1, #0
+                    \t ADDNE   R0, R0, #1
+                    \t RSB     R0, R0, #0
+                    \t RSB     R1, R1, #0
+                    \t ADDNE   R1, R1, R2
+                    div_exit
+                    \t CMP     R0, #0
+                    \t ADDEQ   R1, R1, R4
+                    \t LDMFD   SP!, {PC, R2-R5}
+                   """);
+
             Symbol symbol = this.findSymbolInScopes(node.getRootProcedure().getIdentifier());
             //Context.background().setCallerName(symbol.getIdentifier());
             this.output.append(symbol.getIdentifier()).append("\n").append("""
