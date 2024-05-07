@@ -749,12 +749,6 @@
     \end{lstlisting}
 
     On peut voir la façon dont on descend dans l'arbre (\texttt{node.getExpression().accept(this)}) et comment on génère le code correspondant à ce noeud. Bien que simple, ce code est représentatif de la manière dont nous générons le code pour chaque noeud de l'AST.
-    
-
-
-    \subsection{Quelques schémas de traduction}
-
-
 
     \section{Tests et Validation}\label{sec:tests-et-validation}
 
@@ -763,14 +757,14 @@
     Voici un code source valide en canAda qui permet de tester notre compilateur :
 
     \begin{lstlisting}[label={lst:lstlisting16}]
-        with Ada.Text_IO; useAda.Text_IO;
-        procedure Main is
-            A : Integer := 5;
-            B : Integer := 10;
-            Sum : Integer;
-        begin
-            Sum := A + B;
-        end Main;
+with Ada.Text_IO; useAda.Text_IO;
+procedure Main is
+    A : Integer := 5;
+    B : Integer := 10;
+    Sum : Integer;
+begin
+    Sum := A + B;
+end Main;
     \end{lstlisting}
 
     On obtient alors après l'analyse lexicale et syntaxique la sortie suivante, on l'a découpée en 3 parties pour plus de lisibilité et laissée sur fond noir pour faciliter la lisibilité des couleurs :
@@ -800,6 +794,94 @@
         \includegraphics[width=1\textwidth]{arbre_draw}
         \caption{Arbre abstrait}\label{fig:figure6}
     \end{figure}
+
+    La partie de génération des TDS et des contrôles sémantiques démarre à présent. Afin de montrer quelque chose de plus parlant que le programme ci-dessus, on prend a présent ce programme : 
+
+    \begin{lstlisting}[label={lst:lstlisting16}]
+with Ada.Text_IO; use Ada.Text_IO;
+procedure unDebut is
+
+function perimetreRectangle(larg : integer; long : integer) return integer is
+p : integer;
+begin
+    p := 1+2+3 ;
+return p ;
+end perimetreRectangle;
+
+    -- VARIABLES
+choix : integer ;
+    -- PROCEDURE PRINCIPALE
+begin
+choix := perimetreRectangle(5, 10);
+end unDebut ;
+    \end{lstlisting}
+
+    On obtient ces différentes tables :
+
+    \begin{lstlisting}
+Entering new scope -> creating new SymbolTable for root  : 
+    character -> Type { identifier = 'character', size = 4, shift = 0 }
+    integer -> Type { identifier = 'integer', size = 4, shift = 0 }
+    unDebut -> Procedure { identifier = 'unDebut', indexedParametersTypes = '[]', shift = 0 }
+    put -> Procedure { identifier = 'put', indexedParametersTypes = '[character]', shift = 0 }
+
+
+Entering new scope -> creating new SymbolTable for unDebut  : 
+    perimetreRectangle -> Function { identifier = 'perimetreRectangle', indexedParametersTypes = '[integer, integer]', returnType = 'integer', shift = 0 }
+    choix -> Variable { identifier = 'choix', type = 'integer', shift = 4 }
+
+
+Entering new scope -> creating new SymbolTable for perimetreRectangle  : 
+    larg -> Parameter { identifier = 'larg', type = 'integer', mode = IN, shift = 4 }
+    long -> Parameter { identifier = 'long', type = 'integer', mode = IN, shift = 8 }
+    p -> Variable { identifier = 'p', type = 'integer', shift = 12 }
+    \end{lstlisting}
+
+    Les contrôles sémantiques sont passés avec succès, et le code généré est le suivant :
+
+    \begin{lstlisting}
+unDebut
+	 STMFD   R13!, {R11, LR} ; Main environment setup
+	 MOV     R11, R13 ; Set up new frame pointer
+	 SUB     R13, R13, #4 ; Save space for choix in stack-frame
+	 MOV     R0, #5 ; Load literal value in R0
+	 STMFD   R13!, {R0} ; Save argument
+	 MOV     R0, #10 ; Load literal value in R0
+	 STMFD   R13!, {R0} ; Save argument
+	 SUB     R13, R13, #4 ; Save space for return value
+	 BL      perimetreRectangle ; Branch link to perimetreRectangle (it will save the return address in LR)
+	 LDR     R0, [R13] ; Load return value
+	 ADD     R13, R13, #4 * 3 ; Remove arguments and return value from stack
+	 MOV     R10, R11
+	 STR     R0, [R10, #-4] ; Assign right expression (assuming result is in R0) to left variable choix
+	 END     ; Program ends here
+perimetreRectangle
+	 STMFD   R13!, {R11, LR} ; Save callers frame pointer and return ASM address
+	 MOV     R11, R13 ; Set up new frame pointer
+	 LDR     R5, [R11, #4 * 4] ; Load parameter larg in R5
+	 STMFD   R13!, {R5} ; Store parameter larg in stack-frame
+	 LDR     R5, [R11, #4 * 3] ; Load parameter long in R5
+	 STMFD   R13!, {R5} ; Store parameter long in stack-frame
+	 SUB     R13, R13, #4 ; Save space for p in stack-frame
+	 MOV     R0, #3 ; Load literal value in R0
+	 STMFD   R13!, {R0} ; Store the right operand in the stack
+	 MOV     R0, #2 ; Load literal value in R0
+	 LDMFD   R13!, {R1} ; Load the right operand in R1
+	 ADD     R0, R0, R1 ; Add operands
+	 STMFD   R13!, {R0} ; Store the right operand in the stack
+	 MOV     R0, #1 ; Load literal value in R0
+	 LDMFD   R13!, {R1} ; Load the right operand in R1
+	 ADD     R0, R0, R1 ; Add operands
+	 MOV     R10, R11
+	 STR     R0, [R10, #-12] ; Assign right expression (assuming result is in R0) to left variable p
+	 MOV     R10, R11
+	 LDR     R0, [R10, #-12] ; Load variable p in R0
+	 STR     R0, [R11, #4 * 2] ; Store return value for in stack-frame
+	 MOV     R13, R11 ; Restore frame pointer
+	 LDMFD   R13!, {R11, PC} ; Restore callers frame pointer and return ASM address
+    \end{lstlisting}
+
+    La phase de génération de code ajoute également des commentaires automatiques pour faciliter la compréhension du code généré. \\
 
     \subsection{Pour un code source invalide}\label{subsec:pour-un-code-source-invalide}
 
@@ -844,10 +926,10 @@
 
     On peut ainsi voir que notre compilateur est capable de gérer les erreurs syntaxiques et de les afficher de manière claire et précise.
     Ainsi que de nous aider à le corriger notamment à travers les warnings et le \textit{Panic Mode} qui permet de continuer à analyser le programme source jusqu'à la fin tout en indiquant les erreurs rencontrées.
+    
 
     Ce qui conclue la partie sur les tests et la validation de notre compilateur.
-    Bien évidemment, de nombreux autres tests ont été réalisés pour valider notre compilateur notamment des tests unitaires pour tester le \textit{Lexer} et le \textit{Parser} ainsi que la construction l'arbre asbtrait.
-
+    Bien évidemment, de nombreux autres tests ont été réalisés pour valider notre compilateur.
     \section{Gestion de projet}\label{sec:gestion-de-projet}
 
     \subsection{Équipe de projet}\label{subsec:equipe-de-projet}
@@ -892,7 +974,7 @@
         Implémentation des règles & 3h & 3h & 3h \\
         Structure de l'arbre abstrait & - & 2h & - \\
         Implémentation des différents nodes & - & 6h & 6h \\
-        Rédaction du rapport & 4h & - & - \\
+        Rédaction du rapport PCL1 & 4h & - & - \\
         \midrule
         Total & 24h & 24h & 22h \\ \bottomrule
     \end{tabular}
