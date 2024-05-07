@@ -6,6 +6,7 @@ import org.trad.pcl.Services.ErrorService;
 import org.trad.pcl.semantic.symbol.Function;
 import org.trad.pcl.semantic.symbol.Procedure;
 import org.trad.pcl.semantic.symbol.Symbol;
+import org.trad.pcl.semantic.symbol.Type;
 
 import java.util.*;
 
@@ -30,13 +31,15 @@ public class SymbolTable {
     public SymbolTable(String scopeIdentifier) {
         this.symbols = new HashMap<>();
         this.errorService = ErrorService.getInstance();
-        this.currentShift = 0;
+        this.currentShift = 4;
         this.scopeIdentifier = scopeIdentifier;
     }
 
     public void addSymbol(Symbol symbol) {
-        if (!(symbol instanceof Procedure)) {
-            symbol.setShift(currentShift+=symbol.getShift());
+        if (!(symbol instanceof Procedure) && !(symbol instanceof Type)) {
+            int temp = symbol.getShift();
+            symbol.setShift(currentShift);
+            currentShift += temp;
         }
         symbols.put(symbol.getIdentifier(), symbol);
     }
