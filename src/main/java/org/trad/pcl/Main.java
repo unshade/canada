@@ -84,6 +84,7 @@ public final class Main {
                     System.out.println(output);
 
                     Files.write(Paths.get("out.s"), output.getBytes());
+                    Files.newOutputStream(Paths.get("out.s")).close();
                 } else {
                     AnsiFormat fWarning2 = new AnsiFormat(Attribute.WHITE_TEXT(), Attribute.RED_BACK(), Attribute.BOLD());
                     System.out.println("\n❌ " + colorize("SEMANTIC ANALYSIS PHASE FAILED", fWarning2));
