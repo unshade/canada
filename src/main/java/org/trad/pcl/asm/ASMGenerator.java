@@ -9,7 +9,10 @@ import org.trad.pcl.ast.statement.*;
 import org.trad.pcl.ast.type.TypeNode;
 import org.trad.pcl.semantic.ASTNodeVisitor;
 import org.trad.pcl.semantic.SymbolTable;
+import org.trad.pcl.semantic.symbol.Record;
 import org.trad.pcl.semantic.symbol.Symbol;
+import org.trad.pcl.semantic.symbol.Type;
+import org.trad.pcl.semantic.symbol.Variable;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -72,7 +75,7 @@ public final class ASMGenerator implements ASTNodeVisitor {
         return -1;
     }
 
-    public Integer findSymbolInScopes(String FunctionOrProcedureName, String identifier) {
+    /*public Integer findSymbolInScopes(String FunctionOrProcedureName, String identifier) {
         SymbolTable symbolTableFunction = this.findSymbolTable(FunctionOrProcedureName);
         return findSymbolInScopesRecursive(symbolTableFunction, identifier, 0);
     }
@@ -88,16 +91,16 @@ public final class ASMGenerator implements ASTNodeVisitor {
         } else {
             return shift - symbol.getShift();
         }
-    }
+    }*/
 
-    private SymbolTable findSymbolTable(String functionOrProcedureName) {
+    /*private SymbolTable findSymbolTable(String functionOrProcedureName) {
         for (SymbolTable symbolTable : this.symbolTables) {
             if (symbolTable.getScopeIdentifier().equals(functionOrProcedureName)) {
                 return symbolTable;
             }
         }
         return null;
-    }
+    }*/
 
     private SymbolTable findTableSymbol(String SymbolIdentifier) {
         for (SymbolTable symbolTable : this.symbolTables) {
@@ -178,11 +181,13 @@ public final class ASMGenerator implements ASTNodeVisitor {
                 newOutput.append(formattedCode).append("\n");
             }
         }*/
-        String formattedCode = String.format("\t SUB     R13, R13, #4 ; Save space for %s in stack-frame", node.getIdentifier());
+        String type = node.getType().getIdentifier();
+        Type typeSymbol = (Type) this.findSymbolInScopes(type);
+        assert typeSymbol != null;
+        String formattedCode = String.format("\t SUB     R13, R13, #%s ; Save space for %s in stack-frame", typeSymbol.getSize(), node.getIdentifier());
         this.output.append(formattedCode).append("\n");
 
         //TODO : assignement
-
 
         //this.output = newOutput;
     }
@@ -191,10 +196,10 @@ public final class ASMGenerator implements ASTNodeVisitor {
     @Override
     public void visit(AssignmentStatementNode node) throws Exception {
         node.getExpression().accept(this); // store result in R0
-        this.findVariableAddress(node.getVariableReference().getIdentifier()); // store in address in R9
-        this.output.append("""   
-                \t STR     R0, [R9, #-%s] ; Assign right expression (assuming result is in R0) to left variable %s
-                """.formatted(findSymbolInScopes(node.getVariableReference().getIdentifier()).getShift(), node.getVariableReference().getIdentifier()));
+        this.findVariableAddress(node.getVariableReference().getIdentifier(),node.getVariableReference().getNextExpression()); // store in address in R9
+        this.output.append("""
+                \t STR     R0, [R9] ; Assign right expression (assuming result is in R0) to left variable %s
+                """.formatted(node.getVariableReference().getIdentifier()));
     }
 
     @Override
@@ -321,16 +326,16 @@ public final class ASMGenerator implements ASTNodeVisitor {
 
         node.getStartExpression().accept(this); // store result in R0
 
-        this.findVariableAddress(node.getIdentifier()); // store in address in R9
+        this.findVariableAddress(node.getIdentifier(),null); // store in address in R9
 
         this.output.append("""   
-                \t STR     R0, [R9, #-%s] ; Assign start expression (assuming result is in R0) to loop variable %s
-                """.formatted(findSymbolInScopes(node.getIdentifier()).getShift(), node.getIdentifier()));
+                \t STR     R0, [R9] ; Assign start expression (assuming result is in R0) to loop variable %s
+                """.formatted(node.getIdentifier()));
 
         output.append(loopStartLabel).append("\n");
         this.output.append("""
-                \t LDR     R1, [R9, #-%s] ; Load variable %s in R0
-                """.formatted(findSymbolInScopes(node.getIdentifier()).getShift(), node.getIdentifier()));
+                \t LDR     R1, [R9] ; Load variable %s in R0
+                """.formatted(node.getIdentifier()));
         node.getEndExpression().accept(this); // store result in R0
 
         this.output.append("""
@@ -340,7 +345,7 @@ public final class ASMGenerator implements ASTNodeVisitor {
 
         node.getBody().accept(this);
 
-        this.findVariableAddress(node.getIdentifier()); // store in address in R9
+        this.findVariableAddress(node.getIdentifier(),null); // store in address in R9
         this.output.append("""
                 \t LDR     R0, [R9, #-%s] ; Load variable %s in R0
                 \t ADD     R0, R0, #1 ; Increment loop variable
@@ -480,10 +485,10 @@ public final class ASMGenerator implements ASTNodeVisitor {
     @Override
     public void visit(VariableReferenceNode node) throws Exception {
 
-        this.findVariableAddress(node.getIdentifier());
+        this.findVariableAddress(node.getIdentifier(),node.getNextExpression());
         this.output.append("""
-                \t LDR     R0, [R9, #-%s] ; Load variable %s in R0
-                """.formatted(findSymbolInScopes(node.getIdentifier()).getShift(), node.getIdentifier()));
+                \t LDR     R0, [R9] ; Load variable %s in R0
+                """.formatted(node.getIdentifier()));
 
     }
 
@@ -511,27 +516,49 @@ public final class ASMGenerator implements ASTNodeVisitor {
                 """.repeat(Math.max(0, depth - 1)));
     }
 
-    public void findVariableAddress(String identifier) {
+    public void findVariableAddress(String identifier, VariableReferenceNode nextExpression) {
+
         int depth = this.findDepthInScopes(identifier);
+        // go to the variable address
         if (depth == 0) {
             this.output.append("""
                     \t MOV     R9, R11
                     """);
-            return;
+
+        } else {
+
+            this.output.append("""
+                    \t LDR     R9, [R11, #4]
+                    """);
+
+            // tkt c'est un for i < depth-1
+            this.output.append("""
+                    \t LDR     R9, [R9]
+                    """.repeat(Math.max(0, depth - 1)));
+
+            this.output.append("""
+                     \t SUB     R9, R9, #4
+                    """);
         }
+        Variable variable = (Variable) this.findSymbolInScopes(identifier);
+        if (nextExpression != null) {
+            Record record = (Record) this.findSymbolInScopes(variable.getType());
+            Variable field = record.getField(nextExpression.getIdentifier());
+            nextExpression = nextExpression.getNextExpression();
+            while (nextExpression != null) {
+                record = (Record) this.findSymbolInScopes(nextExpression.getIdentifier());
+                field = record.getField(nextExpression.getNextExpression().getIdentifier());
+                nextExpression = nextExpression.getNextExpression();
 
-        this.output.append("""
-                \t LDR     R9, [R11, #4]
-                """);
-
-        // tkt c'est un for i < depth-1
-        this.output.append("""
-                \t LDR     R9, [R9]
-                """.repeat(Math.max(0, depth - 1)));
-
-        this.output.append("""
-                 \t SUB     R9, R9, #4
-                """);
+            }
+            this.output.append("""
+                    \t SUB     R9, R9, #%s
+                    """.formatted(field.getShift() + variable.getShift()));
+        } else {
+            this.output.append("""
+                    \t SUB     R9, R9, #%s
+                    """.formatted(variable.getShift()));
+        }
     }
 
     @Override
