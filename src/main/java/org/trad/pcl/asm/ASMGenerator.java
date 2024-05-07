@@ -137,6 +137,7 @@ public final class ASMGenerator implements ASTNodeVisitor {
     public void visit(ProcedureDeclarationNode node) throws Exception {
         enterScope();
         Symbol symbol = this.findSymbolInScopes(node.getIdentifier());
+
         this.output.append(symbol.getIdentifier()).append("\n").append("""
                 \t STMFD   R13!, {R10, LR} ; Save caller's frame pointer and return ASM address
                 \t MOV     R10, R9 ; Set up new static link
@@ -231,6 +232,38 @@ public final class ASMGenerator implements ASTNodeVisitor {
     @Override
     public void visit(CallNode node) throws Exception {
         Symbol symbol = this.findSymbolInScopes(node.getIdentifier());
+
+        if (symbol.getIdentifier().equals("put")) {
+            node.getArguments().forEach(arg -> {
+                try {
+                    arg.accept(this);
+                    if (Context.background().getPutChar()) {
+                        this.output.append("""
+                                addr0 FILL 12              ; on réserve 12 octets pour la valeur
+                                \t LDR R3, =addr0       ; on charge l'adresse de la valeur
+                                \t BL to_ascii          ; on convertit l'entier en chaîne de caractères
+                                \t LDR R0, =addr0       ; on charge l'adresse de la chaîne de caractères
+                                \t BL println           ; on affiche la chaîne de caractères
+                                """);
+                    } else {
+                        this.output.append("""
+                                \t SUB SP, SP, #4   ; réservez 4 octets pour le 0
+                                \t MOV R1, #0
+                                \t STR R1, [SP]
+                                \t SUB SP, SP, #4   ; réservez 4 octets pour la valeur (ou plus)
+                                \t STR R0, [SP]     ; stockez la valeur
+                                \t MOV R0, SP       ; adresse de la valeur (ici SP, mais peut être n'importe quelle adresse)
+                                \t BL println
+                                \t ADD SP, SP, #8   ; libérez la pile
+                                """);
+                    }
+                } catch (Exception ex) {
+                    throw new RuntimeException(ex);
+                }
+            });
+            return;
+        }
+
         node.getArguments().forEach(arg -> {
             try {
                 arg.accept(this);
@@ -464,7 +497,7 @@ public final class ASMGenerator implements ASTNodeVisitor {
 
     @Override
     public void visit(CharacterValExpressionNode node) throws Exception {
-
+        Context.background().setPutChar(true);
     }
 
     @Override
