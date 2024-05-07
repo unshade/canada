@@ -45,3 +45,5 @@ bin/
 ### Other ###
 out.json
 /python/venv/
+/out.s
+/out.s_log.xml
