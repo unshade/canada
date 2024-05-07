@@ -688,13 +688,67 @@
     Après l'analyse syntaxique, le programme source est transformé en un AST, qui est ensuite utilisé pour les étapes de vérification sémantique, d'optimisation, et de génération de code.
     Cette représentation permet une manipulation plus aisée et plus efficace du programme source.
 
-    \section{Symbol Tables et Controles sémantiques}
+    \section{Symbol Tables}
+
+    Les Symbol Tables sont des structures de données qui stockent des informations sur les identificateurs du programme, comme les variables, les fonctions, et les procédures. \\
+
+    Elles suivent toutes un schéma assez simple, a chaque bloc de code (une fonction, une procédure, une boucle for) on crée une nouvelle table des symboles, et on l'empile sur une pile de tables des symboles. Nous utilisons une pile afin de pouvoir par la suite réaliser les contrôles sémantiques au niveau des déclarations (prise en compte des scopes supérieurs).  \\
+
+
+    Au niveau de la structure de donnée, il s'agit d'une simple Table de Hashage, avec comme clé le nom de l'identificateur et comme valeur un objet de type \textit{Symbol} qui contient des informations sur l'identificateur. \\
+
+    Voici un exemple de Symbol Table pour une fonction \textit{perimetreRectangle} ayant deux paramètres \textit{larg} et \textit{long} et une variable locale \textit{p} :
+    \begin{lstlisting}[label={lst:lstlisting16}]
+    Entering new scope -> creating new SymbolTable for perimetreRectangle  : 
+        larg -> Parameter { identifier = 'larg', type = 'integer', mode = IN, shift = 4 }
+        long -> Parameter { identifier = 'long', type = 'integer', mode = IN, shift = 8 }
+        p -> Variable { identifier = 'p', type = 'integer', shift = 12 }
+    \end{lstlisting}
+
+    On peut aisément identifier la clé de la table (le nom de l'identificateur) et la valeur associée de type \textit{Parameter} ou \textit{Variable} qui contient des informations sur l'identificateur tel que le décalage dans la pile, le type, le mode, etc. \\
+
+    \section{Contrôles sémantiques}
+
+    Afin de garantir la cohérence du programme, nous avons implémenté plusieurs contrôles sémantiques. Ces contrôles sont effectués après la construction de l'AST et la création des Symbol Tables. \\
+
+    Nous parcourons l'arbre de haut en bas (Pattern Visitor) en vérifiant les contraintes sémantiques du langage. \\
+
+    Voici une liste des contrôles sémantiques que nous avons implémentés :
+    \begin{itemize}
+        \item \textbf{Déclaration de variables} : Vérification de la déclaration des variables, si elles sont bien déclarées avant d'être utilisées.
+        \item \textbf{Déclaration de fonctions et procédures} : Vérification de la déclaration des fonctions et procédures, si elles sont bien déclarées avant d'être utilisées.
+        \item \textbf{Déclaration de types} : Vérification de la déclaration des types (Access, Record, Type)
+        \item \textbf{Duplication de symbole} : Vérification de la duplication des symboles, si les symboles sont uniques dans le même scope.
+        \item \textbf{Type des expressions} : Vérification du type des expressions, si les types des opérandes sont compatibles avec l'opérateur.
+        \item \textbf{Type des variables} : Vérification du type des variables, si les types des variables sont compatibles avec les opérations effectuées.
+        \item \textbf{Type des paramètres} : Vérification du type des paramètres, si les types des paramètres sont compatibles avec les types des arguments.
+        \item \textbf{Type de retour} : Vérification du type de retour des fonctions, si le type de retour est compatible avec le type de la fonction.
+        \item \textbf{Nombre de paramètres pour fonctions et procédures} : Vérification du nombre de paramètres pour les fonctions et procédures, si le nombre de paramètres est correct.
+        \item \textbf{Vérification des paramètres IN et INOUT} : Vérification des paramètres IN et INOUT.
+    \end{itemize}
+
 
     \section{Génération de Code}
     Une fois l'AST, les Symbol Tables et les contrôles sémantiques complétés, la phase de génération de code peut commencer. Nous utilisons l'AST ainsi que les informations contenues dans les noeuds et dans les Symbol Tables pour générer le code final en ASM UAL ARM 32 bits.
 
     \subsection{Parcours de l'AST}
     Pour générer le code, nous parcourons l'AST dans la classe \textit{ASMGenerator}. Nous partons du root node et nous descendons au fur et à mesure dans l'arbre grâce à un pattern de Double Dispatch : Visitor. Pour chaque type de noeud, nous générons le code correspondant. Chaque noeud est responsable uniquement de la génération de son propre code. Nous utilisons également une petite classe \textit{Context}, celle-ci nous permet de stocker des informations sur le contexte actuel de génération de code, comme le nom de la fonction actuelle, le nombre de variables locales, etc. Bien qu'assez petite, \textit{Context} est importante au niveau des opérations, en effet c'est elle qui nous permet de savoir dans quel registre enregistrer le résultat d'une opération (par exemple, une addition $3+9+1$ : 1 va dans R0, 9 dans R1, leur résultat va dans R0, 3 est stocké dans R1 puis R0 et R1 sont ADD dans R0). \\
+
+    \subsection{Exemple}
+    Afin d'illustrer sur un exemple, voici le code pour le noeud gérant les retours de fonctions :
+    \begin{lstlisting}[label={lst:lstlisting18}]
+        @Override
+        public void visit(ReturnStatementNode node) throws Exception {
+            node.getExpression().accept(this);
+            this.output.append("""
+                    \t STR     R0, [R11, #4 * 2] ; Store return value for in stack-frame
+                    \t MOV     R13, R11 ; Restore frame pointer
+                    \t LDMFD   R13!, {R11, PC} ; Restore caller's frame pointer and return ASM address
+                    """);
+        }
+    \end{lstlisting}
+
+    On peut voir la façon dont on descend dans l'arbre (\texttt{node.getExpression().accept(this)}) et comment on génère le code correspondant à ce noeud. Bien que simple, ce code est représentatif de la manière dont nous générons le code pour chaque noeud de l'AST.
     
 
 
