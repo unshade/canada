@@ -18,6 +18,7 @@ import org.trad.pcl.semantic.SymbolTable;
 import java.io.*;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.nio.file.StandardOpenOption;
 import java.util.List;
 import java.util.Objects;
 
@@ -84,10 +85,7 @@ public final class Main {
                     System.out.println(output);
 
                     Files.write(Paths.get("out.s"), output.getBytes());
-                    Files.newOutputStream(Paths.get("out.s")).close();
-
                     System.out.println("▶️ " + colorize("RUNNING BINARY VIA HEADLESS VISUAL", new AnsiFormat(Attribute.WHITE_TEXT(), Attribute.BLUE_BACK(), Attribute.BOLD())));
-
                     ProcessBuilder pb = new ProcessBuilder("java", "-jar", "pcl.jar", "out.s");
                     pb.redirectOutput(ProcessBuilder.Redirect.INHERIT);
                     pb.redirectError(ProcessBuilder.Redirect.INHERIT);

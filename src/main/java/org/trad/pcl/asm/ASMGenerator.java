@@ -706,7 +706,7 @@ public final class ASMGenerator implements ASTNodeVisitor {
                     ;  clear 3 more
                     \t STRB    R3, [R1], #1
                     \t STRB    R3, [R1], #1
-                    \r STRB    R3, [R1], #1
+                    \t STRB    R3, [R1], #1
                                         
                     \t LDMFD   SP!, {PC, R0-R3}
                     """);
