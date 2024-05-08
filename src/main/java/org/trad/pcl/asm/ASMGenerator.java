@@ -579,24 +579,18 @@ public final class ASMGenerator implements ASTNodeVisitor {
                     """);
         }
         Variable variable = (Variable) this.findSymbolInScopes(identifier);
-        if (nextExpression != null) {
-            Record record = (Record) this.findSymbolInScopes(variable.getType());
+        int shift = variable.getShift();
+        String typeIdent = variable.getType();
+        while (nextExpression != null) {
+            Record record = (Record) this.findSymbolInScopes(typeIdent);
             Variable field = record.getField(nextExpression.getIdentifier());
+            shift += field.getShift();
+            typeIdent = field.getType();
             nextExpression = nextExpression.getNextExpression();
-            while (nextExpression != null) {
-                record = (Record) this.findSymbolInScopes(nextExpression.getIdentifier());
-                field = record.getField(nextExpression.getNextExpression().getIdentifier());
-                nextExpression = nextExpression.getNextExpression();
-
-            }
-            this.output.append("""
-                    \t SUB     R9, R9, #%s
-                    """.formatted(field.getShift() + variable.getShift()));
-        } else {
-            this.output.append("""
-                    \t SUB     R9, R9, #%s
-                    """.formatted(variable.getShift()));
         }
+        this.output.append("""
+                    \t SUB     R9, R9, #%s
+                    """.formatted(shift));
     }
 
     @Override

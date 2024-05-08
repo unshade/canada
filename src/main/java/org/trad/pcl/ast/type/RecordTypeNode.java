@@ -33,13 +33,6 @@ public final class RecordTypeNode extends TypeNode {
         return fields;
     }
 
-    public int getSize() {
-        int size = 0;
-        for (VariableDeclarationNode field : fields) {
-            size += field.getType().getSize();
-        }
-        return size;
-    }
 
     public Symbol toSymbol() throws UndefinedVariableException {
         Record record = new Record(getIdentifier(), 0);
@@ -53,7 +46,7 @@ public final class RecordTypeNode extends TypeNode {
             symbols.add(var);
             shift += temp;
         }
-        record.setSize(getSize());
+        record.setSize(shift);
         record.setFields(symbols);
         return record;
     }

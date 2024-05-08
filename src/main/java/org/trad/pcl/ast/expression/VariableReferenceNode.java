@@ -47,7 +47,6 @@ public class VariableReferenceNode extends ASTNode implements IdentifiableExpres
             if (!(type instanceof Record)) {
                 throw new NonRecordTypeException(typeIdent, this.getConcernedLine());
             }
-
             Variable field = ((Record) type).getField(nextExpression.getIdentifier());
             if (field == null) {
                 throw new UndefinedFieldException(nextExpression.getIdentifier(), typeIdent, this.getConcernedLine());
