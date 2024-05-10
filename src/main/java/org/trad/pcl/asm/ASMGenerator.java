@@ -197,7 +197,7 @@ public final class ASMGenerator implements ASTNodeVisitor {
     @Override
     public void visit(AssignmentStatementNode node) throws Exception {
         node.getExpression().accept(this); // store result in R0
-        this.findVariableAddress(node.getVariableReference().getIdentifier(),node.getVariableReference().getNextExpression()); // store in address in R9
+        this.findVariableAddress(node.getVariableReference().getIdentifier(), node.getVariableReference().getNextExpression()); // store in address in R9
         this.output.append("""
                 \t STR     R0, [R9] ; Assign right expression (assuming result is in R0) to left variable %s
                 """.formatted(node.getVariableReference().getIdentifier()));
@@ -242,15 +242,6 @@ public final class ASMGenerator implements ASTNodeVisitor {
             node.getArguments().forEach(arg -> {
                 try {
                     arg.accept(this);
-                    if (Context.background().getPutChar()) {
-                        this.output.append("""
-                                addr0 FILL 12              ; on réserve 12 octets pour la valeur
-                                \t LDR R3, =addr0       ; on charge l'adresse de la valeur
-                                \t BL to_ascii          ; on convertit l'entier en chaîne de caractères
-                                \t LDR R0, =addr0       ; on charge l'adresse de la chaîne de caractères
-                                \t BL println           ; on affiche la chaîne de caractères
-                                """);
-                    } else {
                         this.output.append("""
                                 \t SUB SP, SP, #4   ; réservez 4 octets pour le 0
                                 \t MOV R1, #0
@@ -261,7 +252,25 @@ public final class ASMGenerator implements ASTNodeVisitor {
                                 \t BL println
                                 \t ADD SP, SP, #8   ; libérez la pile
                                 """);
-                    }
+
+                } catch (Exception ex) {
+                    throw new RuntimeException(ex);
+                }
+            });
+            return;
+        }
+
+        if (symbol.getIdentifier().equals("putInt")) {
+            node.getArguments().forEach(arg -> {
+                try {
+                    arg.accept(this);
+                    this.output.append("""
+                            addr0 FILL 12              ; on réserve 12 octets pour la valeur
+                            \t LDR R3, =addr0       ; on charge l'adresse de la valeur
+                            \t BL to_ascii          ; on convertit l'entier en chaîne de caractères
+                            \t LDR R0, =addr0       ; on charge l'adresse de la chaîne de caractères
+                            \t BL println           ; on affiche la chaîne de caractères
+                            """);
                 } catch (Exception ex) {
                     throw new RuntimeException(ex);
                 }
@@ -359,7 +368,7 @@ public final class ASMGenerator implements ASTNodeVisitor {
 
         node.getStartExpression().accept(this); // store result in R0
 
-        this.findVariableAddress(node.getIdentifier(),null); // store in address in R9
+        this.findVariableAddress(node.getIdentifier(), null); // store in address in R9
 
         this.output.append("""   
                 \t STR     R0, [R9] ; Assign start expression (assuming result is in R0) to loop variable %s
@@ -378,7 +387,7 @@ public final class ASMGenerator implements ASTNodeVisitor {
 
         node.getBody().accept(this);
 
-        this.findVariableAddress(node.getIdentifier(),null); // store in address in R9
+        this.findVariableAddress(node.getIdentifier(), null); // store in address in R9
         this.output.append("""
                 \t LDR     R0, [R9, #-%s] ; Load variable %s in R0
                 \t ADD     R0, R0, #1 ; Increment loop variable
@@ -512,7 +521,7 @@ public final class ASMGenerator implements ASTNodeVisitor {
         } else {
             this.output.append("\t MOV     R0, #%s ; Load literal value in R0\n".formatted(node.getValue()));
         }*/
-        if (node.getType().equalsIgnoreCase("character"))  {
+        if (node.getType().equalsIgnoreCase("character")) {
 
             this.output.append("\t MOV     R0, #%s ; Load literal value in R0\n".formatted((int) String.valueOf(node.getValue()).charAt(0)));
         } else {
@@ -523,7 +532,7 @@ public final class ASMGenerator implements ASTNodeVisitor {
     @Override
     public void visit(VariableReferenceNode node) throws Exception {
 
-        this.findVariableAddress(node.getIdentifier(),node.getNextExpression());
+        this.findVariableAddress(node.getIdentifier(), node.getNextExpression());
         this.output.append("""
                 \t LDR     R0, [R9] ; Load variable %s in R0
                 """.formatted(node.getIdentifier()));
@@ -589,8 +598,8 @@ public final class ASMGenerator implements ASTNodeVisitor {
             nextExpression = nextExpression.getNextExpression();
         }
         this.output.append("""
-                    \t SUB     R9, R9, #%s
-                    """.formatted(shift));
+                \t SUB     R9, R9, #%s
+                """.formatted(shift));
     }
 
     @Override

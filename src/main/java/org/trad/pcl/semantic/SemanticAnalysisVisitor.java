@@ -41,9 +41,12 @@ public class SemanticAnalysisVisitor implements ASTNodeVisitor {
 
     public void addPredefinedFunctions() {
         Procedure put = new Procedure("put",  0);
+        Procedure putInt = new Procedure("putInt",  0);
+        putInt.addParameter(TypeEnum.INT.toString());
         put.addParameter(TypeEnum.CHAR.toString());
 
         scopeStack.peek().addSymbol(put);
+        scopeStack.peek().addSymbol(putInt);
     }
 
     public static Symbol findSymbolInScopes(String identifier, int line) throws UndefinedVariableException {
