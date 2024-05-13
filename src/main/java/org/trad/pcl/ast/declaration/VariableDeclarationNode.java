@@ -43,7 +43,7 @@ public final class VariableDeclarationNode extends ASTNode implements Declaratio
     }
 
     public Variable toSymbol() throws UndefinedVariableException {
-        Type type = (Type) SemanticAnalysisVisitor.findSymbolInScopes(this.type.getIdentifier(), getConcernedLine());
+        Type type = (Type) SemanticAnalysisVisitor.scopeStack.findSymbolInScopes(this.type.getIdentifier(), getConcernedLine());
         Variable variable = new Variable(this.identifier, type.getSize());
         variable.setType(type.getIdentifier());
         return variable;

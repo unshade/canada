@@ -45,7 +45,7 @@ public final class AssignmentStatementNode extends ASTNode implements Identifiab
     }
 
     public void checkIfAssignable() throws UndefinedVariableException {
-        Variable reference = (Variable) SemanticAnalysisVisitor.findSymbolInScopes(this.variableReference.getIdentifier(), this.variableReference.getConcernedLine());
+        Variable reference = (Variable) SemanticAnalysisVisitor.scopeStack.findSymbolInScopes(this.variableReference.getIdentifier(), this.variableReference.getConcernedLine());
 
         if (reference instanceof Parameter) {
             if (((Parameter) reference).getMode().equals(ParameterMode.IN)) {
@@ -54,8 +54,8 @@ public final class AssignmentStatementNode extends ASTNode implements Identifiab
             }
         }
 
-        if (!this.variableReference.getType().equals(expression.getType())) {
-            ErrorService.getInstance().registerSemanticError(new TypeMismatchException(reference.getType(), expression.getType(), this.variableReference.getConcernedLine()));
+        if (!this.variableReference.getType(SemanticAnalysisVisitor.scopeStack).equals(expression.getType(SemanticAnalysisVisitor.scopeStack))) {
+            ErrorService.getInstance().registerSemanticError(new TypeMismatchException(reference.getType(), expression.getType(SemanticAnalysisVisitor.scopeStack), this.variableReference.getConcernedLine()));
         }
 
     }

@@ -86,6 +86,7 @@ public final class FunctionDeclarationNode extends ASTNode implements Declaratio
         return parameters;
     }
 
+
     public TypeNode getReturnType() {
         return returnType;
     }

@@ -7,12 +7,10 @@ import org.trad.pcl.ast.ASTNode;
 import org.trad.pcl.ast.statement.IdentifiableStatement;
 import org.trad.pcl.semantic.ASTNodeVisitor;
 import org.trad.pcl.semantic.SemanticAnalysisVisitor;
+import org.trad.pcl.semantic.StackTDS;
 import org.trad.pcl.semantic.symbol.Record;
 import org.trad.pcl.semantic.symbol.Symbol;
 import org.trad.pcl.semantic.symbol.Variable;
-
-import static org.trad.pcl.semantic.SemanticAnalysisVisitor.findSymbolInScopes;
-
 public class VariableReferenceNode extends ASTNode implements IdentifiableExpression, IdentifiableStatement {
     private String identifier;
 
@@ -43,7 +41,7 @@ public class VariableReferenceNode extends ASTNode implements IdentifiableExpres
         VariableReferenceNode nextExpression = this.getNextExpression();
 
         while(nextExpression != null) {
-            Symbol type = findSymbolInScopes(typeIdent, this.getConcernedLine());
+            Symbol type = SemanticAnalysisVisitor.scopeStack.findSymbolInScopes(typeIdent, this.getConcernedLine());
             if (!(type instanceof Record)) {
                 throw new NonRecordTypeException(typeIdent, this.getConcernedLine());
             }
@@ -59,8 +57,8 @@ public class VariableReferenceNode extends ASTNode implements IdentifiableExpres
     }
 
     @Override
-    public String getType() throws UndefinedVariableException {
-        Variable variableExpression = (Variable) findSymbolInScopes(this.getIdentifier(), this.getConcernedLine());
+    public String getType(StackTDS stack) throws UndefinedVariableException {
+        Variable variableExpression = (Variable) stack.findSymbolInScopes(this.getIdentifier(), this.getConcernedLine());
 
         String type = variableExpression.getType();
 
@@ -68,7 +66,7 @@ public class VariableReferenceNode extends ASTNode implements IdentifiableExpres
 
                 VariableReferenceNode next = this.nextExpression;
                 while (next != null) {
-                    Record recordType = (Record) findSymbolInScopes(type, this.getConcernedLine());
+                    Record recordType = (Record) stack.findSymbolInScopes(type, this.getConcernedLine());
                     type = recordType.getField(next.getIdentifier()).getType();
                     next = next.getNextExpression();
                 }

@@ -9,6 +9,7 @@ import org.trad.pcl.ast.ASTNode;
 import org.trad.pcl.ast.OperatorNode;
 import org.trad.pcl.semantic.ASTNodeVisitor;
 import org.trad.pcl.semantic.SemanticAnalysisVisitor;
+import org.trad.pcl.semantic.StackTDS;
 import org.trad.pcl.semantic.symbol.Type;
 
 public final class BinaryExpressionNode extends ASTNode implements ExpressionNode {
@@ -102,18 +103,19 @@ public final class BinaryExpressionNode extends ASTNode implements ExpressionNod
     }
 
     public void checkType() throws UndefinedVariableException {
-
-        if (!left.getType().equals(right.getType())) {
-            ErrorService.getInstance().registerSemanticError(new BinaryTypeMismatchException(left.getType(), right.getType(), operator.getType(), this.getConcernedLine()));
+        String leftType = left.getType(SemanticAnalysisVisitor.scopeStack);
+        String rightType = right.getType(SemanticAnalysisVisitor.scopeStack);
+        if (!leftType.equals(rightType)) {
+            ErrorService.getInstance().registerSemanticError(new BinaryTypeMismatchException(leftType, rightType, operator.getType(), this.getConcernedLine()));
         }
 
-        Type type = (Type) SemanticAnalysisVisitor.findSymbolInScopes(right.getType(), this.getConcernedLine());
+        Type type = (Type) SemanticAnalysisVisitor.scopeStack.findSymbolInScopes(rightType, this.getConcernedLine());
         if (!operator.getEnterType().contains(type.getTypeEnum())) {
-            ErrorService.getInstance().registerSemanticError(new BinaryTypeMismatchException(left.getType(), right.getType(), operator.getType(), this.getConcernedLine()));
+            ErrorService.getInstance().registerSemanticError(new BinaryTypeMismatchException(type.getIdentifier(), rightType, operator.getType(), this.getConcernedLine()));
         }
     }
     @Override
-    public String getType() {
+    public String getType(StackTDS stack) {
         return operator.getType();
     }
 }

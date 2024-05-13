@@ -4,6 +4,7 @@ import org.trad.pcl.Exceptions.Semantic.UndefinedVariableException;
 import org.trad.pcl.Helpers.TypeEnum;
 import org.trad.pcl.ast.ASTNode;
 import org.trad.pcl.semantic.ASTNodeVisitor;
+import org.trad.pcl.semantic.StackTDS;
 
 public class NewExpressionNode extends ASTNode implements ExpressionNode {
     private String identifier;
@@ -22,7 +23,7 @@ public class NewExpressionNode extends ASTNode implements ExpressionNode {
     }
 
     @Override
-    public String getType() {
+    public String getType(StackTDS stack) {
         return TypeEnum.UNKNOWN.toString();
     }
 }

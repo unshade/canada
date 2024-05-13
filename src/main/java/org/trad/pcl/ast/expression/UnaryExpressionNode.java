@@ -5,6 +5,7 @@ import org.trad.pcl.Helpers.TypeEnum;
 import org.trad.pcl.ast.ASTNode;
 import org.trad.pcl.ast.OperatorNode;
 import org.trad.pcl.semantic.ASTNodeVisitor;
+import org.trad.pcl.semantic.StackTDS;
 
 public final class UnaryExpressionNode extends ASTNode implements ExpressionNode {
     private ExpressionNode operand;
@@ -32,8 +33,8 @@ public final class UnaryExpressionNode extends ASTNode implements ExpressionNode
     }
 
     @Override
-    public String getType() throws UndefinedVariableException {
-        return operand.getType();
+    public String getType(StackTDS stack) throws UndefinedVariableException {
+        return operand.getType(stack);
     }
 
     public OperatorNode getOperatorNode() {

@@ -3,6 +3,7 @@ package org.trad.pcl.ast.expression;
 import org.trad.pcl.Helpers.TypeEnum;
 import org.trad.pcl.ast.ASTNode;
 import org.trad.pcl.semantic.ASTNodeVisitor;
+import org.trad.pcl.semantic.StackTDS;
 
 public class CharacterValExpressionNode extends ASTNode implements ExpressionNode {
     private ExpressionNode expression;
@@ -21,7 +22,7 @@ public class CharacterValExpressionNode extends ASTNode implements ExpressionNod
     }
 
     @Override
-    public String getType() {
+    public String getType(StackTDS stack) {
         return TypeEnum.CHAR.toString();
     }
 }

@@ -39,7 +39,7 @@ public final class ParameterNode extends ASTNode {
     }
 
     public Symbol toSymbol() throws UndefinedVariableException {
-        Type type = (Type) SemanticAnalysisVisitor.findSymbolInScopes(this.type.getIdentifier(), getConcernedLine());
+        Type type = (Type) SemanticAnalysisVisitor.scopeStack.findSymbolInScopes(this.type.getIdentifier(), getConcernedLine());
         Parameter parem = new Parameter(this.identifier, type.getSize());
         parem.setMode(this.mode);
         parem.setType(this.type.getIdentifier());

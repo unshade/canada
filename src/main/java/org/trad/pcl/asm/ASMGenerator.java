@@ -9,6 +9,7 @@ import org.trad.pcl.ast.expression.*;
 import org.trad.pcl.ast.statement.*;
 import org.trad.pcl.ast.type.TypeNode;
 import org.trad.pcl.semantic.ASTNodeVisitor;
+import org.trad.pcl.semantic.StackTDS;
 import org.trad.pcl.semantic.SymbolTable;
 import org.trad.pcl.semantic.symbol.Record;
 import org.trad.pcl.semantic.symbol.*;
@@ -21,14 +22,14 @@ public final class ASMGenerator implements ASTNodeVisitor {
 
     private final List<SymbolTable> symbolTables;
 
-    private final Stack<SymbolTable> scopeStack;
+    private final StackTDS scopeStack;
     private final StringBuilder output;
     private int currentTableIndex;
 
     public ASMGenerator(List<SymbolTable> symbolTables) {
         this.symbolTables = symbolTables;
         output = new StringBuilder();
-        scopeStack = new Stack<>();
+        scopeStack = new StackTDS();
         scopeStack.push(symbolTables.get(0));
         currentTableIndex = 1;
 
@@ -48,19 +49,8 @@ public final class ASMGenerator implements ASTNodeVisitor {
         return null;
     }*/
 
-    public Symbol findSymbolInScopes(String identifier) {
 
-        for (int i = scopeStack.size() - 1; i >= 0; i--) {
-            Symbol s = scopeStack.get(i).findSymbol(identifier);
-            if (s != null) {
-                return s;
-            }
 
-        }
-
-        assert false : "Variable " + identifier + " not found in any scope";
-        return null;
-    }
 
     public int findDepthInScopes(String identifier) {
         for (int i = scopeStack.size() - 1; i >= 0; i--) {
@@ -113,7 +103,7 @@ public final class ASMGenerator implements ASTNodeVisitor {
     @Override
     public void visit(FunctionDeclarationNode node) throws Exception {
         enterScope();
-        Function symbol = (Function) this.findSymbolInScopes(node.getIdentifier());
+        Function symbol = (Function) this.scopeStack.findSymbolInScopes(node.getIdentifier());
         this.output.append(symbol.getIdentifier()).append("\n").append("""
                 \t STMFD   R13!, {R10, LR} ; Save caller's frame pointer and return ASM address
                 \t MOV     R10, R9 ; Set up new static link
@@ -130,7 +120,7 @@ public final class ASMGenerator implements ASTNodeVisitor {
 //                throw new RuntimeException(ex);
 //            }
 //        });
-        Type type = (Type) this.findSymbolInScopes(symbol.getReturnType());
+        Type type = (Type) this.scopeStack.findSymbolInScopes(symbol.getReturnType());
         assert type != null;
         int counter = node.getParameters().size() + 2 + type.getSize() / 4;
         for (ParameterNode param : node.getParameters()) {
@@ -148,7 +138,7 @@ public final class ASMGenerator implements ASTNodeVisitor {
     @Override
     public void visit(ProcedureDeclarationNode node) throws Exception {
         enterScope();
-        Symbol symbol = this.findSymbolInScopes(node.getIdentifier());
+        Symbol symbol = this.scopeStack.findSymbolInScopes(node.getIdentifier());
 
         this.output.append(symbol.getIdentifier()).append("\n").append("""
                 \t STMFD   R13!, {R10, LR} ; Save caller's frame pointer and return ASM address
@@ -192,7 +182,7 @@ public final class ASMGenerator implements ASTNodeVisitor {
             }
         }*/
         String type = node.getType().getIdentifier();
-        Type typeSymbol = (Type) this.findSymbolInScopes(type);
+        Type typeSymbol = (Type) this.scopeStack.findSymbolInScopes(type);
         assert typeSymbol != null;
         String formattedCode = String.format("\t SUB     R13, R13, #%s ; Save space for %s in stack-frame", typeSymbol.getSize(), node.getIdentifier());
         this.output.append(formattedCode).append("\n");
@@ -245,7 +235,7 @@ public final class ASMGenerator implements ASTNodeVisitor {
 
     @Override
     public void visit(CallNode node) throws Exception {
-        Function symbol = (Function) this.findSymbolInScopes(node.getIdentifier());
+        Function symbol = (Function) this.scopeStack.findSymbolInScopes(node.getIdentifier());
 
         assert symbol != null;
         if (symbol.getIdentifier().equals("put")) {
@@ -300,7 +290,7 @@ public final class ASMGenerator implements ASTNodeVisitor {
         });
 
         int returnSize = 1;
-        Type type = (Type) this.findSymbolInScopes(symbol.getReturnType());
+        Type type = (Type) this.scopeStack.findSymbolInScopes(symbol.getReturnType());
         assert type != null;
         if (type.getTypeEnum() == TypeEnum.RECORD) {
             Record record = (Record) type;
@@ -452,9 +442,9 @@ public final class ASMGenerator implements ASTNodeVisitor {
     @Override
     public void visit(ReturnStatementNode node) throws Exception {
         if (node.getExpression() instanceof VariableReferenceNode v) {
-            Variable s = (Variable) this.findSymbolInScopes(v.getIdentifier());
+            Variable s = (Variable) this.scopeStack.findSymbolInScopes(v.getIdentifier());
             assert s != null;
-            Type type = (Type) this.findSymbolInScopes(s.getType());
+            Type type = (Type) this.scopeStack.findSymbolInScopes(s.getType());
             if (type instanceof Record record) {
 
                 this.findVariableAddress(v.getIdentifier(), v.getNextExpression());
@@ -510,11 +500,10 @@ public final class ASMGenerator implements ASTNodeVisitor {
 
     @Override
     public void visit(BinaryExpressionNode node) throws Exception {
-        //Context.background().setLeftOperand(false);
         if (node.getLeft() instanceof VariableReferenceNode) {
-            Variable variable = (Variable) this.findSymbolInScopes(((VariableReferenceNode) node.getLeft()).getIdentifier());
+            Variable variable = (Variable) this.scopeStack.findSymbolInScopes(((VariableReferenceNode) node.getLeft()).getIdentifier());
             assert variable != null;
-            Type type = (Type) this.findSymbolInScopes(variable.getType());
+            Type type = (Type) this.scopeStack.findSymbolInScopes(variable.getType());
             assert type != null;
             if (type.getTypeEnum() == TypeEnum.RECORD) {
                 Record record = (Record) type;
@@ -529,7 +518,6 @@ public final class ASMGenerator implements ASTNodeVisitor {
         this.output.append("""
                 \t STMFD   R13!, {R0} ; Store the right operand in the stack
                 """);
-        //Context.background().setLeftOperand(true);
         node.getLeft().accept(this); // store in R0
         this.output.append("""
                 \t LDMFD   R13!, {R1} ; Load the right operand in R1
@@ -609,7 +597,7 @@ public final class ASMGenerator implements ASTNodeVisitor {
         } else {
             this.output.append("\t MOV     R0, #%s ; Load literal value in R0\n".formatted(node.getValue()));
         }*/
-        if (node.getType().equalsIgnoreCase("character")) {
+        if (node.getType(scopeStack).equalsIgnoreCase("character")) {
 
             this.output.append("\t LDR     R0, =%s ; Load literal value in R0\n".formatted((int) String.valueOf(node.getValue()).charAt(0)));
         } else {
@@ -675,12 +663,12 @@ public final class ASMGenerator implements ASTNodeVisitor {
                      \t SUB     R9, R9, #4
                     """);
         }
-        Variable variable = (Variable) this.findSymbolInScopes(identifier);
+        Variable variable = (Variable) this.scopeStack.findSymbolInScopes(identifier);
         assert variable != null;
         int shift = variable.getShift();
         String typeIdent = variable.getType();
         while (nextExpression != null) {
-            Record record = (Record) this.findSymbolInScopes(typeIdent);
+            Record record = (Record) this.scopeStack.findSymbolInScopes(typeIdent);
             assert record != null;
             Variable field = record.getField(nextExpression.getIdentifier());
             shift += field.getShift();
@@ -724,7 +712,7 @@ public final class ASMGenerator implements ASTNodeVisitor {
             // INIT ALEX LIB
             this.output.append("STR_OUT      FILL    0x1000\n");
 
-            Symbol symbol = this.findSymbolInScopes(node.getRootProcedure().getIdentifier());
+            Symbol symbol = this.scopeStack.findSymbolInScopes(node.getRootProcedure().getIdentifier());
             //Context.background().setCallerName(symbol.getIdentifier());
             this.output.append(symbol.getIdentifier()).append("\n").append("""
                     \t STMFD   R13!, {R10, LR} ; Save caller's frame pointer and return ASM address
@@ -1004,7 +992,7 @@ public final class ASMGenerator implements ASTNodeVisitor {
     private void equalsRecord(Record record, String left, String right, int shift) {
         // Pour chaque champs du record, on test si les deux sont égaux en ASM
         for (Variable field : record.getFields()) {
-            Type type = (Type) this.findSymbolInScopes(field.getType());
+            Type type = (Type) this.scopeStack.findSymbolInScopes(field.getType());
             assert type != null;
             if (type.getTypeEnum().equals(TypeEnum.RECORD)) {
                 Record subRecord = (Record) type;

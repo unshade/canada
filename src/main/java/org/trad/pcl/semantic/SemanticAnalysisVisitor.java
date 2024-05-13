@@ -17,7 +17,7 @@ import java.util.List;
 import java.util.Stack;
 
 public class SemanticAnalysisVisitor implements ASTNodeVisitor {
-    private static final Stack<SymbolTable> scopeStack = new Stack<>();
+    public static final StackTDS scopeStack = new StackTDS();
 
     private List<SymbolTable> symbolTables = new ArrayList<>();
     private final ErrorService errorService;
@@ -52,18 +52,6 @@ public class SemanticAnalysisVisitor implements ASTNodeVisitor {
         scopeStack.peek().addSymbol(putInt);
     }
 
-    public static Symbol findSymbolInScopes(String identifier, int line) throws UndefinedVariableException {
-
-        for (int i = scopeStack.size() - 1; i >= 0; i--) {
-            Symbol s = scopeStack.get(i).findSymbol(identifier);
-            if (s != null) {
-                return s;
-            }
-        }
-
-        throw new UndefinedVariableException(identifier, line);
-    }
-
     @Override
     public void visit(FunctionDeclarationNode node) throws Exception {
 
@@ -72,7 +60,7 @@ public class SemanticAnalysisVisitor implements ASTNodeVisitor {
         node.checkEndIdentifier();
 
         // Add the function to the current scope
-        addSymbolInScopes(node.toSymbol(), node.getConcernedLine());
+        scopeStack.addSymbolInScopes(node.toSymbol(), node.getConcernedLine());
 
         // Create a new scope
         enterScope(new SymbolTable(node.getIdentifier()));
@@ -87,7 +75,7 @@ public class SemanticAnalysisVisitor implements ASTNodeVisitor {
         //StringFormatHelper.printTDS(scopeStack.peek(), "FUNCTION", node.getIdentifier());
 
         // Exit the scope
-        exitScope();
+        scopeStack.exitScope();
     }
 
     @Override
@@ -96,7 +84,7 @@ public class SemanticAnalysisVisitor implements ASTNodeVisitor {
         node.checkEndIdentifier();
 
         // Add the procedure to the current scope
-        addSymbolInScopes(node.toSymbol(), node.getConcernedLine());
+        scopeStack.addSymbolInScopes(node.toSymbol(), node.getConcernedLine());
         // Create a new scope
         enterScope(new SymbolTable(node.getIdentifier()));
 
@@ -111,7 +99,7 @@ public class SemanticAnalysisVisitor implements ASTNodeVisitor {
         //StringFormatHelper.printTDS(scopeStack.peek(), "PROCEDURE", node.getIdentifier());
 
         // Exit the scope
-        exitScope();
+        scopeStack.exitScope();
 
     }
 
@@ -136,14 +124,14 @@ public class SemanticAnalysisVisitor implements ASTNodeVisitor {
             case "TypeNode":
                 break;
         }
-        addSymbolInScopes(node.toSymbol(), node.getConcernedLine());
+        scopeStack.addSymbolInScopes(node.toSymbol(), node.getConcernedLine());
     }
 
     @Override
     public void visit(VariableDeclarationNode node) throws Exception {
 
         node.getType().accept(this);
-        addSymbolInScopes(node.toSymbol(), node.getConcernedLine());
+        scopeStack.addSymbolInScopes(node.toSymbol(), node.getConcernedLine());
         if (node.getAssignment() != null) {
             node.getAssignment().accept(this);
         }
@@ -181,7 +169,7 @@ public class SemanticAnalysisVisitor implements ASTNodeVisitor {
 
     @Override
     public void visit(CallNode node) throws Exception {
-        Symbol s = findSymbolInScopes(node.getIdentifier(), node.getConcernedLine());
+        Symbol s = scopeStack.findSymbolInScopes(node.getIdentifier(), node.getConcernedLine());
         if (!(s instanceof Function) && node.getIsExpression()) {
             throw new Exception("Line " + node.getConcernedLine() + ": " + "The identifier " + node.getIdentifier() + " is not a valid function");
         }
@@ -230,7 +218,7 @@ public class SemanticAnalysisVisitor implements ASTNodeVisitor {
 
     @Override
     public void visit(LoopStatementNode node) throws Exception {
-            Symbol s = findSymbolInScopes(node.getIdentifier(), node.getConcernedLine());
+            Symbol s = scopeStack.findSymbolInScopes(node.getIdentifier(), node.getConcernedLine());
             if (!(s instanceof Variable var)) {
                 throw new Exception("Line " + node.getConcernedLine() + ": " + "The identifier " + node.getIdentifier() + " is not a valid variable");
             }
@@ -241,12 +229,12 @@ public class SemanticAnalysisVisitor implements ASTNodeVisitor {
 
             node.getStartExpression().accept(this);
             node.getEndExpression().accept(this);
-            if (!node.getStartExpression().getType().equals(TypeEnum.INT.toString()) || !node.getEndExpression().getType().equals(TypeEnum.INT.toString())) {
-                if (!node.getStartExpression().getType().equals(TypeEnum.INT.toString())) {
-                    throw new TypeMismatchException(TypeEnum.INT.toString(), node.getStartExpression().getType(), node.getConcernedLine());
+            if (!node.getStartExpression().getType(scopeStack).equals(TypeEnum.INT.toString()) || !node.getEndExpression().getType(scopeStack).equals(TypeEnum.INT.toString())) {
+                if (!node.getStartExpression().getType(scopeStack).equals(TypeEnum.INT.toString())) {
+                    throw new TypeMismatchException(TypeEnum.INT.toString(), node.getStartExpression().getType(scopeStack), node.getConcernedLine());
                 }
-                if (!node.getEndExpression().getType().equals(TypeEnum.INT.toString())) {
-                    throw new TypeMismatchException(TypeEnum.INT.toString(), node.getEndExpression().getType(), node.getConcernedLine());
+                if (!node.getEndExpression().getType(scopeStack).equals(TypeEnum.INT.toString())) {
+                    throw new TypeMismatchException(TypeEnum.INT.toString(), node.getEndExpression().getType(scopeStack), node.getConcernedLine());
                 }
             }
             node.getBody().accept(this);
@@ -254,7 +242,7 @@ public class SemanticAnalysisVisitor implements ASTNodeVisitor {
 
     @Override
     public void visit(ReturnStatementNode node) throws Exception {
-        Symbol s = findSymbolInScopes(scopeStack.peek().getScopeIdentifier(), node.getConcernedLine());
+        Symbol s = scopeStack.findSymbolInScopes(scopeStack.peek().getScopeIdentifier(), node.getConcernedLine());
         switch (s.getClass().getSimpleName()) {
             case "Function" -> {
                 if (node.getExpression() == null) {
@@ -263,13 +251,13 @@ public class SemanticAnalysisVisitor implements ASTNodeVisitor {
 
                 node.getExpression().accept(this);
 
-                if (!node.getExpression().getType().equals(((Function) s).getReturnType())) {
-                    throw new InvalidReturnTypeException(((Function) s).getReturnType(), node.getExpression().getType(), node.getConcernedLine());
+                if (!node.getExpression().getType(scopeStack).equals(((Function) s).getReturnType())) {
+                    throw new InvalidReturnTypeException(((Function) s).getReturnType(), node.getExpression().getType(scopeStack), node.getConcernedLine());
                 }
             }
             case "Procedure" -> {
                 if (node.getExpression() != null) {
-                    throw new InvalidReturnTypeException(TypeEnum.VOID.toString(), node.getExpression().getType(), node.getConcernedLine());
+                    throw new InvalidReturnTypeException(TypeEnum.VOID.toString(), node.getExpression().getType(scopeStack), node.getConcernedLine());
                 }
             }
         }
@@ -279,8 +267,8 @@ public class SemanticAnalysisVisitor implements ASTNodeVisitor {
     @Override
     public void visit(WhileStatementNode node) throws Exception {
         node.getCondition().accept(this);
-        if (!node.getCondition().getType().equals(TypeEnum.BOOL.toString())) {
-            throw new TypeMismatchException(TypeEnum.BOOL.toString(), node.getCondition().getType(), node.getConcernedLine());
+        if (!node.getCondition().getType(scopeStack).equals(TypeEnum.BOOL.toString())) {
+            throw new TypeMismatchException(TypeEnum.BOOL.toString(), node.getCondition().getType(scopeStack), node.getConcernedLine());
         }
         node.getBody().accept(this);
     }
@@ -298,9 +286,9 @@ public class SemanticAnalysisVisitor implements ASTNodeVisitor {
         // Check if the expression is valid
         node.getExpression().accept(this);
         // Check if the expression is an integer
-        System.out.println(node.getExpression().getType());
-        if (!node.getExpression().getType().equals(TypeEnum.INT.toString())) {
-            throw new TypeMismatchException(TypeEnum.INT.toString(), node.getExpression().getType(), node.getConcernedLine());
+        System.out.println(node.getExpression().getType(scopeStack));
+        if (!node.getExpression().getType(scopeStack).equals(TypeEnum.INT.toString())) {
+            throw new TypeMismatchException(TypeEnum.INT.toString(), node.getExpression().getType(scopeStack), node.getConcernedLine());
         }
     }
 
@@ -312,7 +300,7 @@ public class SemanticAnalysisVisitor implements ASTNodeVisitor {
     @Override
     public void visit(VariableReferenceNode node) throws Exception {
         // Check if the variable is defined
-        Symbol var = findSymbolInScopes(node.getIdentifier(), node.getConcernedLine());
+        Symbol var = scopeStack.findSymbolInScopes(node.getIdentifier(), node.getConcernedLine());
         if (!(var instanceof Variable variable)) {
             throw new InvalidVariableReferenceException(node.getIdentifier(), var.getClass().getSimpleName(), node.getConcernedLine());
         }
@@ -323,20 +311,20 @@ public class SemanticAnalysisVisitor implements ASTNodeVisitor {
     @Override
     public void visit(NewExpressionNode node) throws UndefinedVariableException {
         // Check if the type is defined
-        Symbol s = findSymbolInScopes(node.getIdentifier(), node.getConcernedLine());
+        Symbol s = scopeStack.findSymbolInScopes(node.getIdentifier(), node.getConcernedLine());
     }
 
     @Override
     public void visit(UnaryExpressionNode node) throws Exception {
         node.getOperand().accept(this);
-        if (!node.getOperator().getType().equals(node.getOperand().getType())) {
-            throw new TypeMismatchException(node.getOperator().getType(), node.getOperand().getType(), node.getConcernedLine());
+        if (!node.getOperator().getType().equals(node.getOperand().getType(scopeStack))) {
+            throw new TypeMismatchException(node.getOperator().getType(), node.getOperand().getType(scopeStack), node.getConcernedLine());
         }
     }
 
     @Override
     public void visit(TypeNode node) throws Exception {
-        Symbol s = findSymbolInScopes(node.getIdentifier(), node.getConcernedLine());
+        Symbol s = scopeStack.findSymbolInScopes(node.getIdentifier(), node.getConcernedLine());
         if (!(s instanceof Type)) {
             throw new Exception("Line " + node.getConcernedLine() + ": " + "The identifier " + node.getIdentifier() + " is not a valid type");
         }
@@ -357,7 +345,7 @@ public class SemanticAnalysisVisitor implements ASTNodeVisitor {
             node.getRootProcedure().accept(this);
         } catch (Exception ignored) {
         }
-        exitScope();
+        scopeStack.exitScope();
     }
 
     @Override
@@ -373,25 +361,9 @@ public class SemanticAnalysisVisitor implements ASTNodeVisitor {
         symbolTables.add(symbolTable);
     }
 
-    //sortir de la portée
-    public void exitScope() {
-        if (!scopeStack.isEmpty()) {
-            scopeStack.pop();
-        }
-    }
-
     public List<SymbolTable> getSymbolTables() {
         return symbolTables;
     }
 
-    public void addSymbolInScopes(Symbol symbol, int line) throws DuplicateSymbolException {
-        for (int i = scopeStack.size() - 1; i >= 0; i--) {
-            Symbol s = scopeStack.get(i).findSymbol(symbol.getIdentifier());
-            if (s != null) {
-                throw new DuplicateSymbolException(symbol.getIdentifier(), line);
-            }
-        }
-        scopeStack.peek().addSymbol(symbol);
-    }
 
 }

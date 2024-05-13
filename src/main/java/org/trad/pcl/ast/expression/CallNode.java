@@ -5,6 +5,7 @@ import org.trad.pcl.Exceptions.Semantic.IncorrectNumberOfArgumentsException;
 import org.trad.pcl.Exceptions.Semantic.UndefinedVariableException;
 import org.trad.pcl.semantic.ASTNodeVisitor;
 import org.trad.pcl.semantic.SemanticAnalysisVisitor;
+import org.trad.pcl.semantic.StackTDS;
 import org.trad.pcl.semantic.symbol.Function;
 import org.trad.pcl.semantic.symbol.Procedure;
 import org.trad.pcl.semantic.symbol.Record;
@@ -41,15 +42,14 @@ public final class CallNode extends VariableReferenceNode {
     }
 
     @Override
-    public String getType() throws UndefinedVariableException {
-        System.out.println(this.getIdentifier());
-        Function function = (Function) SemanticAnalysisVisitor.findSymbolInScopes(this.getIdentifier(), this.getConcernedLine());
+    public String getType(StackTDS stack) throws UndefinedVariableException {
+        Function function = (Function) stack.findSymbolInScopes(this.getIdentifier(), this.getConcernedLine());
         String type = function.getReturnType();
 
         if (this.getNextExpression() != null) {
             VariableReferenceNode next = this.getNextExpression();
             while (next != null) {
-                Record recordType = (Record) SemanticAnalysisVisitor.findSymbolInScopes(type, this.getConcernedLine());
+                Record recordType = (Record) stack.findSymbolInScopes(type, this.getConcernedLine());
                 type = recordType.getField(next.getIdentifier()).getType();
                 next = next.getNextExpression();
             }
@@ -58,7 +58,7 @@ public final class CallNode extends VariableReferenceNode {
     }
 
     public void checkParametersSize() throws Exception {
-        Procedure correspondingDeclaration = (Procedure) SemanticAnalysisVisitor.findSymbolInScopes(this.getIdentifier(), this.getConcernedLine());
+        Procedure correspondingDeclaration = (Procedure) SemanticAnalysisVisitor.scopeStack.findSymbolInScopes(this.getIdentifier(), this.getConcernedLine());
 
         // Check if the number of arguments match the number of declared parameters
         // Check if arguments are null
@@ -71,10 +71,10 @@ public final class CallNode extends VariableReferenceNode {
 
     public void checkParametersTypes() throws Exception {
         // Check if the types of the arguments match the types of the declared parameters
-        Procedure correspondingDeclaration = (Procedure) SemanticAnalysisVisitor.findSymbolInScopes(this.getIdentifier(), this.getConcernedLine());
+        Procedure correspondingDeclaration = (Procedure) SemanticAnalysisVisitor.scopeStack.findSymbolInScopes(this.getIdentifier(), this.getConcernedLine());
         if (this.getArguments() != null) {
             for (int i = 0; i < this.getArguments().size(); i++) {
-                String argumentType = this.getArguments().get(i).getType();
+                String argumentType = this.getArguments().get(i).getType(SemanticAnalysisVisitor.scopeStack);
                 String parameterType = correspondingDeclaration.getIndexedParametersTypes().get(i);
                 if (!argumentType.equals(parameterType)) {
                     throw new ArgumentTypeMismatchException(correspondingDeclaration.getIndexedParametersTypes().get(i), argumentType, this.getConcernedLine());

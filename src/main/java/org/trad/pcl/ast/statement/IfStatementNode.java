@@ -8,6 +8,7 @@ import org.trad.pcl.Services.ErrorService;
 import org.trad.pcl.ast.ASTNode;
 import org.trad.pcl.ast.expression.ExpressionNode;
 import org.trad.pcl.semantic.ASTNodeVisitor;
+import org.trad.pcl.semantic.SemanticAnalysisVisitor;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -56,8 +57,8 @@ public final class IfStatementNode extends ASTNode implements StatementNode {
     }
 
     public void checkConditionType() throws UndefinedVariableException {
-        if (!condition.getType().equals(TypeEnum.BOOL.toString())) {
-            ErrorService.getInstance().registerSemanticError(new InvalidConditionTypeException(condition.getType(), this.getConcernedLine()));
+        if (!condition.getType(SemanticAnalysisVisitor.scopeStack).equals(TypeEnum.BOOL.toString())) {
+            ErrorService.getInstance().registerSemanticError(new InvalidConditionTypeException(condition.getType(SemanticAnalysisVisitor.scopeStack), this.getConcernedLine()));
         }
     }
 
