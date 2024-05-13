@@ -1,6 +1,7 @@
 package org.trad.pcl.ast.type;
 
 import org.trad.pcl.Exceptions.Semantic.UndefinedVariableException;
+import org.trad.pcl.Helpers.TypeEnum;
 import org.trad.pcl.ast.declaration.VariableDeclarationNode;
 import org.trad.pcl.semantic.ASTNodeVisitor;
 import org.trad.pcl.semantic.symbol.Record;
@@ -48,6 +49,7 @@ public final class RecordTypeNode extends TypeNode {
         }
         record.setSize(shift);
         record.setFields(symbols);
+        record.setTypeEnum(TypeEnum.RECORD);
         return record;
     }
 

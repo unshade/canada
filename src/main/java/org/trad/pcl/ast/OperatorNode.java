@@ -4,6 +4,8 @@ import org.trad.pcl.Helpers.OperatorEnum;
 import org.trad.pcl.Helpers.TypeEnum;
 import org.trad.pcl.semantic.ASTNodeVisitor;
 
+import java.util.List;
+
 public final class OperatorNode extends ASTNode {
     private OperatorEnum operator;
 
@@ -20,10 +22,11 @@ public final class OperatorNode extends ASTNode {
     public void accept(ASTNodeVisitor visitor) {
     }
 
-    public String getEnterType() {
+    public List<TypeEnum> getEnterType() {
         return switch (operator) {
-            case  AND, ANDTHEN, OR, ORELSE -> TypeEnum.BOOL.toString();
-            default -> TypeEnum.INT.toString();
+            case  AND, ANDTHEN, OR, ORELSE -> List.of(TypeEnum.BOOL);
+            case EQUALS, NOT_EQUALS -> List.of(TypeEnum.INT, TypeEnum.RECORD);
+            default -> List.of(TypeEnum.INT);
         };
     }
 

@@ -28,10 +28,13 @@ public class SemanticAnalysisVisitor implements ASTNodeVisitor {
 
     public void addPrimitiveTypes() {
         Type integer = new Type(TypeEnum.INT.toString(), 0);
+        integer.setTypeEnum(TypeEnum.INT);
         integer.setSize(4);
         Type character = new Type(TypeEnum.CHAR.toString(), 0);
+        character.setTypeEnum(TypeEnum.CHAR);
         character.setSize(4);
         Type bool = new Type(TypeEnum.BOOL.toString(), 0);
+        bool.setTypeEnum(TypeEnum.BOOL);
         bool.setSize(4);
 
         scopeStack.peek().addSymbol(integer);

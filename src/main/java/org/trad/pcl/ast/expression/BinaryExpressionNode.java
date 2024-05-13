@@ -8,6 +8,8 @@ import org.trad.pcl.Services.ErrorService;
 import org.trad.pcl.ast.ASTNode;
 import org.trad.pcl.ast.OperatorNode;
 import org.trad.pcl.semantic.ASTNodeVisitor;
+import org.trad.pcl.semantic.SemanticAnalysisVisitor;
+import org.trad.pcl.semantic.symbol.Type;
 
 public final class BinaryExpressionNode extends ASTNode implements ExpressionNode {
     private ExpressionNode left;
@@ -101,7 +103,12 @@ public final class BinaryExpressionNode extends ASTNode implements ExpressionNod
 
     public void checkType() throws UndefinedVariableException {
 
-        if (!left.getType().equals(right.getType()) || !left.getType().equals(operator.getEnterType())) {
+        if (!left.getType().equals(right.getType())) {
+            ErrorService.getInstance().registerSemanticError(new BinaryTypeMismatchException(left.getType(), right.getType(), operator.getType(), this.getConcernedLine()));
+        }
+
+        Type type = (Type) SemanticAnalysisVisitor.findSymbolInScopes(right.getType(), this.getConcernedLine());
+        if (!operator.getEnterType().contains(type.getTypeEnum())) {
             ErrorService.getInstance().registerSemanticError(new BinaryTypeMismatchException(left.getType(), right.getType(), operator.getType(), this.getConcernedLine()));
         }
     }

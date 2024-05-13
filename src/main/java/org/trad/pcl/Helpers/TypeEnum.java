@@ -5,7 +5,7 @@ public enum TypeEnum {
     INT("integer"),
     BOOL("boolean"),
     CHAR("character"),
-
+    RECORD("record"),
     VOID("void"),
     UNKNOWN("unknown")
     ;
