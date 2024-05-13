@@ -5,16 +5,25 @@ type point is record
     y : integer;
 end record;
 
-function perimetreRectangle(larg : integer; long : integer) return point is
-dot : point;
+type rectangle is record
+    hautGauche : point;
+    basDroite : point;
+end record;
+
+function perimetreRectangle(larg : point; long : integer) return rectangle is
+rect : rectangle;
 begin
-    dot.x := larg +2;
-    dot.y := long +2;
-return dot ;
+    rect.hautGauche.x := 0;
+    rect.hautGauche.y := 0;
+    rect.basDroite.x := larg.x;
+    rect.basDroite.y := long;
+    return rect;
 end perimetreRectangle;
 
 choix : point;
 
 begin
-choix := perimetreRectangle(5, 10);
+choix.x := 3;
+choix.y := 4;
+choix := perimetreRectangle(choix, 10).hautGauche;
 end unDebut ;

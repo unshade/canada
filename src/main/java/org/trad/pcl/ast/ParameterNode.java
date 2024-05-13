@@ -6,6 +6,7 @@ import org.trad.pcl.ast.declaration.VariableDeclarationNode;
 import org.trad.pcl.ast.type.TypeNode;
 import org.trad.pcl.semantic.ASTNodeVisitor;
 import org.trad.pcl.semantic.SemanticAnalysisVisitor;
+import org.trad.pcl.semantic.StackTDS;
 import org.trad.pcl.semantic.symbol.Parameter;
 import org.trad.pcl.semantic.symbol.Symbol;
 import org.trad.pcl.semantic.symbol.Type;
@@ -36,6 +37,10 @@ public final class ParameterNode extends ASTNode {
 
     public TypeNode getType() {
         return type;
+    }
+
+    public int getSize(StackTDS stack) throws UndefinedVariableException {
+        return ((Type) stack.findSymbolInScopes(this.type.getIdentifier(), getConcernedLine())).getSize();
     }
 
     public Symbol toSymbol() throws UndefinedVariableException {

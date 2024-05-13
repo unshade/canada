@@ -70,7 +70,7 @@ public final class ASMGenerator implements ASTNodeVisitor {
     @Override
     public void visit(FunctionDeclarationNode node) throws Exception {
         enterScope();
-        Function symbol = (Function) this.scopeStack.findSymbolInScopes(node.getIdentifier());
+        Function symbol = (Function) scopeStack.findSymbolInScopes(node.getIdentifier());
         this.output.append(symbol.getIdentifier()).append("\n").append("""
                 \t STMFD   R13!, {R10, LR} ; Save caller's frame pointer and return ASM address
                 \t MOV     R10, R9 ; Set up new static link
@@ -87,15 +87,28 @@ public final class ASMGenerator implements ASTNodeVisitor {
 //                throw new RuntimeException(ex);
 //            }
 //        });
-        Type type = (Type) this.scopeStack.findSymbolInScopes(symbol.getReturnType());
-        assert type != null;
-        int counter = node.getParameters().size() + 2 + type.getSize() / 4;
+        Type type = (Type) scopeStack.findSymbolInScopes(symbol.getReturnType());
+        int counter = node.getParemetersSize(scopeStack) + 2 *4 + type.getSize();
         for (ParameterNode param : node.getParameters()) {
-            this.output.append("""
-                    \t LDR     R5, [R11, #4 * %s] ; Load parameter %s in R5
-                    \t STMFD   R13!, {R5} ; Store parameter %s in stack-frame
+            if((Type) scopeStack.findSymbolInScopes(param.getType().getIdentifier()) instanceof Record record) {
+                this.output.append("""
+                            \t ADD     R1, R11, #%s ; Load field in R0
+                            \t SUB   R2, R13, #4 ; Store argument for %s in stack-frame
+                            """.formatted(counter,symbol.getIdentifier()));
+                this.output.append(saveRecordInStack(record, 0));
+                this.output.append("""
+                            \t SUB   R13, R13, #%s ; 
+                            """.formatted(record.getSize()));
+                counter-=record.getSize();
+            } else {
+                this.output.append("""
+                    \t LDR     R0, [R11, #%s] ; Load parameter %s in R0
+                    \t STMFD   R13!, {R0} ; Store parameter %s in stack-frame
                     """.formatted(counter, param.getIdentifier(), param.getIdentifier()));
-            counter--;
+                counter-=4;
+            }
+
+
         }
         //Context.background().setCallerName(node.getIdentifier());
         node.getBody().accept(this);
@@ -105,7 +118,7 @@ public final class ASMGenerator implements ASTNodeVisitor {
     @Override
     public void visit(ProcedureDeclarationNode node) throws Exception {
         enterScope();
-        Symbol symbol = this.scopeStack.findSymbolInScopes(node.getIdentifier());
+        Symbol symbol = scopeStack.findSymbolInScopes(node.getIdentifier());
 
         this.output.append(symbol.getIdentifier()).append("\n").append("""
                 \t STMFD   R13!, {R10, LR} ; Save caller's frame pointer and return ASM address
@@ -257,9 +270,20 @@ public final class ASMGenerator implements ASTNodeVisitor {
         node.getArguments().forEach(arg -> {
             try {
                 arg.accept(this);
-                this.output.append(""" 
-                        \t STMFD   R13!, {R0} ; Save argument
-                        """);
+                if((Type) scopeStack.findSymbolInScopes(arg.getType(scopeStack)) instanceof Record record) {
+                    this.output.append("""
+                            \t MOV     R1, R9 ; Load field in R0
+                            \t SUB   R2, R13, #4 ; Store argument for %s in stack-frame
+                            """.formatted(symbol.getIdentifier()));
+                    this.output.append(saveRecordInStack(record, 0));
+                    this.output.append("""
+                            \t SUB   R13, R13, #%s ; Save space for argument
+                            """.formatted(record.getSize()));
+                } else {
+                    this.output.append("""
+                            \t STMFD   R13!, {R0} ; Save argument
+                            """);
+                }
 
             } catch (Exception ex) {
                 throw new RuntimeException(ex);

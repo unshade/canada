@@ -3,6 +3,7 @@ package org.trad.pcl.ast.declaration;
 
 import org.trad.pcl.Exceptions.Semantic.InvalidEndIdentifierException;
 import org.trad.pcl.Exceptions.Semantic.MissingReturnStatementException;
+import org.trad.pcl.Exceptions.Semantic.UndefinedVariableException;
 import org.trad.pcl.Services.ErrorService;
 import org.trad.pcl.ast.ASTNode;
 import org.trad.pcl.ast.ParameterNode;
@@ -12,6 +13,7 @@ import org.trad.pcl.ast.statement.ReturnStatementNode;
 import org.trad.pcl.ast.statement.StatementNode;
 import org.trad.pcl.ast.type.TypeNode;
 import org.trad.pcl.semantic.ASTNodeVisitor;
+import org.trad.pcl.semantic.StackTDS;
 import org.trad.pcl.semantic.symbol.Function;
 import org.trad.pcl.semantic.symbol.Symbol;
 
@@ -84,6 +86,14 @@ public final class FunctionDeclarationNode extends ASTNode implements Declaratio
 
     public List<ParameterNode> getParameters() {
         return parameters;
+    }
+
+    public int getParemetersSize(StackTDS stack) throws UndefinedVariableException {
+        int size = 0;
+        for (ParameterNode parameter : parameters) {
+            size += parameter.getSize(stack);
+        }
+        return size;
     }
 
 
