@@ -265,10 +265,9 @@ public final class ASMGenerator implements ASTNodeVisitor {
                 try {
                     arg.accept(this);
                     this.output.append("""
-                            addr0 FILL 12              ; on réserve 12 octets pour la valeur
-                            \t LDR R3, =addr0       ; on charge l'adresse de la valeur
+                            \t LDR R3, =STR_OUT       ; on charge l'adresse de la valeur
                             \t BL to_ascii          ; on convertit l'entier en chaîne de caractères
-                            \t LDR R0, =addr0       ; on charge l'adresse de la chaîne de caractères
+                            \t LDR R0, =STR_OUT       ; on charge l'adresse de la chaîne de caractères
                             \t BL println           ; on affiche la chaîne de caractères
                             """);
                 } catch (Exception ex) {

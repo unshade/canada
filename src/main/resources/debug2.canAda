@@ -5,7 +5,12 @@ function perimetreRectangle(larg : integer; long : integer) return integer is
 p : integer;
 c : character;
 begin
+    p := 2 ;
     put(Character'val(65));
+    put('J');
+    putInt(78);
+    putInt(85);
+    putInt(p);
 return p ;
 end perimetreRectangle;
 
