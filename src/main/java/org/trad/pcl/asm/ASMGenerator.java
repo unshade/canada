@@ -1,7 +1,6 @@
 package org.trad.pcl.asm;
 
 import org.trad.pcl.Exceptions.Semantic.UndefinedVariableException;
-import org.trad.pcl.Helpers.TypeEnum;
 import org.trad.pcl.ast.ParameterNode;
 import org.trad.pcl.ast.ProgramNode;
 import org.trad.pcl.ast.declaration.*;
@@ -39,34 +38,6 @@ public final class ASMGenerator implements ASTNodeVisitor {
         return this.output.toString();
     }
 
-
-    /*public Integer findSymbolInScopes(String FunctionOrProcedureName, String identifier) {
-        SymbolTable symbolTableFunction = this.findSymbolTable(FunctionOrProcedureName);
-        return findSymbolInScopesRecursive(symbolTableFunction, identifier, 0);
-    }
-
-    public Integer findSymbolInScopesRecursive(SymbolTable symbolTableFunction, String identifier, int shift) {
-        Symbol symbol = symbolTableFunction.findSymbol(identifier);
-        if (symbol == null) {
-            String scopeIdentifier = symbolTableFunction.getScopeIdentifier();
-            SymbolTable parentSymbolTable = findTableSymbol(scopeIdentifier);
-            shift += parentSymbolTable.findSymbol(scopeIdentifier).getShift();
-            shift = findSymbolInScopesRecursive(parentSymbolTable, identifier, shift);
-            return shift;
-        } else {
-            return shift - symbol.getShift();
-        }
-    }*/
-
-    /*private SymbolTable findSymbolTable(String functionOrProcedureName) {
-        for (SymbolTable symbolTable : this.symbolTables) {
-            if (symbolTable.getScopeIdentifier().equals(functionOrProcedureName)) {
-                return symbolTable;
-            }
-        }
-        return null;
-    }*/
-
     @Override
     public void visit(FunctionDeclarationNode node) throws Exception {
         enterScope();
@@ -78,15 +49,7 @@ public final class ASMGenerator implements ASTNodeVisitor {
                 \t STR     R11, [R13]
                 \t MOV     R11, R13 ; Set up new frame pointer
                 """);
-//        Context.background().setCounter(node.getParameters().size());
-//        node.getParameters().forEach(param -> {
-//            try {
-//                param.accept(this);
-//                Context.background().setCounter(Context.background().getCounter() - 1);
-//            } catch (Exception ex) {
-//                throw new RuntimeException(ex);
-//            }
-//        });
+
         Type type = (Type) scopeStack.findSymbolInScopes(symbol.getReturnType());
         int counter = node.getParemetersSize(scopeStack) + 2 *4 + type.getSize();
         for (ParameterNode param : node.getParameters()) {
@@ -97,7 +60,7 @@ public final class ASMGenerator implements ASTNodeVisitor {
                             """.formatted(counter,symbol.getIdentifier()));
                 this.output.append(saveRecordInStack(record, 0));
                 this.output.append("""
-                            \t SUB   R13, R13, #%s ; 
+                            \t SUB   R13, R13, #%s ;
                             """.formatted(record.getSize()));
                 counter-=record.getSize();
             } else {
@@ -110,7 +73,6 @@ public final class ASMGenerator implements ASTNodeVisitor {
 
 
         }
-        //Context.background().setCallerName(node.getIdentifier());
         node.getBody().accept(this);
         scopeStack.exitScope();
     }
@@ -136,7 +98,6 @@ public final class ASMGenerator implements ASTNodeVisitor {
                 throw new RuntimeException(ex);
             }
         });
-        //Context.background().setCallerName(node.getIdentifier());
         node.getBody().accept(this);
         scopeStack.exitScope();
     }
@@ -148,19 +109,6 @@ public final class ASMGenerator implements ASTNodeVisitor {
 
     @Override
     public void visit(VariableDeclarationNode node) throws Exception {
-        /*int lineToWrite = Context.background().getNonCallableDeclarationWriteLine();
-
-        String[] outputLines = this.output.toString().split("\\r?\\n");
-        StringBuilder newOutput = new StringBuilder();
-
-        for (int i = 0; i < outputLines.length; i++) {
-            newOutput.append(outputLines[i]).append("\n");
-
-            if (i == lineToWrite - 1) {
-                String formattedCode = String.format("\t SUB     R13, R13, #4 ; Save space for %s in stack-frame", node.getIdentifier());
-                newOutput.append(formattedCode).append("\n");
-            }
-        }*/
         String type = node.getType().getIdentifier();
         Type typeSymbol = (Type) scopeStack.findSymbolInScopes(type);
         assert typeSymbol != null;
@@ -565,11 +513,6 @@ public final class ASMGenerator implements ASTNodeVisitor {
 
     @Override
     public void visit(LiteralNode node) {
-       /* if (Context.background().isLeftOperand()) {
-            this.output.append("\t MOV     R1, #%s ; Load literal value in R1\n".formatted(node.getValue()));
-        } else {
-            this.output.append("\t MOV     R0, #%s ; Load literal value in R0\n".formatted(node.getValue()));
-        }*/
         if (node.getType(scopeStack).equalsIgnoreCase("character")) {
 
             this.output.append("\t LDR     R0, =%s ; Load literal value in R0\n".formatted((int) String.valueOf(node.getValue()).charAt(0)));
