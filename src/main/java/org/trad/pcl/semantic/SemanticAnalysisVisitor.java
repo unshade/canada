@@ -227,7 +227,15 @@ public class SemanticAnalysisVisitor implements ASTNodeVisitor {
 
     @Override
     public void visit(LoopStatementNode node) throws Exception {
-            findSymbolInScopes(node.getIdentifier(), node.getConcernedLine());
+            Symbol s = findSymbolInScopes(node.getIdentifier(), node.getConcernedLine());
+            if (!(s instanceof Variable var)) {
+                throw new Exception("Line " + node.getConcernedLine() + ": " + "The identifier " + node.getIdentifier() + " is not a valid variable");
+            }
+            
+            if (!var.getType().equals(TypeEnum.INT.toString())) {
+                throw new TypeMismatchException(TypeEnum.INT.toString(), var.getType(), node.getConcernedLine());
+            }
+
             node.getStartExpression().accept(this);
             node.getEndExpression().accept(this);
             if (!node.getStartExpression().getType().equals(TypeEnum.INT.toString()) || !node.getEndExpression().getType().equals(TypeEnum.INT.toString())) {
