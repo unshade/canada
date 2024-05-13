@@ -386,22 +386,31 @@ public final class ASMGenerator implements ASTNodeVisitor {
         } else {
             node.getEndExpression().accept(this); // store result in R0
         }
-        
+
         this.output.append("""
                 \t CMP     R1, R0 ; Compare loop variable to end expression
-                \t BGT     %s ; Branch if loop variable is greater than end expression
-                """.formatted(loopEndLabel));
+                """);
+        if (node.isReverse()) {
+            this.output.append("""
+                    \t BLT     %s ; Branch if loop variable is less than end expression
+                    """.formatted(loopEndLabel));
+        } else {
+            this.output.append("""
+                    \t BGT     %s ; Branch if loop variable is greater than end expression
+                    """.formatted(loopEndLabel));
+        }
 
         node.getBody().accept(this);
 
         this.findVariableAddress(node.getIdentifier(), null); // store in address in R9
-        this.output.append("\t LDR     R0, [R9] ; Load variable %s in R0");
+        this.output.append("\t LDR     R0, [R9] ; Load loop variable in R0\n");
+
         if(node.isReverse()){
-            this.output.append("\t SUB     R0, R0, #1 ; Decrement loop variable");
+            this.output.append("\t SUB     R0, R0, #1 ; Decrement loop variable\n");
         } else {
-            this.output.append("\t ADD     R0, R0, #1 ; Increment loop variable");
+            this.output.append("\t ADD     R0, R0, #1 ; Increment loop variable\n");
         }
-        this.output.append("\t STR     R0, [R9] ; Assign incremented loop variable to loop variable");
+        this.output.append("\t STR     R0, [R9] ; Assign incremented loop variable to loop variable\n");
 
         output.append("\t B       ").append(loopStartLabel).append("\n");
 
