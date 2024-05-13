@@ -1,6 +1,7 @@
 package org.trad.pcl.asm;
 
 import org.trad.pcl.Exceptions.Semantic.UndefinedVariableException;
+import org.trad.pcl.Helpers.TypeEnum;
 import org.trad.pcl.ast.ParameterNode;
 import org.trad.pcl.ast.ProgramNode;
 import org.trad.pcl.ast.declaration.*;
@@ -456,6 +457,20 @@ public final class ASMGenerator implements ASTNodeVisitor {
     @Override
     public void visit(BinaryExpressionNode node) throws Exception {
         //Context.background().setLeftOperand(false);
+        if (node.getLeft() instanceof VariableReferenceNode) {
+            Variable variable = (Variable) this.findSymbolInScopes(((VariableReferenceNode) node.getLeft()).getIdentifier());
+            assert variable != null;
+            Type type = (Type) this.findSymbolInScopes(variable.getType());
+            assert type != null;
+            if (type.getTypeEnum() == TypeEnum.RECORD) {
+                Record record = (Record) type;
+                this.output.append("""
+                \t MOV     R0, #1 ; Set R0 to 0
+                """);
+                this.equalsRecord(record, ((VariableReferenceNode) node.getLeft()).getIdentifier(), ((VariableReferenceNode) node.getRight()).getIdentifier(), 0);
+                return;
+            }
+        }
         node.getRight().accept(this);
         this.output.append("""
                 \t STMFD   R13!, {R0} ; Store the right operand in the stack
@@ -607,10 +622,12 @@ public final class ASMGenerator implements ASTNodeVisitor {
                     """);
         }
         Variable variable = (Variable) this.findSymbolInScopes(identifier);
+        assert variable != null;
         int shift = variable.getShift();
         String typeIdent = variable.getType();
         while (nextExpression != null) {
             Record record = (Record) this.findSymbolInScopes(typeIdent);
+            assert record != null;
             Variable field = record.getField(nextExpression.getIdentifier());
             shift += field.getShift();
             typeIdent = field.getType();
@@ -930,6 +947,33 @@ public final class ASMGenerator implements ASTNodeVisitor {
                 """);
     }
 
+    private void equalsRecord(Record record, String left, String right, int shift) {
+        // Pour chaque champs du record, on test si les deux sont égaux en ASM
+        for (Variable field : record.getFields()) {
+            Type type = (Type) this.findSymbolInScopes(field.getType());
+            assert type != null;
+            if (type.getTypeEnum().equals(TypeEnum.RECORD)) {
+                Record subRecord = (Record) type;
+                this.equalsRecord(subRecord, left, right, field.getShift()+shift);
+            } else {
+                // On va chercher le champ pour left dans la pile avec findVariableAddress
+                this.findVariableAddress(left, null);
+                this.output.append("""
+                        \t LDR     R1, [R9, #-%s] ; Load variable %s in R0
+                        """.formatted(field.getShift()+shift, left));
+                // On va chercher le champ pour right dans la pile avec findVariableAddress
+                this.findVariableAddress(right, null);
+                this.output.append("""
+                        \t LDR     R2, [R9, #-%s] ; Load variable %s in R1
+                        """.formatted(field.getShift()+shift, right));
+                // On compare les deux champs
+                this.output.append("""
+                        \t CMP     R1, R2 ; Compare operands
+                        \t MOVNE   R0, #0 ; Set R2 to 1 if operands are not equal
+                        """);
+            }
+        }
+    }
 
     public void enterScope() {
         scopeStack.push(symbolTables.get(currentTableIndex));
