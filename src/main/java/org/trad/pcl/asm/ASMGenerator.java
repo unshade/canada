@@ -16,7 +16,8 @@ import org.trad.pcl.semantic.symbol.*;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Stack;
+
+import static org.trad.pcl.asm.ASMUtils.*;
 
 public final class ASMGenerator implements ASTNodeVisitor {
 
@@ -38,17 +39,6 @@ public final class ASMGenerator implements ASTNodeVisitor {
         return this.output.toString();
     }
 
-    public int findDepthInScopes(String identifier) {
-        for (int i = scopeStack.size() - 1; i >= 0; i--) {
-            Symbol s = scopeStack.get(i).findSymbol(identifier);
-            if (s != null) {
-                return scopeStack.size() - i - 1;
-            }
-        }
-
-        assert false : "Variable " + identifier + " not found in any scope";
-        return -1;
-    }
 
     /*public Integer findSymbolInScopes(String FunctionOrProcedureName, String identifier) {
         SymbolTable symbolTableFunction = this.findSymbolTable(FunctionOrProcedureName);
@@ -159,7 +149,7 @@ public final class ASMGenerator implements ASTNodeVisitor {
             }
         }*/
         String type = node.getType().getIdentifier();
-        Type typeSymbol = (Type) this.scopeStack.findSymbolInScopes(type);
+        Type typeSymbol = (Type) scopeStack.findSymbolInScopes(type);
         assert typeSymbol != null;
         String formattedCode = String.format("\t SUB     R13, R13, #%s ; Save space for %s in stack-frame", typeSymbol.getSize(), node.getIdentifier());
         this.output.append(formattedCode).append("\n");
@@ -177,13 +167,13 @@ public final class ASMGenerator implements ASTNodeVisitor {
             this.output.append("""
                     \t MOV   R1, R9 ; Load record address in R1
                     """);
-            this.findVariableAddress(node.getVariableReference().getIdentifier(), node.getVariableReference().getNextExpression()); // store in address in R9
+            this.output.append(findVariableAddress(node.getVariableReference().getIdentifier(), node.getVariableReference().getNextExpression())); // store in address in R9
             this.output.append("""
                     \t MOV   R2, R9 ; Load variable address in R2
                     """);
-            this.output.append(ASMUtils.saveRecordInStack(record, 0));
+            this.output.append(saveRecordInStack(record, 0));
         } else {
-            this.findVariableAddress(node.getVariableReference().getIdentifier(), node.getVariableReference().getNextExpression()); // store in address in R9
+            this.output.append(findVariableAddress(node.getVariableReference().getIdentifier(), node.getVariableReference().getNextExpression())); // store in address in R9
             this.output.append("""
                     \t STR     R0, [R9] ; Assign right expression (assuming result is in R0) to left variable %s
                     """.formatted(node.getVariableReference().getIdentifier()));
@@ -223,7 +213,7 @@ public final class ASMGenerator implements ASTNodeVisitor {
 
     @Override
     public void visit(CallNode node) throws Exception {
-        Function symbol = (Function) this.scopeStack.findSymbolInScopes(node.getIdentifier());
+        Function symbol = (Function) scopeStack.findSymbolInScopes(node.getIdentifier());
 
         if (symbol.getIdentifier().equals("put")) {
             node.getArguments().forEach(arg -> {
@@ -276,12 +266,12 @@ public final class ASMGenerator implements ASTNodeVisitor {
             }
         });
 
-        Type type = (Type) this.scopeStack.findSymbolInScopes(symbol.getReturnType());
+        Type type = (Type) scopeStack.findSymbolInScopes(symbol.getReturnType());
         this.output.append("""
                 \t SUB     R13, R13, #%s ; Save space for return value
                 """.formatted(type.getSize()));
 
-        this.findAddress(node.getIdentifier());
+        this.output.append(findAddress(node.getIdentifier()));
 
         this.output.append("""
                 \t BL      %s ; Branch link to %s (it will save the return address in LR)
@@ -366,7 +356,7 @@ public final class ASMGenerator implements ASTNodeVisitor {
         }
 
 
-        this.findVariableAddress(node.getIdentifier(), null); // store in address in R9
+        this.output.append(findVariableAddress(node.getIdentifier(), null)); // store in address in R9
 
         this.output.append("""   
                 \t STR     R0, [R9] ; Assign start expression (assuming result is in R0) to loop variable %s
@@ -397,7 +387,7 @@ public final class ASMGenerator implements ASTNodeVisitor {
 
         node.getBody().accept(this);
 
-        this.findVariableAddress(node.getIdentifier(), null); // store in address in R9
+        this.output.append(findVariableAddress(node.getIdentifier(), null)); // store in address in R9
         this.output.append("\t LDR     R0, [R9] ; Load loop variable in R0\n");
 
         if (node.isReverse()) {
@@ -423,7 +413,7 @@ public final class ASMGenerator implements ASTNodeVisitor {
                     \t MOV     R1, R9 ; Load field in R0
                     \t ADD   R2, R11, #%s ; Store return value for in stack-frame
                     """.formatted(shift));
-            this.output.append(ASMUtils.saveRecordInStack(record, 0));
+            this.output.append(saveRecordInStack(record, 0));
         } else {
             this.output.append("""
                     \t STR     R0, [R11, #%s] ; Store return value for in stack-frame
@@ -468,7 +458,7 @@ public final class ASMGenerator implements ASTNodeVisitor {
             this.output.append("""
                     \t MOV     R0, #1 ; Set R0 to 0
                     """);
-            this.equalsRecord(record, ((VariableReferenceNode) node.getLeft()).getIdentifier(), ((VariableReferenceNode) node.getRight()).getIdentifier(), 0);
+            this.output.append(equalsRecord(record, ((VariableReferenceNode) node.getLeft()).getIdentifier(), ((VariableReferenceNode) node.getRight()).getIdentifier(), 0));
             return;
 
         }
@@ -567,77 +557,13 @@ public final class ASMGenerator implements ASTNodeVisitor {
     @Override
     public void visit(VariableReferenceNode node) throws Exception {
 
-        this.findVariableAddress(node.getIdentifier(), node.getNextExpression());
+        this.output.append(findVariableAddress(node.getIdentifier(), node.getNextExpression()));
         this.output.append("""
                 \t LDR     R0, [R9] ; Load variable %s in R0
                 """.formatted(node.getIdentifier()));
 
     }
 
-    /**
-     * Find the address of a variable in the scope and put it in R10
-     *
-     * @param identifier
-     */
-    public void findAddress(String identifier) {
-        int depth = this.findDepthInScopes(identifier);
-        if (depth == 0) {
-            this.output.append("""
-                    \t MOV     R9, R10
-                    """);
-            return;
-        }
-
-        this.output.append("""
-                \t LDR     R9, [R11, #4]
-                """);
-
-        // tkt c'est un for i < depth-1
-        this.output.append("""
-                \t LDR     R9, [R9]
-                """.repeat(Math.max(0, depth - 1)));
-    }
-
-    public void findVariableAddress(String identifier, VariableReferenceNode nextExpression) {
-
-        int depth = this.findDepthInScopes(identifier);
-        // go to the variable address
-        if (depth == 0) {
-            this.output.append("""
-                    \t MOV     R9, R11
-                    """);
-
-        } else {
-
-            this.output.append("""
-                    \t LDR     R9, [R11, #4]
-                    """);
-
-            // tkt c'est un for i < depth-1
-            this.output.append("""
-                    \t LDR     R9, [R9]
-                    """.repeat(Math.max(0, depth - 1)));
-
-            this.output.append("""
-                     \t SUB     R9, R9, #4
-                    """);
-        }
-        Variable variable = (Variable) this.scopeStack.findSymbolInScopes(identifier);
-        assert variable != null;
-        int shift = variable.getShift();
-        String typeIdent = variable.getType();
-        while (nextExpression != null) {
-            Record record = (Record) this.scopeStack.findSymbolInScopes(typeIdent);
-            assert record != null;
-            Variable field = record.getField(nextExpression.getIdentifier());
-            shift += field.getShift();
-            typeIdent = field.getType();
-            nextExpression = nextExpression.getNextExpression();
-        }
-        this.output.append("""
-                \t SUB     R9, R9, #%s
-                """.formatted(shift));
-    }
 
     @Override
     public void visit(NewExpressionNode node) throws UndefinedVariableException {
@@ -671,8 +597,7 @@ public final class ASMGenerator implements ASTNodeVisitor {
             // INIT ALEX LIB
             this.output.append("STR_OUT      FILL    0x1000\n");
 
-            Symbol symbol = this.scopeStack.findSymbolInScopes(node.getRootProcedure().getIdentifier());
-            //Context.background().setCallerName(symbol.getIdentifier());
+            Symbol symbol = scopeStack.findSymbolInScopes(node.getRootProcedure().getIdentifier());
             this.output.append(symbol.getIdentifier()).append("\n").append("""
                     \t STMFD   R13!, {R10, LR} ; Save caller's frame pointer and return ASM address
                     \t MOV     R10, R13 ; Set up new static link
@@ -680,15 +605,7 @@ public final class ASMGenerator implements ASTNodeVisitor {
                     \t STR     R11, [R13]
                     \t MOV     R11, R13 ; Set up new frame pointer
                     """);
-            //this.updateContextNonCallableDeclaration();
-           /* node.getRootProcedure().getBody().getStatements().forEach(statementNode -> {
-                try {
-                    statementNode.accept(this);
-                } catch (Exception e) {
-                    System.err.println(e.getMessage());
-                    System.exit(1);
-                }
-            });*/
+
             List<DeclarationNode> tempDeclarations = new ArrayList<>();
             node.getRootProcedure().getBody().getDeclarations().forEach(declaration -> {
                 try {
@@ -717,14 +634,7 @@ public final class ASMGenerator implements ASTNodeVisitor {
                     throw new RuntimeException(ex);
                 }
             });
-            /*node.getRootProcedure().getBody().getDeclarations().forEach(declarationNode -> {
-                try {
-                    declarationNode.accept(this);
-                } catch (Exception e) {
-                    System.err.println(e.getMessage());
-                    System.exit(1);
-                }
-            });*/
+
             this.output.append("""
                     println
                     \t STMFD   SP!, {LR, R0-R3}
@@ -739,7 +649,7 @@ public final class ASMGenerator implements ASTNodeVisitor {
                     \t STRB    R2, [R1, #-1]
                     \t MOV     R2, #0
                     \t STRB    R2, [R1]
-                                        
+                                       \s
                     ;  we need to clear the output buffer
                     \t LDR     R1, =STR_OUT
                     \t MOV     R0, R3
@@ -753,9 +663,9 @@ public final class ASMGenerator implements ASTNodeVisitor {
                     \t STRB    R3, [R1], #1
                     \t STRB    R3, [R1], #1
                     \t STRB    R3, [R1], #1
-                                        
+                                       \s
                     \t LDMFD   SP!, {PC, R0-R3}
-                    """);
+                   \s""");
 
             this.output.append("""
                     to_ascii
@@ -766,10 +676,10 @@ public final class ASMGenerator implements ASTNodeVisitor {
                     \t MOVGE   R6, R0
                     \t RSBLT   R6, R0, #0
                     \t MOV     R0, R6
-                                        
+                                       \s
                     \t MOV     R4, #0 ; Initialize digit counter
-                                        
-                    to_ascii_loop 
+                                       \s
+                    to_ascii_loop\s
                     \t MOV     R1, R0
                     \t MOV     R2, #10
                     \t BL      div32 ; R0 = R0 / 10, R1 = R0 % 10
@@ -778,17 +688,17 @@ public final class ASMGenerator implements ASTNodeVisitor {
                     \t ADD     R4, R4, #1 ; Increment digit counter
                     \t CMP     R0, #0
                     \t BNE     to_ascii_loop
-                                        
+                                       \s
                     \t ; add the sign if it was negative
                     \t CMP     R7, #0
-                    \t MOVGE   R1, #0	
+                    \t MOVGE   R1, #0\t
                     \t MOVLT   R1, #45
                     \t STRB    R1, [R3, R4]
                     \t ADD     R4, R4, #1
-                            
+                           \s
                     \t LDMFD   SP!, {PC, R4-R7}
-                                        
-                    """);
+                                       \s
+                   \s""");
 
             this.output.append("""
                     ;       Integer division routine
@@ -948,33 +858,6 @@ public final class ASMGenerator implements ASTNodeVisitor {
                 """);
     }
 
-    private void equalsRecord(Record record, String left, String right, int shift) {
-        // Pour chaque champs du record, on test si les deux sont égaux en ASM
-        for (Variable field : record.getFields()) {
-            Type type = (Type) this.scopeStack.findSymbolInScopes(field.getType());
-            assert type != null;
-            if (type.getTypeEnum().equals(TypeEnum.RECORD)) {
-                Record subRecord = (Record) type;
-                this.equalsRecord(subRecord, left, right, field.getShift() + shift);
-            } else {
-                // On va chercher le champ pour left dans la pile avec findVariableAddress
-                this.findVariableAddress(left, null);
-                this.output.append("""
-                        \t LDR     R1, [R9, #-%s] ; Load variable %s in R0
-                        """.formatted(field.getShift() + shift, left));
-                // On va chercher le champ pour right dans la pile avec findVariableAddress
-                this.findVariableAddress(right, null);
-                this.output.append("""
-                        \t LDR     R2, [R9, #-%s] ; Load variable %s in R1
-                        """.formatted(field.getShift() + shift, right));
-                // On compare les deux champs
-                this.output.append("""
-                        \t CMP     R1, R2 ; Compare operands
-                        \t MOVNE   R0, #0 ; Set R2 to 1 if operands are not equal
-                        """);
-            }
-        }
-    }
 
     public void enterScope() {
         scopeStack.push(symbolTables.get(currentTableIndex));
