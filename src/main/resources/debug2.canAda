@@ -4,17 +4,17 @@ type point is record
     x : integer;
     y : integer;
 end record;
+
 function perimetreRectangle(larg : integer; long : integer) return point is
 dot : point;
 begin
-    dot.x := larg;
-    dot.y := long;
+    dot.x := larg +2;
+    dot.y := long +2;
 return dot ;
 end perimetreRectangle;
 
-choix : integer;
+choix : point;
 
 begin
-choix := 4;
-perimetreRectangle(5, 10);
+choix := perimetreRectangle(5, 10);
 end unDebut ;
