@@ -227,6 +227,7 @@ public class SemanticAnalysisVisitor implements ASTNodeVisitor {
 
     @Override
     public void visit(LoopStatementNode node) throws Exception {
+            findSymbolInScopes(node.getIdentifier(), node.getConcernedLine());
             node.getStartExpression().accept(this);
             node.getEndExpression().accept(this);
             if (!node.getStartExpression().getType().equals(TypeEnum.INT.toString()) || !node.getEndExpression().getType().equals(TypeEnum.INT.toString())) {
