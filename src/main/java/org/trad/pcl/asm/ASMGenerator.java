@@ -11,9 +11,7 @@ import org.trad.pcl.ast.type.TypeNode;
 import org.trad.pcl.semantic.ASTNodeVisitor;
 import org.trad.pcl.semantic.SymbolTable;
 import org.trad.pcl.semantic.symbol.Record;
-import org.trad.pcl.semantic.symbol.Symbol;
-import org.trad.pcl.semantic.symbol.Type;
-import org.trad.pcl.semantic.symbol.Variable;
+import org.trad.pcl.semantic.symbol.*;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -115,7 +113,7 @@ public final class ASMGenerator implements ASTNodeVisitor {
     @Override
     public void visit(FunctionDeclarationNode node) throws Exception {
         enterScope();
-        Symbol symbol = this.findSymbolInScopes(node.getIdentifier());
+        Function symbol = (Function) this.findSymbolInScopes(node.getIdentifier());
         this.output.append(symbol.getIdentifier()).append("\n").append("""
                 \t STMFD   R13!, {R10, LR} ; Save caller's frame pointer and return ASM address
                 \t MOV     R10, R9 ; Set up new static link
@@ -123,15 +121,25 @@ public final class ASMGenerator implements ASTNodeVisitor {
                 \t STR     R11, [R13]
                 \t MOV     R11, R13 ; Set up new frame pointer
                 """);
-        Context.background().setCounter(node.getParameters().size());
-        node.getParameters().forEach(param -> {
-            try {
-                param.accept(this);
-                Context.background().setCounter(Context.background().getCounter() - 1);
-            } catch (Exception ex) {
-                throw new RuntimeException(ex);
-            }
-        });
+//        Context.background().setCounter(node.getParameters().size());
+//        node.getParameters().forEach(param -> {
+//            try {
+//                param.accept(this);
+//                Context.background().setCounter(Context.background().getCounter() - 1);
+//            } catch (Exception ex) {
+//                throw new RuntimeException(ex);
+//            }
+//        });
+        Type type = (Type) this.findSymbolInScopes(symbol.getReturnType());
+        assert type != null;
+        int counter = node.getParameters().size() + 2 + type.getSize() / 4;
+        for (ParameterNode param : node.getParameters()) {
+            this.output.append("""
+                \t LDR     R5, [R11, #4 * %s] ; Load parameter %s in R5
+                \t STMFD   R13!, {R5} ; Store parameter %s in stack-frame
+                """.formatted(counter, param.getIdentifier(), param.getIdentifier()));
+            counter--;
+        }
         //Context.background().setCallerName(node.getIdentifier());
         node.getBody().accept(this);
         exitScope();
@@ -189,7 +197,7 @@ public final class ASMGenerator implements ASTNodeVisitor {
         String formattedCode = String.format("\t SUB     R13, R13, #%s ; Save space for %s in stack-frame", typeSymbol.getSize(), node.getIdentifier());
         this.output.append(formattedCode).append("\n");
 
-        if(node.getAssignment() != null) {
+        if (node.getAssignment() != null) {
             node.getAssignment().accept(this);
         }
     }
@@ -237,8 +245,9 @@ public final class ASMGenerator implements ASTNodeVisitor {
 
     @Override
     public void visit(CallNode node) throws Exception {
-        Symbol symbol = this.findSymbolInScopes(node.getIdentifier());
+        Function symbol = (Function) this.findSymbolInScopes(node.getIdentifier());
 
+        assert symbol != null;
         if (symbol.getIdentifier().equals("put")) {
             node.getArguments().forEach(arg -> {
                 try {
@@ -289,17 +298,38 @@ public final class ASMGenerator implements ASTNodeVisitor {
                 throw new RuntimeException(ex);
             }
         });
+
+        int returnSize = 1;
+        Type type = (Type) this.findSymbolInScopes(symbol.getReturnType());
+        assert type != null;
+        if (type.getTypeEnum() == TypeEnum.RECORD) {
+            Record record = (Record) type;
+            assert record != null;
+            returnSize = record.getSize() / 4;
+        }
+
         this.output.append("""
-                \t SUB     R13, R13, #4 ; Save space for return value
-                """);
+                \t SUB     R13, R13, #4 * %s ; Save space for return value
+                """.formatted(returnSize));
 
         this.findAddress(node.getIdentifier());
 
         this.output.append("""
                 \t BL      %s ; Branch link to %s (it will save the return address in LR)
-                \t LDR     R0, [R13] ; Load return value
+                """.formatted(symbol.getIdentifier(), symbol.getIdentifier()));
+        if(type.getTypeEnum() == TypeEnum.RECORD) {
+            this.output.append("""
+                    \t MOV     R0, R13, #4 * %s ; Remove arguments and return value from stack
+                    """.formatted(returnSize-1));
+        } else {
+            this.output.append("""
+                    \t LDR     R0, [R13] ; Load return value
+                    """.formatted(returnSize));
+        }
+
+        this.output.append("""
                 \t ADD     R13, R13, #4 * %s ; Remove arguments and return value from stack
-                """.formatted(symbol.getIdentifier(), symbol.getIdentifier(), node.getArguments().size() + 1));
+                """.formatted(node.getArguments().size() + returnSize));
     }
 
     @Override
@@ -365,10 +395,9 @@ public final class ASMGenerator implements ASTNodeVisitor {
     public void visit(LoopStatementNode node) throws Exception {
         String loopStartLabel = "loop_start_" + Context.background().getUniqueLabelId();
         String loopEndLabel = "loop_end_" + Context.background().getUniqueLabelId();
-        if(node.isReverse()){
+        if (node.isReverse()) {
             node.getEndExpression().accept(this); // store result in R0
-        }
-        else {
+        } else {
             node.getStartExpression().accept(this); // store result in R0
         }
 
@@ -383,8 +412,8 @@ public final class ASMGenerator implements ASTNodeVisitor {
         this.output.append("""
                 \t LDR     R1, [R9] ; Load variable %s in R1
                 """.formatted(node.getIdentifier()));
-        if(node.isReverse()){
-           node.getStartExpression().accept(this); // store result in R0
+        if (node.isReverse()) {
+            node.getStartExpression().accept(this); // store result in R0
         } else {
             node.getEndExpression().accept(this); // store result in R0
         }
@@ -407,7 +436,7 @@ public final class ASMGenerator implements ASTNodeVisitor {
         this.findVariableAddress(node.getIdentifier(), null); // store in address in R9
         this.output.append("\t LDR     R0, [R9] ; Load loop variable in R0\n");
 
-        if(node.isReverse()){
+        if (node.isReverse()) {
             this.output.append("\t SUB     R0, R0, #1 ; Decrement loop variable\n");
         } else {
             this.output.append("\t ADD     R0, R0, #1 ; Increment loop variable\n");
@@ -422,14 +451,39 @@ public final class ASMGenerator implements ASTNodeVisitor {
 
     @Override
     public void visit(ReturnStatementNode node) throws Exception {
-        node.getExpression().accept(this);
+        if (node.getExpression() instanceof VariableReferenceNode v) {
+            Variable s = (Variable) this.findSymbolInScopes(v.getIdentifier());
+            assert s != null;
+            Type type = (Type) this.findSymbolInScopes(s.getType());
+            if (type instanceof Record record) {
+
+                this.findVariableAddress(v.getIdentifier(), v.getNextExpression());
+                // Copy record into
+                for (Variable var : record.getFields()) {
+                    this.output.append("""
+                            \t LDR     R0, [R9, #%s] ; Load variable %s in R0
+                            \t STR   R0, [R11, #4 * %s] ; Store return value for in stack-frame
+                            """.formatted(var.getShift(), v.getIdentifier(), 2 + record.getSize() /4 - var.getShift() / 4));
+                }
+            } else {
+                node.getExpression().accept(this);
+                this.output.append("""
+                        \t STR     R0, [R11, #4 * 3] ; Store return value for in stack-frame
+                        """);
+            }
+        } else {
+            node.getExpression().accept(this);
+            this.output.append("""
+                    \t STR     R0, [R11, #4 * 3] ; Store return value for in stack-frame
+                    """);
+        }
         this.output.append("""
-                \t STR     R0, [R11, #4 * 3] ; Store return value for in stack-frame
                 \t MOV     R13, R11 ; Restore frame pointer
                 \t LDR     R11, [R13] ; Restore caller's frame pointer
                 \t ADD     R13, R13, #4 ; Remove return value from stack
                 \t LDMFD   R13!, {R10, PC} ; Restore caller's frame pointer and return ASM address
                 """);
+
     }
 
     @Override

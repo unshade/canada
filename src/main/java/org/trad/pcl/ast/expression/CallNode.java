@@ -42,6 +42,7 @@ public final class CallNode extends VariableReferenceNode {
 
     @Override
     public String getType() throws UndefinedVariableException {
+        System.out.println(this.getIdentifier());
         Function function = (Function) SemanticAnalysisVisitor.findSymbolInScopes(this.getIdentifier(), this.getConcernedLine());
         String type = function.getReturnType();
 
