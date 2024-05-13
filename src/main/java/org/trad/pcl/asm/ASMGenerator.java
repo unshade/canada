@@ -242,16 +242,16 @@ public final class ASMGenerator implements ASTNodeVisitor {
             node.getArguments().forEach(arg -> {
                 try {
                     arg.accept(this);
-                        this.output.append("""
-                                \t SUB SP, SP, #4   ; réservez 4 octets pour le 0
-                                \t MOV R1, #0
-                                \t STR R1, [SP]
-                                \t SUB SP, SP, #4   ; réservez 4 octets pour la valeur (ou plus)
-                                \t STR R0, [SP]     ; stockez la valeur
-                                \t MOV R0, SP       ; adresse de la valeur (ici SP, mais peut être n'importe quelle adresse)
-                                \t BL println
-                                \t ADD SP, SP, #8   ; libérez la pile
-                                """);
+                    this.output.append("""
+                            \t SUB SP, SP, #4   ; réservez 4 octets pour le 0
+                            \t MOV R1, #0
+                            \t STR R1, [SP]
+                            \t SUB SP, SP, #4   ; réservez 4 octets pour la valeur (ou plus)
+                            \t STR R0, [SP]     ; stockez la valeur
+                            \t MOV R0, SP       ; adresse de la valeur (ici SP, mais peut être n'importe quelle adresse)
+                            \t BL println
+                            \t ADD SP, SP, #8   ; libérez la pile
+                            """);
 
                 } catch (Exception ex) {
                     throw new RuntimeException(ex);
@@ -511,7 +511,7 @@ public final class ASMGenerator implements ASTNodeVisitor {
 
     @Override
     public void visit(CharacterValExpressionNode node) throws Exception {
-        Context.background().setPutChar(true);
+        node.getExpression().accept(this);
     }
 
     @Override
