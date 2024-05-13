@@ -367,9 +367,10 @@ public final class ASMGenerator implements ASTNodeVisitor {
         if(node.isReverse()){
             node.getEndExpression().accept(this); // store result in R0
         }
-        {
+        else {
             node.getStartExpression().accept(this); // store result in R0
         }
+
 
         this.findVariableAddress(node.getIdentifier(), null); // store in address in R9
 
