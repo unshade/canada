@@ -12,6 +12,9 @@ begin
 return dot ;
 end perimetreRectangle;
 
+choix : integer;
+
 begin
+choix := 4;
 perimetreRectangle(5, 10);
 end unDebut ;
