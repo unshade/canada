@@ -188,9 +188,7 @@ public final class ASMGenerator implements ASTNodeVisitor {
         String formattedCode = String.format("\t SUB     R13, R13, #%s ; Save space for %s in stack-frame", typeSymbol.getSize(), node.getIdentifier());
         this.output.append(formattedCode).append("\n");
 
-        //TODO : assignement
-
-        //this.output = newOutput;
+        node.getAssignment().accept(this);
     }
 
 
@@ -375,7 +373,7 @@ public final class ASMGenerator implements ASTNodeVisitor {
 
         output.append(loopStartLabel).append("\n");
         this.output.append("""
-                \t LDR     R1, [R9] ; Load variable %s in R0
+                \t LDR     R1, [R9] ; Load variable %s in R1
                 """.formatted(node.getIdentifier()));
         node.getEndExpression().accept(this); // store result in R0
 
@@ -388,9 +386,9 @@ public final class ASMGenerator implements ASTNodeVisitor {
 
         this.findVariableAddress(node.getIdentifier(), null); // store in address in R9
         this.output.append("""
-                \t LDR     R0, [R9, #-%s] ; Load variable %s in R0
+                \t LDR     R0, [R9] ; Load variable %s in R0
                 \t ADD     R0, R0, #1 ; Increment loop variable
-                \t STR     R0, [R9, #-%s] ; Assign incremented loop variable to loop variable %s
+                \t STR     R0, [R9] ; Assign incremented loop variable to loop variable %s
                 """.formatted(findSymbolInScopes(node.getIdentifier()).getShift(), node.getIdentifier(), findSymbolInScopes(node.getIdentifier()).getShift(), node.getIdentifier()));
 
         output.append("\t B       ").append(loopStartLabel).append("\n");
