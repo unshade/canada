@@ -124,94 +124,94 @@
     La grammaire initiale du langage \textit{canAda}, avant sa transformation en grammaire LL(1), se présente comme suit en BNF sans les regex:
 
     \begin{lstlisting}[keywordstyle=\color{black},label={lst:lstlisting}]
-        fichier -> $withAda.Text$_$IO$ $;$ $useAda.Text$_$IO$ $;$ $procedure$ $ident$ $is$ <decls> $begin$ <instrs> $end$ <hasident> $;$ $EOF$
+fichier -> $withAda.Text$_$IO$ $;$ $useAda.Text$_$IO$ $;$ $procedure$ $ident$ $is$ <decls> $begin$ <instrs> $end$ <hasident> $;$ $EOF$
 
-        decl -> $type$ $ident$ $;$
-               | $type$ $ident$ $is$ $access$ $ident$ $;$
-               | $type$ $ident$ $is$ $record$ <champs> $end$ $record$ $;$
-               | <identsep> $:$ <type> <typexpr> $;$
-               | $procedure$ $ident$ <hasparams> $is$ <decls> $begin$ <instrs> $end$ <hasident> $;$
-               | $function$ $ident$ <hasparams> $return$ <type> $is$ <decls> $begin$ <instrs> $end$ <hasident> $;$
+decl -> $type$ $ident$ $;$
+        | $type$ $ident$ $is$ $access$ $ident$ $;$
+        | $type$ $ident$ $is$ $record$ <champs> $end$ $record$ $;$
+        | <identsep> $:$ <type> <typexpr> $;$
+        | $procedure$ $ident$ <hasparams> $is$ <decls> $begin$ <instrs> $end$ <hasident> $;$
+        | $function$ $ident$ <hasparams> $return$ <type> $is$ <decls> $begin$ <instrs> $end$ <hasident> $;$
 
-        decls -> <decl> <decls>
+decls -> <decl> <decls>
+        | $\epsilon$
+
+hasident -> $ident$
+            | $\epsilon$
+
+identsep -> $ident$ $,$ <identsep>
+            | ident
+
+champ -> <identsep> $:$ <type> $;$
+
+champs -> <champ> <champs>
+            | <champ>
+
+type -> $ident$
+        | $access$ ident
+
+params -> $($ <paramsep> $)$
+
+hasparams -> <params>
+            | $\epsilon$
+
+paramsep -> <param> $;$ <paramsep>
+            | <param>
+
+typexpr -> $:=$ <expr>
+            | $\epsilon$
+
+param -> <identsep> $:$ <mode> <type>
+
+mode -> $in$
+        | $in$ $out$
+        | $\epsilon$
+
+expr -> $entier$
+        | $caractère$
+        | $true$
+        | $false$
+        | $null$
+        | $($ <expr> $)$
+        | <acces>
+        | <expr> <operateur> <expr>
+        | $not$ <expr>
+        | $-$ <expr>
+        | $new$ $ident$
+        | $ident$ ( <exprsep> )
+        | $character$ $'$ $val$ $($ <expr> $)$
+
+exprsep -> <expr> $,$ <exprsep>
+            | <expr>
+
+hasexpr -> <expr>
+            | $\epsilon$
+
+instr -> <acces> $:=$ <expr> ;
+            | $ident$ $;$
+            | $ident$ ( <exprsep> ) $;$
+            | $return$ <hasexpr> $;$
+            | $begin$ <instrs> $end$ $;$
+            | $if$ <expr> $then$ <instrs> <elsif> <else> $end$ $if$ $;$
+            | $for$ $ident$ $in$ <hasreverse> <expr> .. <expr> $loop$ <instrs> $end$ $loop$ $;$
+            | $while$ <expr> $loop$ <instrs> $end$ $loop$ $;$
+
+elsif -> $elsif$ <expr> $then$ <instrs> <elsif>
+            | $\epsilon$
+
+else -> $else$ <instrs>
+            | $\epsilon$
+
+hasreverse -> $reverse$
                 | $\epsilon$
 
-        hasident -> $ident$
-                   | $\epsilon$
+instrs -> <instr> <instrs>
+            | <instr>
 
-        identsep -> $ident$ $,$ <identsep>
-                   | ident
+operateur -> $=$ | $/=$ | $<$ | $<=$ | $>$ | $>=$ | $+$ | $-$ | $*$ | $/$ | $rem$ | $and$ | $and$ $then$ | $or$ | $or$ $else$
 
-        champ -> <identsep> $:$ <type> $;$
-
-        champs -> <champ> <champs>
-                 | <champ>
-
-        type -> $ident$
-               | $access$ ident
-
-        params -> $($ <paramsep> $)$
-
-        hasparams -> <params>
-                    | $\epsilon$
-
-        paramsep -> <param> $;$ <paramsep>
-                   | <param>
-
-        typexpr -> $:=$ <expr>
-                  | $\epsilon$
-
-        param -> <identsep> $:$ <mode> <type>
-
-        mode -> $in$
-               | $in$ $out$
-               | $\epsilon$
-
-        expr -> $entier$
-               | $caractère$
-               | $true$
-               | $false$
-               | $null$
-               | $($ <expr> $)$
-               | <acces>
-               | <expr> <operateur> <expr>
-               | $not$ <expr>
-               | $-$ <expr>
-               | $new$ $ident$
-               | $ident$ ( <exprsep> )
-               | $character$ $'$ $val$ $($ <expr> $)$
-
-        exprsep -> <expr> $,$ <exprsep>
-                  | <expr>
-
-        hasexpr -> <expr>
-                  | $\epsilon$
-
-        instr -> <acces> $:=$ <expr> ;
-                 | $ident$ $;$
-                 | $ident$ ( <exprsep> ) $;$
-                 | $return$ <hasexpr> $;$
-                 | $begin$ <instrs> $end$ $;$
-                 | $if$ <expr> $then$ <instrs> <elsif> <else> $end$ $if$ $;$
-                 | $for$ $ident$ $in$ <hasreverse> <expr> .. <expr> $loop$ <instrs> $end$ $loop$ $;$
-                 | $while$ <expr> $loop$ <instrs> $end$ $loop$ $;$
-
-        elsif -> $elsif$ <expr> $then$ <instrs> <elsif>
-                 | $\epsilon$
-
-        else -> $else$ <instrs>
-                 | $\epsilon$
-
-        hasreverse -> $reverse$
-                      | $\epsilon$
-
-        instrs -> <instr> <instrs>
-                  | <instr>
-
-        operateur -> $=$ | $/=$ | $<$ | $<=$ | $>$ | $>=$ | $+$ | $-$ | $*$ | $/$ | $rem$ | $and$ | $and$ $then$ | $or$ | $or$ $else$
-
-        acces -> $ident$
-                | <expr> $.$ $ident$
+acces -> $ident$
+        | <expr> $.$ $ident$
 
     \end{lstlisting}
 
@@ -219,15 +219,15 @@
     La grammaire initiale comportait plusieurs instances de récursivité à gauche.
     Par exemple, les deux règles suivantes:
     \begin{lstlisting}[label={lst:lstlisting2}]
-        expr -> <acces>
-        acces -> $ident$ | <expr> . ident
+expr -> <acces>
+acces -> $ident$ | <expr> . ident
     \end{lstlisting}
     ont été transformées en:
     \begin{lstlisting}[label={lst:lstlisting3}]
-        expr -> [$\dots$] -> primary
-        primary -> $ident$ <primary2>
-        primary2 -> $($ <exprsep> $)$ <acces> | <acces>
-        acces -> $.$ ident <acces> | $\epsilon$
+expr -> [$\dots$] -> primary
+primary -> $ident$ <primary2>
+primary2 -> $($ <exprsep> $)$ <acces> | <acces>
+acces -> $.$ ident <acces> | $\epsilon$
     \end{lstlisting}
     Comme la priorisation des calculs a beaucoup impacté la structure de la grammaire, on note [\dots] pour représenter l'enchainement de règles permettant de se retrouver dans le cas de la règle \textit{expr} de départ.
     Cette modification élimine la (double ici) récursivité à gauche, rendant la grammaire adaptée pour une analyse LL(1).
@@ -237,13 +237,13 @@
     La factorisation à gauche a été nécessaire pour certaines règles.
     Par exemple, les règles suivantes:
     \begin{lstlisting}[label={lst:lstlisting4}]
-        exprsep -> <expr> $,$ <exprsep>
-        exprsep -> <expr>
+exprsep -> <expr> $,$ <exprsep>
+exprsep -> <expr>
     \end{lstlisting}
     ont été réécrites en:
     \begin{lstlisting}[label={lst:lstlisting5}]
-        exprsep -> <expr> <exprsep$'$>
-        exprsep$'$ -> $,$ <expr> <exprsep$'$> | $\epsilon$
+exprsep -> <expr> <exprsep$'$>
+exprsep$'$ -> $,$ <expr> <exprsep$'$> | $\epsilon$
     \end{lstlisting}
     Ceci assure que la règle peut être analysée de manière déterministe en LL(1).
 
@@ -255,24 +255,24 @@
     \end{lstlisting}
     a été réécrite en partie de cette manière:
     \begin{lstlisting}[label={lst:lstlisting7}]
-        expr -> <or_expr>
-        or_expr -> <and_expr> <or_expr$'$>
-        or_expr$'$ -> $or$ <or_expr$'$2> | $\epsilon$
-        or_expr$'$2 -> <and_expr> <or_expr$'$>
-        or_expr$'$2 -> $else$ <and_expr> <or_expr$'$>
-        and_expr -> <not_expr> <and_expr$'$>
-        [$\dots$]
-        unary_expr -> $-$ <unary_expr>
-        unary_expr -> <primary>
-        primary -> $entier$
-        primary -> $caractère$
-        primary -> $true$
-        primary -> $false$
-        primary -> $null$
-        primary -> $($ <expr> $)$
-        primary -> $ident$ <primary2>
-        primary -> $new$ $ident$
-        primary -> $character$ $'$ $val$ ( <expr> )
+expr -> <or_expr>
+or_expr -> <and_expr> <or_expr$'$>
+or_expr$'$ -> $or$ <or_expr$'$2> | $\epsilon$
+or_expr$'$2 -> <and_expr> <or_expr$'$>
+or_expr$'$2 -> $else$ <and_expr> <or_expr$'$>
+and_expr -> <not_expr> <and_expr$'$>
+[$\dots$]
+unary_expr -> $-$ <unary_expr>
+unary_expr -> <primary>
+primary -> $entier$
+primary -> $caractère$
+primary -> $true$
+primary -> $false$
+primary -> $null$
+primary -> $($ <expr> $)$
+primary -> $ident$ <primary2>
+primary -> $new$ $ident$
+primary -> $character$ $'$ $val$ ( <expr> )
     \end{lstlisting}
     Cela permet de respecter la hiérarchie des opérations dans les expressions arithmétiques et logiques.
 
@@ -283,165 +283,165 @@
     \subsection{Grammaire Transformée en LL(1)}\label{subsec:grammaire-transformee-en-ll(1)}
     La grammaire transformée en LL(1) se présente comme suit:
     \begin{lstlisting}[label={lst:lstlisting9}]
-        fichier -> $withAda.Text$_$IO$ $;$ $useAda.Text$_$IO$ $;$ $procedure$ $ident$ $is$ decls $begin$ instrs $end$ hasident $;$ $EOF$
-        decl -> $type$ $ident$ hasischoose $;$
-        decl -> identsep $:$ type_n typexpr $;$
-        decl -> $procedure$ ident hasparams $is$ decls $begin$ instrs $end$ hasident $;$
-        decl -> $function$ $ident$ hasparams $return$ type_n $is$ decls $begin$ instrs $end$ hasident $;$
+fichier -> $withAda.Text$_$IO$ $;$ $useAda.Text$_$IO$ $;$ $procedure$ $ident$ $is$ decls $begin$ instrs $end$ hasident $;$ $EOF$
+decl -> $type$ $ident$ hasischoose $;$
+decl -> identsep $:$ type_n typexpr $;$
+decl -> $procedure$ ident hasparams $is$ decls $begin$ instrs $end$ hasident $;$
+decl -> $function$ $ident$ hasparams $return$ type_n $is$ decls $begin$ instrs $end$ hasident $;$
 
-        hasischoose -> $is$ accorrec | $\epsilon$
+hasischoose -> $is$ accorrec | $\epsilon$
 
-        accorrec -> $access$ $ident$
-        accorrec -> $record$ champs $end$ $record$
+accorrec -> $access$ $ident$
+accorrec -> $record$ champs $end$ $record$
 
-        decls -> decl decls
-        decls -> $\epsilon$
+decls -> decl decls
+decls -> $\epsilon$
 
-        hasident -> $ident$
-        hasident -> $\epsilon$
+hasident -> $ident$
+hasident -> $\epsilon$
 
-        identsep -> $ident$ identsep2
+identsep -> $ident$ identsep2
 
-        identsep2 -> $,$ identsep
-        identsep2 -> $\epsilon$
+identsep2 -> $,$ identsep
+identsep2 -> $\epsilon$
 
-        champ -> identsep $:$ type_n $;$
+champ -> identsep $:$ type_n $;$
 
-        champs -> champ champs2
+champs -> champ champs2
 
-        champs2 -> champs | $\epsilon$
+champs2 -> champs | $\epsilon$
 
-        type_n -> $ident$
-        type_n -> $access$ $ident$
+type_n -> $ident$
+type_n -> $access$ $ident$
 
-        params -> $($ paramsep $)$
+params -> $($ paramsep $)$
 
-        hasparams -> params
-        hasparams -> $\epsilon$
+hasparams -> params
+hasparams -> $\epsilon$
 
-        paramsep -> param paramsep2
+paramsep -> param paramsep2
 
-        paramsep2 -> $;$ paramsep
-        paramsep2 -> $\epsilon$
+paramsep2 -> $;$ paramsep
+paramsep2 -> $\epsilon$
 
-        typexpr -> $:=$ expr
-        typexpr -> $\epsilon$
+typexpr -> $:=$ expr
+typexpr -> $\epsilon$
 
-        param -> identsep $:$ mode type_n
+param -> identsep $:$ mode type_n
 
-        mode -> $in$ modeout
-        mode -> $\epsilon$
+mode -> $in$ modeout
+mode -> $\epsilon$
 
-        modeout -> $out$
-        modeout -> $\epsilon$
+modeout -> $out$
+modeout -> $\epsilon$
 
-        expr -> or_expr
+expr -> or_expr
 
-        or_expr -> and_expr or_expr$'$
+or_expr -> and_expr or_expr$'$
 
-        or_expr$'$ -> $or$ or_expr$'$2
-        or_expr$'$ -> $\epsilon$
+or_expr$'$ -> $or$ or_expr$'$2
+or_expr$'$ -> $\epsilon$
 
-        or_expr$'$2 -> and_expr or_expr$'$
-        or_expr$'$2 -> $else$ and_expr or_expr$'$
+or_expr$'$2 -> and_expr or_expr$'$
+or_expr$'$2 -> $else$ and_expr or_expr$'$
 
-        and_expr -> not_expr and_expr$'$
+and_expr -> not_expr and_expr$'$
 
-        and_expr$'$ -> $and$ and_expr$'$2
-        and_expr$'$ -> $\epsilon$
+and_expr$'$ -> $and$ and_expr$'$2
+and_expr$'$ -> $\epsilon$
 
-        and_expr$'$2 -> not_expr and_expr$'$
-        and_expr$'$2 -> $then$ not_expr and_expr$'$
+and_expr$'$2 -> not_expr and_expr$'$
+and_expr$'$2 -> $then$ not_expr and_expr$'$
 
-        not_expr -> equality_expr not_expr$'$
+not_expr -> equality_expr not_expr$'$
 
-        not_expr$'$ -> $not$ equality_expr not_expr$'$
-        not_expr$'$ -> $\epsilon$
+not_expr$'$ -> $not$ equality_expr not_expr$'$
+not_expr$'$ -> $\epsilon$
 
-        equality_expr -> relational_expr equality_expr$'$
+equality_expr -> relational_expr equality_expr$'$
 
-        equality_expr$'$ -> $=$ relational_expr equality_expr$'$
-        equality_expr$'$ -> $/=$ relational_expr equality_expr$'$
-        equality_expr$'$ -> $\epsilon$
+equality_expr$'$ -> $=$ relational_expr equality_expr$'$
+equality_expr$'$ -> $/=$ relational_expr equality_expr$'$
+equality_expr$'$ -> $\epsilon$
 
-        relational_expr -> additive_expr relational_expr$'$
+relational_expr -> additive_expr relational_expr$'$
 
-        relational_expr$'$ -> $<$ additive_expr relational_expr$'$
-        relational_expr$'$ -> $<=$ additive_expr relational_expr$'$
-        relational_expr$'$ -> $>$ additive_expr relational_expr$'$
-        relational_expr$'$ -> $>=$ additive_expr relational_expr$'$
-        relational_expr$'$ -> $\epsilon$
+relational_expr$'$ -> $<$ additive_expr relational_expr$'$
+relational_expr$'$ -> $<=$ additive_expr relational_expr$'$
+relational_expr$'$ -> $>$ additive_expr relational_expr$'$
+relational_expr$'$ -> $>=$ additive_expr relational_expr$'$
+relational_expr$'$ -> $\epsilon$
 
-        additive_expr -> multiplicative_expr additive_expr$'$
+additive_expr -> multiplicative_expr additive_expr$'$
 
-        additive_expr$'$ -> $+$ multiplicative_expr additive_expr$'$
-        additive_expr$'$ -> $-$ multiplicative_expr additive_expr$'$
-        additive_expr$'$ -> $\epsilon$
+additive_expr$'$ -> $+$ multiplicative_expr additive_expr$'$
+additive_expr$'$ -> $-$ multiplicative_expr additive_expr$'$
+additive_expr$'$ -> $\epsilon$
 
-        multiplicative_expr -> unary_expr multiplicative_expr$'$
+multiplicative_expr -> unary_expr multiplicative_expr$'$
 
-        multiplicative_expr$'$ -> $*$ unary_expr multiplicative_expr$'$
-        multiplicative_expr$'$ -> $/$ unary_expr multiplicative_expr$'$
-        multiplicative_expr$'$ -> $rem$ unary_expr multiplicative_expr$'$
-        multiplicative_expr$'$ -> $\epsilon$
+multiplicative_expr$'$ -> $*$ unary_expr multiplicative_expr$'$
+multiplicative_expr$'$ -> $/$ unary_expr multiplicative_expr$'$
+multiplicative_expr$'$ -> $rem$ unary_expr multiplicative_expr$'$
+multiplicative_expr$'$ -> $\epsilon$
 
-        unary_expr -> $-$ unary_expr
-        unary_expr -> primary
+unary_expr -> $-$ unary_expr
+unary_expr -> primary
 
-        primary -> $entier$
-        primary -> $caractère$
-        primary -> $true$
-        primary -> $false$
-        primary -> $null$
-        primary -> $($ expr $)$
-        primary -> $ident$ primary2
-        primary -> $new$ $ident$
-        primary -> $character$ $'$ $val$ $($ expr $)$
+primary -> $entier$
+primary -> $caractère$
+primary -> $true$
+primary -> $false$
+primary -> $null$
+primary -> $($ expr $)$
+primary -> $ident$ primary2
+primary -> $new$ $ident$
+primary -> $character$ $'$ $val$ $($ expr $)$
 
-        primary2 -> $($ exprsep $)$ acces
-        primary2 -> acces
+primary2 -> $($ exprsep $)$ acces
+primary2 -> acces
 
-        exprsep -> expr exprsep2
+exprsep -> expr exprsep2
 
-        exprsep2 -> $,$ exprsep
-        exprsep2 -> $\epsilon$
+exprsep2 -> $,$ exprsep
+exprsep2 -> $\epsilon$
 
-        hasexpr -> expr
-        hasexpr -> $\epsilon$
+hasexpr -> expr
+hasexpr -> $\epsilon$
 
-        instr -> $ident$ instr2
-        instr -> $return$ hasexpr $;$
-        instr -> $begin$ instrs $end$ $;$
-        instr -> $if$ expr $then$ instrs elifn elsen $end$ $if$ $;$
-        instr -> $for$ ident $in$ hasreverse expr $..$ expr $loop$ instrs $end$ $loop$ $;$
-        instr -> $while$ expr $loop$ instrs $end$ $loop$ $;$
+instr -> $ident$ instr2
+instr -> $return$ hasexpr $;$
+instr -> $begin$ instrs $end$ $;$
+instr -> $if$ expr $then$ instrs elifn elsen $end$ $if$ $;$
+instr -> $for$ ident $in$ hasreverse expr $..$ expr $loop$ instrs $end$ $loop$ $;$
+instr -> $while$ expr $loop$ instrs $end$ $loop$ $;$
 
-        instr2 -> instr3 $:=$ expr $;$
-        instr2 -> $($ exprsep $)$ instr3 hasassign $;$
-        instr2 -> $;$
+instr2 -> instr3 $:=$ expr $;$
+instr2 -> $($ exprsep $)$ instr3 hasassign $;$
+instr2 -> $;$
 
-        instr3 -> $.$ $ident$ instr3
-        instr3 -> $\epsilon$
+instr3 -> $.$ $ident$ instr3
+instr3 -> $\epsilon$
 
-        hasassign -> $:=$ expr
-        hasassign -> $\epsilon$
+hasassign -> $:=$ expr
+hasassign -> $\epsilon$
 
-        elifn -> $elif$ expr $then$ instrs elifn
-        elifn -> $\epsilon$
+elifn -> $elif$ expr $then$ instrs elifn
+elifn -> $\epsilon$
 
-        elsen -> $else$ instrs
-        elsen -> $\epsilon$
+elsen -> $else$ instrs
+elsen -> $\epsilon$
 
-        hasreverse -> $reverse$
-        hasreverse -> $\epsilon$
+hasreverse -> $reverse$
+hasreverse -> $\epsilon$
 
-        instrs -> instr instrs2
+instrs -> instr instrs2
 
-        instrs2 -> instr instrs2
-        instrs2 -> $\epsilon$
+instrs2 -> instr instrs2
+instrs2 -> $\epsilon$
 
-        acces -> $.$ $ident$ acces
-        acces -> $\epsilon$
+acces -> $.$ $ident$ acces
+acces -> $\epsilon$
     \end{lstlisting}
 
     \subsection{Table LL(1)}\label{subsec:table-ll(1)}
@@ -474,68 +474,68 @@
     Cela repose sur deux fonctions complexes qui permettent de lire le flux de caractères et de déterminer si le caractère courant est la fin d'un token.
 
     \begin{lstlisting}[language=Java,label={lst:lstlisting1}]
-        /**
-         * Check if the current character is the end of a token
-         *
-         * @return true if the current character is the end of a token, false otherwise
-         */
-        private boolean isEndOfToken() {
-            char current = (char) currentChar;
-            int nextInt = this.reader.peek(1);
-            char next = (char) nextInt;
+/**
+    * Check if the current character is the end of a token
+    *
+    * @return true if the current character is the end of a token, false otherwise
+    */
+private boolean isEndOfToken() {
+    char current = (char) currentChar;
+    int nextInt = this.reader.peek(1);
+    char next = (char) nextInt;
 
-            boolean isCurrentLetterOrDigit = Character.isLetterOrDigit(current) || current == '_';
-            boolean isNextLetterOrDigit = Character.isLetterOrDigit(next) || next == '_';
-            boolean isNextWhitespace = Character.isWhitespace(next);
+    boolean isCurrentLetterOrDigit = Character.isLetterOrDigit(current) || current == '_';
+    boolean isNextLetterOrDigit = Character.isLetterOrDigit(next) || next == '_';
+    boolean isNextWhitespace = Character.isWhitespace(next);
 
-            // If the current character is a whitespace or the end of the file, the current character is the end of the token
-            if (nextInt == -1 || isNextWhitespace) {
-                return true;
-            }
-            // If the current character is an identifier or an integer, the next character must not be a letter or a digit
-            if (isCurrentLetterOrDigit) {
-                return !isNextLetterOrDigit;
-            }
+    // If the current character is a whitespace or the end of the file, the current character is the end of the token
+    if (nextInt == -1 || isNextWhitespace) {
+        return true;
+    }
+    // If the current character is an identifier or an integer, the next character must not be a letter or a digit
+    if (isCurrentLetterOrDigit) {
+        return !isNextLetterOrDigit;
+    }
 
-            Token token = this.matchToken(lexeme.toString());
+    Token token = this.matchToken(lexeme.toString());
 
-            // If the current character is a token and the next character is not a token, the current character is the end of the token
-            if (token.tag() != Tag.UNKNOWN) {
-                Token nextToken = this.matchToken(lexeme.toString() + next);
-                return nextToken.tag() == Tag.UNKNOWN;
-            }
+    // If the current character is a token and the next character is not a token, the current character is the end of the token
+    if (token.tag() != Tag.UNKNOWN) {
+        Token nextToken = this.matchToken(lexeme.toString() + next);
+        return nextToken.tag() == Tag.UNKNOWN;
+    }
 
-            return false;
-        }
+    return false;
+}
     \end{lstlisting}
 
     \begin{lstlisting}[label={lst:lstlisting12}]
-        public Token nextToken() {
+public Token nextToken() {
 
-            while ((this.currentChar = this.reader.read()) != -1) {
+    while ((this.currentChar = this.reader.read()) != -1) {
 
-                if (this.isComment()) {
-                    this.skipComment();
-                } else if (Character.isWhitespace((char) currentChar)) {
-                    this.skipWhitespace();
-                } else if (isCharacterLiteral()) {
-                    return this.readCharacterLiteral();
-                } else {
-                    lexeme.append((char) currentChar);
-                    if (this.isEndOfToken()) {
-                        Token token = this.matchToken(lexeme.toString());
-                        lexeme.setLength(0); // clear the StringBuilder
-                        if (token.tag() == Tag.UNKNOWN) {
-                            this.errorService.registerLexicalError(new UnknownTokenException(token));
-                        }
-                        return token;
-                    }
+        if (this.isComment()) {
+            this.skipComment();
+        } else if (Character.isWhitespace((char) currentChar)) {
+            this.skipWhitespace();
+        } else if (isCharacterLiteral()) {
+            return this.readCharacterLiteral();
+        } else {
+            lexeme.append((char) currentChar);
+            if (this.isEndOfToken()) {
+                Token token = this.matchToken(lexeme.toString());
+                lexeme.setLength(0); // clear the StringBuilder
+                if (token.tag() == Tag.UNKNOWN) {
+                    this.errorService.registerLexicalError(new UnknownTokenException(token));
                 }
+                return token;
             }
-
-            this.reader.close();
-            return new Token(Tag.EOF, this.reader.getCurrentLine(), lexeme.toString());
         }
+    }
+
+    this.reader.close();
+    return new Token(Tag.EOF, this.reader.getCurrentLine(), lexeme.toString());
+}
     \end{lstlisting}
 
     \subsection{Optimisation et Fiabilité}\label{subsec:optimisation-et-fiabilite}
@@ -558,14 +558,14 @@
     Sinon on appelle la méthode associée au non-terminal de la règle et ainsi de suite \dots
 
     \begin{lstlisting}[label={lst:lstlisting10}]
-        @PrintMethodName
-        private void expr() {
-            switch (this.currentToken.tag()) {
-                case IDENT, OPEN_PAREN, DOT, ENTIER, CARACTERE, TRUE, FALSE, NULL, NEW, CHARACTER -> {
-                    or_expr();
-                }
-            }
+@PrintMethodName
+private void expr() {
+    switch (this.currentToken.tag()) {
+        case IDENT, OPEN_PAREN, DOT, ENTIER, CARACTERE, TRUE, FALSE, NULL, NEW, CHARACTER -> {
+            or_expr();
         }
+    }
+}
     \end{lstlisting}
 
 
@@ -578,22 +578,22 @@
     Si le token ne correspond pas à la règle, on génère une erreur syntaxique.
 
     \begin{lstlisting}[label={lst:lstlisting11}]
-        @PrintMethodName
-        private void analyseTerminal(Tag tag) {
-            System.out.println("\t\t-> " + this.currentToken);
-            if (!(this.currentToken.tag() == tag)) {
-                Token expectedToken = new Token(tag, this.currentToken.line(), TagHelper.getTagString(tag));
-                if (expectedToken.tag() == Tag.SEMICOLON) {
-                    this.errorService.registerSyntaxWarning(new MissingSemicolonException(this.currentToken));
-                } else {
-                this.errorService.registerSyntaxError(new UnexpectedTokenException(expectedToken, this.currentToken));}
-            }
-            // Contient le prochain token ou <EOF, currentLine,""> si fin de fichier
-            if (this.currentToken.tag() == Tag.EOF) {
-                return;
-            }
-            this.currentToken = lexer.nextToken();
-        }
+@PrintMethodName
+private void analyseTerminal(Tag tag) {
+    System.out.println("\t\t-> " + this.currentToken);
+    if (!(this.currentToken.tag() == tag)) {
+        Token expectedToken = new Token(tag, this.currentToken.line(), TagHelper.getTagString(tag));
+        if (expectedToken.tag() == Tag.SEMICOLON) {
+            this.errorService.registerSyntaxWarning(new MissingSemicolonException(this.currentToken));
+        } else {
+        this.errorService.registerSyntaxError(new UnexpectedTokenException(expectedToken, this.currentToken));}
+    }
+    // Contient le prochain token ou <EOF, currentLine,""> si fin de fichier
+    if (this.currentToken.tag() == Tag.EOF) {
+        return;
+    }
+    this.currentToken = lexer.nextToken();
+}
     \end{lstlisting}
 
     \subsection{Gestion des Erreurs Syntaxiques}\label{subsec:gestion-des-erreurs-syntaxiques}
@@ -616,25 +616,25 @@
     Par exemple, \textit{OperatorNode} représente une opération arithmétique ou logique, tandis que \textit{ProgramNode} représente la structure globale du programme \textit{canAda}.
 
     \begin{lstlisting}[label={lst:lstlisting13}]
-        public class ProgramNode extends ASTNode {
-            private ProcedureDeclarationNode rootProcedure;
+public class ProgramNode extends ASTNode {
+    private ProcedureDeclarationNode rootProcedure;
 
-            public void setRootProcedure(ProcedureDeclarationNode rootProcedure) {
-                this.rootProcedure = rootProcedure;
-                rootProcedure.setParent(this);
-            }
-        }
+    public void setRootProcedure(ProcedureDeclarationNode rootProcedure) {
+        this.rootProcedure = rootProcedure;
+        rootProcedure.setParent(this);
+    }
+}
     \end{lstlisting}
 
     \begin{lstlisting}[label={lst:lstlisting15}]
-        public class OperatorNode extends ASTNode {
-            private String operator;
+public class OperatorNode extends ASTNode {
+    private String operator;
 
-            public OperatorNode(String operator) {
-                this.operator = operator;
-            }
+    public OperatorNode(String operator) {
+        this.operator = operator;
+    }
 
-        }
+}
     \end{lstlisting}
 
     Et ainsi de suite pour chaque nœud de l'arbre.
@@ -642,39 +642,39 @@
     Ainsi on a juste a appeler la fonction \textit{toString()} sur le nœud racine de l'arbre pour afficher l'arbre abstrait syntaxique qui récupère les différents nœuds de l'arbre et les affiche de manière récursivee en récupérant les différents attributs de chaque nœud.
 
     \begin{lstlisting}[label={lst:lstlisting14}]
-        public String toString() {
-            Field[] fields = this.getClass().getDeclaredFields();
-            String className = this.getClass().getSimpleName();
-            StringBuilder res = new StringBuilder(colorize(className, Attribute.YELLOW_TEXT()) + " : { \n");
-            if (isJson) {
-                res = new StringBuilder("{ \n");
-            }
-            int lastIndex = fields.length - 1;
+public String toString() {
+    Field[] fields = this.getClass().getDeclaredFields();
+    String className = this.getClass().getSimpleName();
+    StringBuilder res = new StringBuilder(colorize(className, Attribute.YELLOW_TEXT()) + " : { \n");
+    if (isJson) {
+        res = new StringBuilder("{ \n");
+    }
+    int lastIndex = fields.length - 1;
 
-            for (int i = 0; i < fields.length; i++) {
-                Field field = fields[i];
-                field.setAccessible(true);
-                try {
-                    Object attributeValue = field.get(this);
-                    if (attributeValue instanceof String) {
-                        attributeValue = colorize("\"" + attributeValue + "\"", Attribute.GREEN_TEXT());
-                    }
-                    if (attributeValue == null) {
-                        attributeValue = colorize("null", Attribute.BRIGHT_MAGENTA_TEXT());
-                    }
-                    res.append("\t").append("\"").append(colorize(field.getName(), Attribute.RED_TEXT())).append("\"").append(" : ").append(attributeValue);
-                    if (i < lastIndex || !isJson) {
-                        res.append(",");
-                    }
-                    res.append(" \n");
-
-                } catch (IllegalAccessException e) {
-                    System.err.println("Erreur lors de l'acces au champ " + field.getName());
-                }
+    for (int i = 0; i < fields.length; i++) {
+        Field field = fields[i];
+        field.setAccessible(true);
+        try {
+            Object attributeValue = field.get(this);
+            if (attributeValue instanceof String) {
+                attributeValue = colorize("\"" + attributeValue + "\"", Attribute.GREEN_TEXT());
             }
-            res.append("}");
-            return format(res.toString());
+            if (attributeValue == null) {
+                attributeValue = colorize("null", Attribute.BRIGHT_MAGENTA_TEXT());
+            }
+            res.append("\t").append("\"").append(colorize(field.getName(), Attribute.RED_TEXT())).append("\"").append(" : ").append(attributeValue);
+            if (i < lastIndex || !isJson) {
+                res.append(",");
+            }
+            res.append(" \n");
+
+        } catch (IllegalAccessException e) {
+            System.err.println("Erreur lors de l'acces au champ " + field.getName());
         }
+    }
+    res.append("}");
+    return format(res.toString());
+}
     \end{lstlisting}
 
     \subsection{Représentation des Structures Syntaxiques}\label{subsec:representation-des-structures-syntaxiques}
@@ -699,10 +699,10 @@
 
     Voici un exemple de Symbol Table pour une fonction \textit{perimetreRectangle} ayant deux paramètres \textit{larg} et \textit{long} et une variable locale \textit{p} :
     \begin{lstlisting}[label={lst:lstlisting16}]
-    Entering new scope -> creating new SymbolTable for perimetreRectangle  : 
-        larg -> Parameter { identifier = 'larg', type = 'integer', mode = IN, shift = 4 }
-        long -> Parameter { identifier = 'long', type = 'integer', mode = IN, shift = 8 }
-        p -> Variable { identifier = 'p', type = 'integer', shift = 12 }
+Entering new scope -> creating new SymbolTable for perimetreRectangle  : 
+    larg -> Parameter { identifier = 'larg', type = 'integer', mode = IN, shift = 4 }
+    long -> Parameter { identifier = 'long', type = 'integer', mode = IN, shift = 8 }
+    p -> Variable { identifier = 'p', type = 'integer', shift = 12 }
     \end{lstlisting}
 
     On peut aisément identifier la clé de la table (le nom de l'identificateur) et la valeur associée de type \textit{Parameter} ou \textit{Variable} qui contient des informations sur l'identificateur tel que le décalage dans la pile, le type, le mode, etc. \\
@@ -737,15 +737,15 @@
     \subsection{Exemple}
     Afin d'illustrer sur un exemple, voici le code pour le noeud gérant les retours de fonctions :
     \begin{lstlisting}[label={lst:lstlisting18}]
-        @Override
-        public void visit(ReturnStatementNode node) throws Exception {
-            node.getExpression().accept(this);
-            this.output.append("""
-                    \t STR     R0, [R11, #4 * 2] ; Store return value for in stack-frame
-                    \t MOV     R13, R11 ; Restore frame pointer
-                    \t LDMFD   R13!, {R11, PC} ; Restore caller's frame pointer and return ASM address
-                    """);
-        }
+@Override
+public void visit(ReturnStatementNode node) throws Exception {
+    node.getExpression().accept(this);
+    this.output.append("""
+            \t STR     R0, [R11, #4 * 2] ; Store return value for in stack-frame
+            \t MOV     R13, R11 ; Restore frame pointer
+            \t LDMFD   R13!, {R11, PC} ; Restore caller's frame pointer and return ASM address
+            """);
+}
     \end{lstlisting}
 
     On peut voir la façon dont on descend dans l'arbre (\texttt{node.getExpression().accept(this)}) et comment on génère le code correspondant à ce noeud. Bien que simple, ce code est représentatif de la manière dont nous générons le code pour chaque noeud de l'AST.
@@ -954,18 +954,19 @@ perimetreRectangle
     La phase de génération de code ajoute également des commentaires automatiques pour faciliter la compréhension du code généré. \\
 
     \subsection{Pour un code source invalide}\label{subsec:pour-un-code-source-invalide}
+    \subsubsection{Erreurs syntaxiques}
 
     Voici un code source invalide en canAda qui permet de tester notre compilateur, on a volontairement rajouter un ; en trop à la fin de la ligne 5 :
 
     \begin{lstlisting}[label={lst:lstlisting17}]
-        with Ada.Text_IO; useAda.Text_IO;
-        procedure Main is
-            A : Integer := 5;
-            B : Integer := 10;
-            Sum : Integer;
-        begin ;
-            Sum := A + B;
-        end Main;
+with Ada.Text_IO; useAda.Text_IO;
+procedure Main is
+    A : Integer := 5;
+    B : Integer := 10;
+    Sum : Integer;
+begin ;
+    Sum := A + B;
+end Main;
     \end{lstlisting}
 
     On obtient alors après l'analyse lexicale et syntaxique la sortie suivante, on l'a découpée en 3 parties pour plus de lisibilité et laissée sur fond noir pour faciliter la lisibilité des couleurs :
@@ -993,13 +994,46 @@ perimetreRectangle
         \includegraphics[width=1\textwidth]{syntax_warn}
         \caption{Warnings}\label{fig:figure9}
     \end{figure}
+    \subsubsection{Erreurs sémantiques}
+
+    Voici un code source valide syntaxiquement mais sémantiquement incorrect :
+
+    \begin{lstlisting}[label={lst:lstlisting18}]
+with Ada.Text_IO; use Ada.Text_IO;
+procedure unDebut is
+
+function perimetreRectangle(larg : integer; long : integer) return integer is
+p : integer;
+c : character;
+begin
+    p := 2 ;
+    p := 'C' ;
+    c := 'C' ;
+    return c ;
+end perimetreRectangle;
+
+choix : integer ;
+begin
+choix := perimetreRectangle(5, 10, 15);
+end unDebut ;
+    \end{lstlisting}
+
+    On peut voir ici plusieurs erreur, tel que l'assignation a \texttt{p} d'un char, le retour d'un char dans une fonction qui retourne un int (\texttt{perimetreRectangle}), et l'appel de la fonction \texttt{perimetreRectangle} avec un nombre incorrect de paramètres. \\
+    Nous obtenons alors les erreurs suivantes :
+    \begin{lstlisting}
+Semantic errors:
+	Line 9: Type mismatch: expected integer but got character
+	Line 11: The return type of the FUNCTION does not match the type of the expression (expected integer but got character)
+	Line 17: The FUNCTION perimetreRectangle expects 2 arguments but got 3
+    \end{lstlisting}
 
     On peut ainsi voir que notre compilateur est capable de gérer les erreurs syntaxiques et de les afficher de manière claire et précise.
     Ainsi que de nous aider à le corriger notamment à travers les warnings et le \textit{Panic Mode} qui permet de continuer à analyser le programme source jusqu'à la fin tout en indiquant les erreurs rencontrées.
+    Il analyse également la sémantique du programme et vérifie que les types sont compatibles entre eux.
     
 
     Ce qui conclue la partie sur les tests et la validation de notre compilateur.
-    Bien évidemment, de nombreux autres tests ont été réalisés pour valider notre compilateur.
+    Bien évidemment, de nombreux autres tests ont été réalisés pour valider notre compilateur, ceux-ci sont disponible dans la source du projet.
     \section{Gestion de projet}\label{sec:gestion-de-projet}
 
     \subsection{Équipe de projet}\label{subsec:equipe-de-projet}
@@ -1046,19 +1080,32 @@ perimetreRectangle
         Implémentation des différents nodes & - & 6h & 6h \\
         Rédaction du rapport PCL1 & 4h & - & - \\
         \midrule
-        Total & 24h & 24h & 22h \\ \bottomrule
+        Total PCL1 & 24h & 24h & 22h \\ \bottomrule
+        Tables des symboles & 2h & 5h & 5h \\
+        Structure de l'analyse sémantique & 2h & 2h & 9h \\
+        Analyse sémantique & 9h & 9h & 9h \\
+        Tests & 5h & - & - \\
+        Génération de code & 10h & 10h & 10h \\
+        Rédaction du rapport PCL2 & - & 2h & - \\
+        \midrule
+        Total PCL2 & 27h & 26h & 33h \\ \bottomrule
+        \midrule
+        Total PCL1 + PCL2 & 52h & 52h & 55h \\ \bottomrule
+
     \end{tabular}
 
     \section{Conclusion}\label{sec:conclusion}
     Ce rapport a présenté en détail le processus de développement d'un compilateur pour le langage \textit{canAda}, réalisé dans le cadre du module PCL1 à TELECOM Nancy.
     Le projet a débuté par la transformation de la grammaire originale en une grammaire LL(1), adaptée pour une analyse syntaxique précise.
     Cette transformation a impliqué tout d'abord d'avoir une grammaire explicite sans regex, puis l'élimination de la récursivité à gauche, la factorisation, et la gestion des priorités de calculs pour assurer une analyse déterministe.
-
+    \newline
     L'analyse lexicale a été effectuée par le \textit{Lexer}, un composant clé qui convertit le code source en tokens, en s'appuyant sur un ensemble de règles prédéfinies et un système efficace de lecture en avance et d'une astuce pour déterminer la fin d'un token ce qui nous a permis de nous passer d'un automate à états finis.
     La classe \textit{Parser}, quant à elle, a permis l'analyse syntaxique à travers la récupération du flux de \textit{Token} du programme source et l'application des règles établies dans le tableau LL(1), tout en gérant les erreurs/warnings syntaxiques de manière robuste permettant ainsi de continuer à analyser le programme source jusqu'à la fin tout en indiquant les erreurs rencontrées pour aider le développeur à les corriger.
-
+    \newline
     La construction de l'arbre abstrait syntaxique (AST) a été une étape cruciale, permettant une représentation concise et manipulable du programme source pour les étapes ultérieures de la compilation.
     Chaque nœud de l'AST, tel que \textit{OperatorNode} ou \textit{ProgramNode}, a capturé des éléments essentiels des structures syntaxiques du langage \textit{canAda}.
+    \newline
+    PCL2 nous a permis d'implémenter les Symbol Tables, les contrôles sémantiques et la génération de code. Les Symbol Tables stockent des informations sur les identificateurs du programme, tandis que les contrôles sémantiques garantissent la cohérence du programme en vérifiant les types et les structures syntaxiques. La génération de code a permis de traduire l'AST en code ASM UAL ARM 32 bits, en utilisant un pattern de Double Dispatch : Visitor pour parcourir l'AST et générer le code correspondant à chaque nœud.
 
     La répartition du temps de travail sur les différentes tâches a été équilibrée, assurant ainsi une contribution égale de tous les membres de l'équipe.
 
