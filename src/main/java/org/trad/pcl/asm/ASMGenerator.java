@@ -188,7 +188,9 @@ public final class ASMGenerator implements ASTNodeVisitor {
         String formattedCode = String.format("\t SUB     R13, R13, #%s ; Save space for %s in stack-frame", typeSymbol.getSize(), node.getIdentifier());
         this.output.append(formattedCode).append("\n");
 
-        node.getAssignment().accept(this);
+        if(node.getAssignment() != null) {
+            node.getAssignment().accept(this);
+        }
     }
 
 

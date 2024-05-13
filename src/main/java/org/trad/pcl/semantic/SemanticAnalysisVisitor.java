@@ -231,7 +231,7 @@ public class SemanticAnalysisVisitor implements ASTNodeVisitor {
             if (!(s instanceof Variable var)) {
                 throw new Exception("Line " + node.getConcernedLine() + ": " + "The identifier " + node.getIdentifier() + " is not a valid variable");
             }
-            
+
             if (!var.getType().equals(TypeEnum.INT.toString())) {
                 throw new TypeMismatchException(TypeEnum.INT.toString(), var.getType(), node.getConcernedLine());
             }
