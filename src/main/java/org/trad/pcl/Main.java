@@ -86,10 +86,24 @@ public final class Main {
 
                     Files.write(Paths.get("out.s"), output.getBytes());
                     System.out.println("▶️ " + colorize("RUNNING BINARY VIA HEADLESS VISUAL", new AnsiFormat(Attribute.WHITE_TEXT(), Attribute.BLUE_BACK(), Attribute.BOLD())));
+                    System.out.println("▶️ " + colorize("RUNNING BINARY VIA HEADLESS VISUAL", new AnsiFormat(Attribute.WHITE_TEXT(), Attribute.BLUE_BACK(), Attribute.BOLD())));
+
                     ProcessBuilder pb = new ProcessBuilder("java", "-jar", "pcl.jar", "out.s");
                     pb.redirectOutput(ProcessBuilder.Redirect.INHERIT);
                     pb.redirectError(ProcessBuilder.Redirect.INHERIT);
-                    pb.start();
+
+                    try {
+                        Process process = pb.start();
+                        int exitCode = process.waitFor();
+
+                        if (exitCode == 0) {
+                            System.out.println("Success");
+                        } else {
+                            System.out.println("err : " + exitCode);
+                        }
+                    } catch (IOException | InterruptedException e) {
+                        e.printStackTrace();
+                    }
 
                 } else {
                     AnsiFormat fWarning2 = new AnsiFormat(Attribute.WHITE_TEXT(), Attribute.RED_BACK(), Attribute.BOLD());
