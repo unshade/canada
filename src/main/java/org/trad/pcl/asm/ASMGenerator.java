@@ -1,6 +1,8 @@
 package org.trad.pcl.asm;
 
+import org.aspectj.weaver.ast.Call;
 import org.trad.pcl.Exceptions.Semantic.UndefinedVariableException;
+import org.trad.pcl.Helpers.TypeEnum;
 import org.trad.pcl.ast.ParameterNode;
 import org.trad.pcl.ast.ProgramNode;
 import org.trad.pcl.ast.declaration.*;
@@ -57,11 +59,11 @@ public final class ASMGenerator implements ASTNodeVisitor {
             if(paramType instanceof Record record) {
                 this.output.append("""
                             \t ADD     R1, R11, #%s ; Load field in R0
-                            \t SUB   R2, R13, #4 ; Store argument for %s in stack-frame
+                            \t SUB     R2, R13, #4 ; Store argument for %s in stack-frame
                             """.formatted(counter,symbol.getIdentifier()));
                 this.output.append(saveRecordInStack(record, 0));
                 this.output.append("""
-                            \t SUB   R13, R13, #%s ;
+                            \t SUB     R13, R13, #%s ;
                             """.formatted(record.getSize()));
             } else {
                 this.output.append("""
@@ -96,11 +98,11 @@ public final class ASMGenerator implements ASTNodeVisitor {
             if(paramType instanceof Record record) {
                 this.output.append("""
                             \t ADD     R1, R11, #%s ; Load field in R0
-                            \t SUB   R2, R13, #4 ; Store argument for %s in stack-frame
+                            \t SUB     R2, R13, #4 ; Store argument for %s in stack-frame
                             """.formatted(counter,symbol.getIdentifier()));
                 this.output.append(saveRecordInStack(record, 0));
                 this.output.append("""
-                            \t SUB   R13, R13, #%s ;
+                            \t SUB     R13, R13, #%s ;
                             """.formatted(record.getSize()));
             } else {
                 this.output.append("""
@@ -126,7 +128,6 @@ public final class ASMGenerator implements ASTNodeVisitor {
     public void visit(VariableDeclarationNode node) throws Exception {
         String type = node.getType().getIdentifier();
         Type typeSymbol = (Type) scopeStack.findSymbolInScopes(type);
-        assert typeSymbol != null;
         String formattedCode = String.format("\t SUB     R13, R13, #%s ; Save space for %s in stack-frame", typeSymbol.getSize(), node.getIdentifier());
         this.output.append(formattedCode).append("\n");
 
@@ -141,11 +142,11 @@ public final class ASMGenerator implements ASTNodeVisitor {
         node.getExpression().accept(this); // store result in R0
         if (((Type) scopeStack.findSymbolInScopes(node.getExpression().getType(scopeStack))) instanceof Record record) {
             this.output.append("""
-                    \t MOV   R1, R9 ; Load record address in R1
+                    \t MOV     R1, R9 ; Load record address in R1
                     """);
             this.output.append(findVariableAddress(node.getVariableReference().getIdentifier(), node.getVariableReference().getNextExpression())); // store in address in R9
             this.output.append("""
-                    \t MOV   R2, R9 ; Load variable address in R2
+                    \t MOV     R2, R9 ; Load variable address in R2
                     """);
             this.output.append(saveRecordInStack(record, 0));
         } else {
@@ -236,11 +237,11 @@ public final class ASMGenerator implements ASTNodeVisitor {
                 if((Type) scopeStack.findSymbolInScopes(arg.getType(scopeStack)) instanceof Record record) {
                     this.output.append("""
                             \t MOV     R1, R9 ; Load field in R0
-                            \t SUB   R2, R13, #4 ; Store argument for %s in stack-frame
+                            \t SUB     R2, R13, #4 ; Store argument for %s in stack-frame
                             """.formatted(symbol.getIdentifier()));
                     this.output.append(saveRecordInStack(record, 0));
                     this.output.append("""
-                            \t SUB   R13, R13, #%s ; Save space for argument
+                            \t SUB     R13, R13, #%s ; Save space for argument
                             """.formatted(record.getSize()));
                 } else {
                     this.output.append("""
@@ -541,8 +542,11 @@ public final class ASMGenerator implements ASTNodeVisitor {
 
     @Override
     public void visit(LiteralNode node) {
-        if (node.getType(scopeStack).equalsIgnoreCase("character")) {
-
+        if(node.getType(scopeStack).equals(TypeEnum.BOOL.toString())) {
+            int bool = (boolean) node.getValue() ? 1 : 0;
+            this.output.append("\t MOV     R0, #%s ; Load literal value in R0\n".formatted(bool));
+        }
+        else if (node.getType(scopeStack).equals(TypeEnum.CHAR.toString())) {
             this.output.append("\t LDR     R0, =%s ; Load literal value in R0\n".formatted((int) String.valueOf(node.getValue()).charAt(0)));
         } else {
             this.output.append("\t LDR     R0, =%s ; Load literal value in R0\n".formatted(node.getValue()));
@@ -551,7 +555,13 @@ public final class ASMGenerator implements ASTNodeVisitor {
 
     @Override
     public void visit(VariableReferenceNode node) throws Exception {
-
+        if(scopeStack.findSymbolInScopes(node.getIdentifier()) instanceof Function){
+            CallNode callNode = new CallNode();
+            callNode.setIdentifier(node.getIdentifier());
+            callNode.setNextExpression(node.getNextExpression());
+            callNode.accept(this);
+            return;
+        }
         this.output.append(findVariableAddress(node.getIdentifier(), node.getNextExpression()));
         this.output.append("""
                 \t LDR     R0, [R9] ; Load variable %s in R0
