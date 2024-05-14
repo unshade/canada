@@ -1,0 +1,90 @@
+with Ada.Text_IO; use Ada.Text_IO;
+procedure CombatSimulator is
+    type Weapon is record
+        damage : integer;
+    end record;
+
+    type Armor is record
+        defense : integer;
+    end record;
+
+    type Character is record
+        name : character;
+        hp : integer;
+        attack : integer;
+        defense : integer;
+        weapon : Weapon;
+        armor : Armor;
+    end record;
+
+
+
+    Player1 : Character;
+    Player2 : Character;
+
+    function Attack (Player1 : in out Character; Player2 : in out Character) return Character is
+    begin
+        Player2.hp := Player2.hp - Player1.attack;
+        return Player2;
+    end Attack;
+
+    function IsDead (Player : Character) return boolean is
+    begin
+        if Player.hp <= 0 then
+            return True;
+        else
+            return False;
+        end if;
+    end IsDead;
+
+    procedure printStats(Player : Character) is
+    begin
+        put(Player.name);
+        putInt(Player.hp);
+        return;
+    end printStats;
+
+    function initCharacter(name : character) return Character is
+    player : Character;
+    begin
+        player.name := name;
+        player.hp := 20;
+        player.attack := 10;
+        player.defense := 5;
+        return player;
+    end initCharacter;
+
+
+
+begin
+    Player1 := initCharacter('A');
+    Player2 := initCharacter('B');
+
+    printStats(Player1);
+    printStats(Player2);
+
+    Player2 := Attack(Player1, Player2);
+
+    printStats(Player1);
+    printStats(Player2);
+
+    if IsDead(Player2) then
+        put('D');
+    else
+        put('A');
+    end if;
+
+    Player2 := Attack(Player1, Player2);
+
+    printStats(Player1);
+    printStats(Player2);
+
+    if IsDead(Player2) then
+        put('D');
+    else
+        put('A');
+    end if;
+
+end CombatSimulator;
+
+
