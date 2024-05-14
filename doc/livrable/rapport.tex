@@ -1,5 +1,3 @@
-%! Author = kouro
-%! Date = 14/01/2024
 \documentclass[french,a4paper]{article}
 \setcounter{tocdepth}{4}
 \setcounter{secnumdepth}{4}
@@ -688,31 +686,69 @@ public String toString() {
     Après l'analyse syntaxique, le programme source est transformé en un AST, qui est ensuite utilisé pour les étapes de vérification sémantique, d'optimisation, et de génération de code.
     Cette représentation permet une manipulation plus aisée et plus efficace du programme source.
 
-    \section{Symbol Tables}
+    \section{Tables des symboles}
 
-    Les Symbol Tables sont des structures de données qui stockent des informations sur les identificateurs du programme, comme les variables, les fonctions, et les procédures. \\
+    \subsection{Structure de donnée}
+    Les tables des symboles sont des structures de données qui stockent des informations sur les identificateurs du programme, comme les variables, les fonctions, et les procédures. \\
 
-    Elles suivent toutes un schéma assez simple, a chaque bloc de code (une fonction, une procédure, une boucle for) on crée une nouvelle table des symboles, et on l'empile sur une pile de tables des symboles. Nous utilisons une pile afin de pouvoir par la suite réaliser les contrôles sémantiques au niveau des déclarations (prise en compte des scopes supérieurs).  \\
+    Une table des symboles est implémentée sous la forme d'une table de hashage, avec comme clé le nom de l'identificateur et comme valeur un objet de type \textit{Symbol} qui contient des informations sur l'identificateur. \\
+
+    Quant à l'organisation des ces tables, elles suivent toutes le schéma suivant:  a chaque bloc de porté (une fonction ou une procédure) on crée une nouvelle table des symboles qui est empilé dans une pile. Grâce à cette pile, nous pouvons réaliser les contrôles sémantiques au niveau des déclarations (prise en compte des scopes supérieurs) en remottant la pile jusqu'a trouver l'identificateur recherché. A la fin d'un bloc de porté, nous dépilons la dernière table de la pile.  \\
+
+    Voici une illustration de l'analyse sémantique d'une fonction :
+    \begin{lstlisting}[label={lst:lstlisting15}]
+    @Override
+    public void visit(FunctionDeclarationNode node) throws Exception {
+
+        // Add the function to the current scope
+        scopeStack.addSymbolInScopes(node.toSymbol(), node.getConcernedLine());
+
+        // Create a new scope
+        enterScope(new SymbolTable(node.getIdentifier()));
 
 
-    Au niveau de la structure de donnée, il s'agit d'une simple Table de Hashage, avec comme clé le nom de l'identificateur et comme valeur un objet de type \textit{Symbol} qui contient des informations sur l'identificateur. \\
+        // Check the semantic here
 
-    Voici un exemple de Symbol Table pour une fonction \textit{perimetreRectangle} ayant deux paramètres \textit{larg} et \textit{long} et une variable locale \textit{p} :
+        // Exit the scope
+        scopeStack.exitScope();
+    }
+    \end{lstlisting}
+
+
+    \subsection{Exemple}
+    Voici un exemple de table des symboles  pour une fonction nommé \textit{perimetreRectangle} ayant deux paramètres \textit{larg} et \textit{long} et une variable locale \textit{p} :
     \begin{lstlisting}[label={lst:lstlisting16}]
-Entering new scope -> creating new SymbolTable for perimetreRectangle  : 
+Entering new scope -> creating new SymbolTable for perimetreRectangle  :
     larg -> Parameter { identifier = 'larg', type = 'integer', mode = IN, shift = 4 }
     long -> Parameter { identifier = 'long', type = 'integer', mode = IN, shift = 8 }
     p -> Variable { identifier = 'p', type = 'integer', shift = 12 }
     \end{lstlisting}
 
-    On peut aisément identifier la clé de la table (le nom de l'identificateur) et la valeur associée de type \textit{Parameter} ou \textit{Variable} qui contient des informations sur l'identificateur tel que le décalage dans la pile, le type, le mode, etc. \\
+    On peut rapidement identifier la clé de la table (le nom de l'identificateur) et la valeur associée de type \textit{Parameter} ou \textit{Variable} qui contient des informations sur l'identificateur tel que le décalage dans la pile, le type, le mode, etc. \\
+
+    La liste des tables des symboles est également utilisé lors de la génération de code.
 
     \section{Contrôles sémantiques}
 
-    Afin de garantir la cohérence du programme, nous avons implémenté plusieurs contrôles sémantiques. Ces contrôles sont effectués après la construction de l'AST et la création des Symbol Tables. \\
+    \subsection{Parcours de l'AST}
 
-    Nous parcourons l'arbre de haut en bas (Pattern Visitor) en vérifiant les contraintes sémantiques du langage. \\
+    Afin de garantir la cohérence du programme, nous avons implémenté plusieurs contrôles sémantiques. Ces contrôles sont effectués après la construction de l'AST.\\
 
+    Nous parcourons l'arbre de haut en bas à l'aide du pattern Visitor qui nous permet de descendre dans les noeuds. A chaque noeud nous effectuons les contrôles sémantiques associé puis descendons dans les noeuds du dessous. Voici un exemple pour le noeud correspondant à l'assignation d'une valeur à une variable : \\
+
+    \begin{lstlisting}[label={lst:lstlisting17}]
+    @Override
+    public void visit(AssignmentStatementNode node) throws Exception {
+        node.getVariableReference().accept(this);
+        node.getExpression().accept(this);
+        node.checkIfAssignable();
+    }
+    \end{lstlisting}
+
+    Ici, nous pouvons remarquer les deux premières lignes (\texttt{node.getVariableReference().accept(this);} et \texttt{node.getExpression().accept(this);}) de la fonction qui permettent de descendre dans l'arbre et d'effectuer les contrôles sémantiques de la variable auquel va être assigné la valeur de l'expression ainsi que l'expression elle même. Ensuite on appelle la méthode qui vérifie si l'expression peut être assigné à la variable.
+
+
+    \subsection{Implémentation}
     Voici une liste des contrôles sémantiques que nous avons implémentés :
     \begin{itemize}
         \item \textbf{Déclaration de variables} : Vérification de la déclaration des variables, si elles sont bien déclarées avant d'être utilisées.
@@ -729,61 +765,203 @@ Entering new scope -> creating new SymbolTable for perimetreRectangle  :
 
 
     \section{Génération de Code}
-    Une fois l'AST, les Symbol Tables et les contrôles sémantiques complétés, la phase de génération de code peut commencer. Nous utilisons l'AST ainsi que les informations contenues dans les noeuds et dans les Symbol Tables pour générer le code final en ASM UAL ARM 32 bits.
+    Une fois l'AST, les tables des symboles et les contrôles sémantiques complétés, la phase de génération de code peut commencer. Nous utilisons l'AST ainsi que les la liste des tables des symboles pour générer le code final en ASM UAL ARM 32 bits.
 
     \subsection{Parcours de l'AST}
-    Pour générer le code, nous parcourons l'AST dans la classe \textit{ASMGenerator}. Nous partons du root node et nous descendons au fur et à mesure dans l'arbre grâce à un pattern de Double Dispatch : Visitor. Pour chaque type de noeud, nous générons le code correspondant. Chaque noeud est responsable uniquement de la génération de son propre code. Nous utilisons également une petite classe \textit{Context}, celle-ci nous permet de stocker des informations sur le contexte actuel de génération de code, comme le nom de la fonction actuelle, le nombre de variables locales, etc. Bien qu'assez petite, \textit{Context} est importante au niveau des opérations, en effet c'est elle qui nous permet de savoir dans quel registre enregistrer le résultat d'une opération (par exemple, une addition $3+9+1$ : 1 va dans R0, 9 dans R1, leur résultat va dans R0, 3 est stocké dans R1 puis R0 et R1 sont ADD dans R0). \\
+    Pour générer le code, nous parcourons l'AST dans la classe \textit{ASMGenerator} de la même manière que l'analyse sémantique avec le pattern Visitor. Nous reconstruisons également la pile de table des symboles au fur et à mesure de la génération. Pour chaque noeud, nous générons le code correspondant. Chaque noeud est responsable uniquement de la génération de son propre code, sauf pour quelques exceptions où nous avons besoin de plus de contexte au moment de la génération (par exemple pour les appels de fonctions avec des paramètres record). \\
 
     \subsection{Exemple}
-    Afin d'illustrer sur un exemple, voici le code pour le noeud gérant les retours de fonctions :
+    Afin d'illustrer la génération de code, voici la partie pour le noeud gérant les retours de fonctions :
     \begin{lstlisting}[label={lst:lstlisting18}]
 @Override
 public void visit(ReturnStatementNode node) throws Exception {
-    node.getExpression().accept(this);
+    if(node.getExpression() != null) {
+        node.getExpression().accept(this);
+        Type type = (Type) scopeStack.findSymbolInScopes(node.getExpression().getType(scopeStack));
+        int shift = 2 * 4 + type.getSize();
+        if (type instanceof Record record) {
+            this.output.append("""
+                    \t MOV     R1, R9 ; Load field in R0
+                    \t ADD   R2, R11, #%s ; Store return value for in stack-frame
+                    """.formatted(shift));
+            this.output.append(saveRecordInStack(record, 0));
+        } else {
+            this.output.append("""
+                    \t STR     R0, [R11, #%s] ; Store return value for in stack-frame
+                    """.formatted(shift));
+        }
+    }
     this.output.append("""
-            \t STR     R0, [R11, #4 * 2] ; Store return value for in stack-frame
             \t MOV     R13, R11 ; Restore frame pointer
-            \t LDMFD   R13!, {R11, PC} ; Restore caller's frame pointer and return ASM address
+            \t LDR     R11, [R13] ; Restore caller's frame pointer
+            \t ADD     R13, R13, #4 ;
+            \t LDMFD   R13!, {R10, PC} ; Restore caller's frame pointer and return ASM address
             """);
+
 }
     \end{lstlisting}
 
-    On peut voir la façon dont on descend dans l'arbre (\texttt{node.getExpression().accept(this)}) et comment on génère le code correspondant à ce noeud. Bien que simple, ce code est représentatif de la manière dont nous générons le code pour chaque noeud de l'AST.
+    On peut voir la façon dont on descend dans l'arbre (\texttt{node.getExpression().accept(this)}) et comment on génère le code correspondant à ce noeud. On peut ensuite déterminer le type de l'expression grâce à notre pile de table des symboles afin de séparé le cas d'un record. En effet, si le type de l'expression est un record alors on va appeler une fonction qui générer le code permettant de recopier un record d'une adresse stocker dans R1 à une adresse stocker dans R2. Enfin on restaure le contexte de la fonction appelante.
 
     \subsection{Schémas de traduction}
-    \subsubsection{Appels de fonctions}
+    \subsubsection{Déclaration de fonction}
 
     Dans un premier temps, les appels de fonctions ont été un problème au niveau de la sortie ASM. En effet ADA permet de déclarer des fonctions dans des fonctions et ainsi de suite, cependant cette structure ne correspond pas à la structure d'un programme en ASM (Chaque fonction aura son étiquette et sera isolée des autres). \\
-    Afin de résoudre ce soucis nous avons décidé de trier les déclarations, de ne traduire que ce qui n'est pas une déclaration de fonction ou procédure, puis traduire la fonction (ou procédure) courrante et enfin les déclarations de fonctions ou procédure en dernier. Ceci permet de garder une structure ASM ou chaque nouvelle fonction est bien a part des autres. \\
+    Afin de résoudre ce problème nous avons décidé de trier les déclarations en ne traduisant que ce celle qui ne sont pas une déclaration de fonction ou procédure. Poursuivre par la traduction la fonction (ou procédure) courante et seulement après traduire les déclarations de fonctions et procédure. Ceci permet de garder une structure ASM où chaque nouvelle fonction est bien a part des autres. \\
 
-    Une fois ce soucis mineur réglé, nous avons pu nous concentrer sur la traduction des appels de fonctions.
-    Voici le code permettant de traduire une fonction :
+    Pour la génération de code d'une fonction, on commence par sauvegarder l'environnement de la fonction appelante et à mettre en place le nouveau, c'est à dire le frame pointer, la chaînage statique et le chaînage dynamque. Voici le code correspondant :
     \begin{lstlisting}
-@Override
-public void visit(FunctionDeclarationNode node) throws Exception {
-    enterScope();
-    Symbol symbol = this.findSymbolInScopes(node.getIdentifier());
     this.output.append(symbol.getIdentifier()).append("\n").append("""
-            \t STMFD   R13!, {R11, LR} ; Save caller's frame pointer and return ASM address
-            \t MOV     R11, R13 ; Set up new frame pointer
-            """);
-    Context.background().setCounter(node.getParameters().size());
-    node.getParameters().forEach(param -> {
-        try {
-            param.accept(this);
-            Context.background().setCounter(Context.background().getCounter() - 1);
-        } catch (Exception ex) {
-            throw new RuntimeException(ex);
-        }
-    });
-    node.getBody().accept(this);
-    exitScope();
-}
+                \t STMFD   R13!, {R10, LR} ; Save caller's frame pointer and return ASM address
+                \t MOV     R10, R9 ; Set up new static link
+                \t SUB     R13, R13, #4
+                \t STR     R11, [R13]
+                \t MOV     R11, R13 ; Set up new frame pointer
+                """);
     \end{lstlisting}
 
-    On peut ici voir dans un premier temps la sauvegarde du frame pointer et de l'adresse de retour, puis la gestion des paramètres, et enfin la génération du code pour le corps de la fonction. \\
-    On peut également voir que chaque node est bien responsable uniquement de la génération de son propre code, ici la fonction ne génère que le code pour sa propre déclaration, les paramètres et le corps de la fonction sont générés par les noeuds correspondants. \\
-    Nous pouvons également utiliser les fonctions de manière récursive, grâce à l'implémentation d'un chainage statique et dynamique. \\
+    Ensuite, nous récupérons les paramètres de la fonction en distinguant le cas d'un paramètre de type record nécessitant plusieurs instructions pour recopier chaque champs dans le paramètre. Voici le code correspondant :
+    \begin{lstlisting}
+    int counter = symbol.getParametersSize() + 2 *4 + type.getSize();
+        for (ParameterNode param : node.getParameters()) {
+            Type paramType = (Type) scopeStack.findSymbolInScopes(param.getType().getIdentifier());
+            if(paramType instanceof Record record) {
+                this.output.append("""
+                            \t ADD     R1, R11, #%s ; Load field in R0
+                            \t SUB     R2, R13, #4 ; Store argument for %s in stack-frame
+                            """.formatted(counter,symbol.getIdentifier()));
+                this.output.append(saveRecordInStack(record, 0));
+                this.output.append("""
+                            \t SUB     R13, R13, #%s ;
+                            """.formatted(record.getSize()));
+            } else {
+                this.output.append("""
+                    \t LDR     R0, [R11, #%s] ; Load parameter %s in R0
+                    \t STMFD   R13!, {R0} ; Store parameter %s in stack-frame
+                    """.formatted(counter, param.getIdentifier(), param.getIdentifier()));
+
+            }
+            counter-=paramType.getSize();
+
+
+        }
+    \end{lstlisting}
+
+    Ici nous pouvons voir que l'on calcul le décalage permettant de retrouver les paramètres en prenant en compte la taille des paramètres, la taille du type de retour, ainsi qu'une constante (\texttt{2*4}) correspondant au chaînage statique et dynamique.
+
+    L'implémentation du chaînage statique et dynamique nous permet de retrouver n'importe quel variable notamment lors de l'accès à une variable global dans une fonction récursive. \\
+
+    Le code complet pour la partie déclaration de fonction est disponible en annexe.
+
+    \subsubsection{Appels de fonctions}
+    Pour la génération du code d'un appel des fonction, on commence par recopier les paramètres de la fonction, voici le code :
+    \begin{lstlisting}
+    node.getArguments().forEach(arg -> {
+
+            arg.accept(this);
+            if((Type) scopeStack.findSymbolInScopes(arg.getType(scopeStack)) instanceof Record record) {
+                this.output.append("""
+                        \t MOV     R1, R9 ; Load field in R0
+                        \t SUB   R2, R13, #4 ; Store argument for %s in stack-frame
+                        """.formatted(symbol.getIdentifier()));
+                this.output.append(saveRecordInStack(record, 0));
+                this.output.append("""
+                        \t SUB   R13, R13, #%s ; Save space for argument
+                        """.formatted(record.getSize()));
+            } else {
+                this.output.append("""
+                        \t STMFD   R13!, {R0} ; Save argument
+                        """);
+            }
+    });
+    \end{lstlisting}
+
+    Une fois de plus, on distingue le cas des records auxquels on doit recopier les champs un par un grâce à la méthode \texttt{saveRecordInStack(record, 0)} expliqué plus bas. \\
+
+    Ensuite on prépare l'appel en laissant un espace pour la valeur de retour( qui peut être un record), puis après l'appel on récupère la valeur de retour dans R0. Voici le code correspondant :
+    \begin{lstlisting}
+    if(symbol instanceof Function function) {
+        Type type = (Type) scopeStack.findSymbolInScopes(function.getReturnType());
+        this.output.append("""
+                \t SUB     R13, R13, #%s ; Save space for return value
+                """.formatted(type.getSize()));
+
+        this.output.append(findAddress(node.getIdentifier()));
+
+        this.output.append("""
+                \t BL      %s ; Branch link to %s (it will save the return address in LR)
+                """.formatted(symbol.getIdentifier(), symbol.getIdentifier()));
+
+        int shift = ASMUtils.getVariableReferenceShift(function.getReturnType(), node.getNextExpression());
+        this.output.append("""
+                \t ADD     R9, R13, #%s ; Store the return value address in R0
+                \t LDR     R0, [R9] ; Load the return value in R0
+                """.formatted(type.getSize() - 4 - shift));
+
+        this.output.append("""
+                \t ADD     R13, R13, #%s ; Remove arguments and return value from stack
+                """.formatted(symbol.getParametersSize() + type.getSize()));
+    } else {
+        this.output.append(findAddress(node.getIdentifier()));
+        this.output.append("""
+                \t BL      %s ; Branch link to %s (it will save the return address in LR)
+                """.formatted(symbol.getIdentifier(), symbol.getIdentifier()));
+        this.output.append("""
+                \t ADD     R13, R13, #%s ; Remove arguments and return value from stack
+                """.formatted(symbol.getParametersSize()));
+    }
+    \end{lstlisting}
+
+    Ici, on sépare les fonctions des procédures car les procédures ne nécessitent pas d'instructions pour la valeur de retour. Après l'appel, on réduit la taille de notre pile en enlevant les arguments et valeurs de retour n'étant plus utile. \\
+
+    De plus, nous avons ajouter des instructions particulières pour pouvoir afficher des valeurs. En effet nous avons implémenté 2 fonctions spéciales (put et putInt afin d'afficher des éléments sur la sortie standard).  Ces fonctions put et putInt ont été réalisées à l'aide de la librairie visUAL2 d'Alexandre Duchesne. Voici le code correspondant :
+    \begin{lstlisting}
+    if (symbol.getIdentifier().equals("put")) {
+        node.getArguments().forEach(arg -> {
+            try {
+                arg.accept(this);
+                this.output.append("""
+                        \t SUB SP, SP, #4   ; réservez 4 octets pour le 0
+                        \t MOV R1, #0
+                        \t STR R1, [SP]
+                        \t SUB SP, SP, #4   ; réservez 4 octets pour la valeur (ou plus)
+                        \t STR R0, [SP]     ; stockez la valeur
+                        \t MOV R0, SP       ; adresse de la valeur (ici SP, mais peut être n'importe quelle adresse)
+                        \t BL println
+                        \t ADD SP, SP, #8   ; libérez la pile
+                        """);
+
+            } catch (Exception ex) {
+                throw new RuntimeException(ex);
+            }
+        });
+        return;
+    }
+
+    if (symbol.getIdentifier().equals("putInt")) {
+        node.getArguments().forEach(arg -> {
+            try {
+                arg.accept(this);
+                this.output.append("""
+                        \t LDR R3, =STR_OUT       ; on charge l'adresse de la valeur
+                        \t BL to_ascii          ; on convertit l'entier en chaîne de caractères
+                        \t LDR R0, =STR_OUT       ; on charge l'adresse de la chaîne de caractères
+                        \t BL println           ; on affiche la chaîne de caractères
+                        """);
+            } catch (Exception ex) {
+                throw new RuntimeException(ex);
+            }
+        });
+        return;
+    }
+    \end{lstlisting}
+
+    Le code complet de l'appel de fonction est disponible en annexe.
+
+
+
+
+
     \subsubsection{Conditionnelles imbriquées}
 
     Les conditionnelles imbriquées ont été gérées de manière naturelle. Chaque if se voit attribuer une étiquette unique basée sur un ID. Ainsi, chaque if est isolé des autres et peut être traité de manière indépendante. L'imbrication de ceux ci ne pose donc aucun soucis. Voici le code pour la génération de code pour les conditionnelles :
@@ -815,9 +993,61 @@ public void visit(IfStatementNode node) throws Exception {
 }
     \end{lstlisting}
 
-    On remarque au début la génération des étiquettes uniques pour chaque if, puis la génération du code pour la condition, le branchement si la condition est fausse, le traitement du else si il existe, et enfin le traitement du then et la fin du if. Dans le cas où une conditionnelle est imbriquée le code de l'imbriquée sera simplement généré entre le branchement du then et la fin de l'if, et se verra attribuer une étiquette unique.
+    On remarque au début la génération des étiquettes uniques pour chaque if, puis la génération du code pour la condition, le branchement si la condition est fausse, le traitement du else si il existe, et enfin le traitement du then et la fin du if. Dans le cas où une conditionnelle est imbriquée, le code de l'imbriquée sera simplement généré entre le branchement du then et la fin de l'if, et se verra attribuer une étiquette unique.
 
-    \subsubsection{Records}
+    \subsection{Records}
+
+    La gestion des records à travers les appels de fonctions ont été décrit au dessus. En terme général, les records sont traités comme des variables normales, avec un décalage dans la pile. Nous pouvons faire cela car leur taille est statique et connue à la compilation. Nous empilons donc de manière contigüe les différents champs du record, et nous les désemplilons de la même manière. Lorsque nous avons besoin de passer un record en argument, nous passons l'adresse du premier champs du record en argument, et nous utilisons le décalage pour accéder aux différents champs du record Voici la fonction permettant de calculer le décalage au sein d'un record. \\
+
+    \begin{lstlisting}
+
+        public static int getVariableReferenceShift(String typeIdent, VariableReferenceNode nextExpression) {
+        int shift = 0;
+        while (nextExpression != null) {
+            Record record = (Record) scopeStack.findSymbolInScopes(typeIdent);
+            assert record != null;
+            Variable field = record.getField(nextExpression.getIdentifier());
+            shift += field.getShift();
+            typeIdent = field.getType();
+            nextExpression = nextExpression.getNextExpression();
+        }
+        return shift;
+    }
+    \end{lstlisting}
+
+    Ici nous pouvons voir que nous parcourons les accès aux champs du record et récupérons l'addition du shift de chacun des champs. Grâce à cela nous pouvons avoir accès à un champ dans des records imbriqués.\\
+
+    Nous avons également implémenté la comparaison de record. En effet, nous pouvons tester l'égalité de record, deux record seront égaux si tous leur champ le sont. Voici le code correspondant :
+    \begin{lstlisting}
+    public static String equalsRecord(Record record, String left, String right, int shift) {
+        StringBuilder sb = new StringBuilder();
+        for (Variable field : record.getFields()) {
+            Type type = (Type) scopeStack.findSymbolInScopes(field.getType());
+            if (type instanceof Record subRecord) {
+                sb.append(equalsRecord(subRecord, left, right, field.getShift() + shift));
+            } else {
+                // On va chercher le champ pour left dans la pile avec findVariableAddress
+                sb.append(findVariableAddress(left, null));
+                sb.append("""
+                        \t LDR     R1, [R9, #-%s] ; Load variable %s in R0
+                        """.formatted(field.getShift() + shift, left));
+                // On va chercher le champ pour right dans la pile avec findVariableAddress
+                sb.append(findVariableAddress(right, null));
+                sb.append("""
+                        \t LDR     R2, [R9, #-%s] ; Load variable %s in R1
+                        """.formatted(field.getShift() + shift, right));
+                // On compare les deux champs
+                sb.append("""
+                        \t CMP     R1, R2 ; Compare operands
+                        \t MOVNE   R0, #0 ; Set R2 to 1 if operands are not equal
+                        """);
+            }
+        }
+        return sb.toString();
+    }
+    \end{lstlisting}
+
+    Ici nous pouvons tester l'égalité de deux records et ceux même si un champ est également un record car la méthode fonctionne récursivement.
 
 
     \section{Tests et Validation}\label{sec:tests-et-validation}
@@ -865,7 +1095,7 @@ end Main;
         \caption{Arbre abstrait}\label{fig:figure6}
     \end{figure}
 
-    La partie de génération des TDS et des contrôles sémantiques démarre à présent. Afin de montrer quelque chose de plus parlant que le programme ci-dessus, on prend a présent ce programme : 
+    La partie de génération des TDS et des contrôles sémantiques démarre à présent. Afin de montrer quelque chose de plus parlant que le programme ci-dessus, on prend a présent ce programme :
 
     \begin{lstlisting}[label={lst:lstlisting16}]
 with Ada.Text_IO; use Ada.Text_IO;
@@ -889,19 +1119,19 @@ end unDebut ;
     On obtient ces différentes tables :
 
     \begin{lstlisting}
-Entering new scope -> creating new SymbolTable for root  : 
+Entering new scope -> creating new SymbolTable for root  :
     character -> Type { identifier = 'character', size = 4, shift = 0 }
     integer -> Type { identifier = 'integer', size = 4, shift = 0 }
     unDebut -> Procedure { identifier = 'unDebut', indexedParametersTypes = '[]', shift = 0 }
     put -> Procedure { identifier = 'put', indexedParametersTypes = '[character]', shift = 0 }
 
 
-Entering new scope -> creating new SymbolTable for unDebut  : 
+Entering new scope -> creating new SymbolTable for unDebut  :
     perimetreRectangle -> Function { identifier = 'perimetreRectangle', indexedParametersTypes = '[integer, integer]', returnType = 'integer', shift = 0 }
     choix -> Variable { identifier = 'choix', type = 'integer', shift = 4 }
 
 
-Entering new scope -> creating new SymbolTable for perimetreRectangle  : 
+Entering new scope -> creating new SymbolTable for perimetreRectangle  :
     larg -> Parameter { identifier = 'larg', type = 'integer', mode = IN, shift = 4 }
     long -> Parameter { identifier = 'long', type = 'integer', mode = IN, shift = 8 }
     p -> Variable { identifier = 'p', type = 'integer', shift = 12 }
@@ -1018,7 +1248,7 @@ choix := perimetreRectangle(5, 10, 15);
 end unDebut ;
     \end{lstlisting}
 
-    On peut voir ici plusieurs erreur, tel que l'assignation a \texttt{p} d'un char, le retour d'un char dans une fonction qui retourne un int (\texttt{perimetreRectangle}), et l'appel de la fonction \texttt{perimetreRectangle} avec un nombre incorrect de paramètres. \\
+    On peut voir ici plusieurs erreur, tel que l'assignation à \texttt{p} d'un char, le retour d'un char dans une fonction qui retourne un int (\texttt{perimetreRectangle}), et l'appel de la fonction \texttt{perimetreRectangle} avec un nombre incorrect de paramètres. \\
     Nous obtenons alors les erreurs suivantes :
     \begin{lstlisting}
 Semantic errors:
@@ -1030,10 +1260,12 @@ Semantic errors:
     On peut ainsi voir que notre compilateur est capable de gérer les erreurs syntaxiques et de les afficher de manière claire et précise.
     Ainsi que de nous aider à le corriger notamment à travers les warnings et le \textit{Panic Mode} qui permet de continuer à analyser le programme source jusqu'à la fin tout en indiquant les erreurs rencontrées.
     Il analyse également la sémantique du programme et vérifie que les types sont compatibles entre eux.
-    
+
 
     Ce qui conclue la partie sur les tests et la validation de notre compilateur.
-    Bien évidemment, de nombreux autres tests ont été réalisés pour valider notre compilateur, ceux-ci sont disponible dans la source du projet.
+    Bien évidemment, de nombreux autres tests ont été réalisés pour valider notre compilateur, ceux-ci sont disponible dans la source du projet. \\
+
+    Vous pourrez trouver en annexe notre programme de démonstration. Celui-ci permet de mettre en valeur toutes les fonctionnalités du compilateur, à travers un jeu de combat.
     \section{Gestion de projet}\label{sec:gestion-de-projet}
 
     \subsection{Équipe de projet}\label{subsec:equipe-de-projet}
@@ -1085,12 +1317,12 @@ Semantic errors:
         Structure de l'analyse sémantique & 2h & 2h & 9h \\
         Analyse sémantique & 9h & 9h & 9h \\
         Tests & 5h & - & - \\
-        Génération de code & 20h & 20h & 20h \\
-        Rédaction du rapport PCL2 & - & 2h & - \\
+        Génération de code & 20h & 20h & 24h \\
+        Rédaction du rapport PCL2 & 1h & 2h & 1h \\
         \midrule
-        Total PCL2 & 37h & 36h & 43h \\ \bottomrule
+        Total PCL2 & 38h & 36h & 48h \\ \bottomrule
         \midrule
-        Total PCL1 + PCL2 & 62h & 62h & 65h \\ \bottomrule
+        Total PCL1 + PCL2 & 62h & 62h & 69h \\ \bottomrule
 
     \end{tabular}
 
@@ -1114,4 +1346,247 @@ Semantic errors:
 
     Il a également renforcé notre compréhension des fondamentaux de la compilation, une compétence essentielle pour tout développeur de logiciels ainsi que pour tout ingénieur en informatique.
 
+    \section{Annexe}\label{sec:annexe}
+
+    \subsection{Code complet de génération du code de déclaration de fonction}
+
+
+    \begin{lstlisting}
+
+    public void visit(FunctionDeclarationNode node) throws Exception {
+        enterScope();
+        Function symbol = (Function) scopeStack.findSymbolInScopes(node.getIdentifier());
+        this.output.append(symbol.getIdentifier()).append("\n").append("""
+                \t STMFD   R13!, {R10, LR} ; Save caller's frame pointer and return ASM address
+                \t MOV     R10, R9 ; Set up new static link
+                \t SUB     R13, R13, #4
+                \t STR     R11, [R13]
+                \t MOV     R11, R13 ; Set up new frame pointer
+                """);
+
+        Type type = (Type) scopeStack.findSymbolInScopes(symbol.getReturnType());
+        int counter = symbol.getParametersSize() + 2 *4 + type.getSize();
+        for (ParameterNode param : node.getParameters()) {
+            Type paramType = (Type) scopeStack.findSymbolInScopes(param.getType().getIdentifier());
+            if(paramType instanceof Record record) {
+                this.output.append("""
+                            \t ADD     R1, R11, #%s ; Load field in R0
+                            \t SUB     R2, R13, #4 ; Store argument for %s in stack-frame
+                            """.formatted(counter,symbol.getIdentifier()));
+                this.output.append(saveRecordInStack(record, 0));
+                this.output.append("""
+                            \t SUB     R13, R13, #%s ;
+                            """.formatted(record.getSize()));
+            } else {
+                this.output.append("""
+                    \t LDR     R0, [R11, #%s] ; Load parameter %s in R0
+                    \t STMFD   R13!, {R0} ; Store parameter %s in stack-frame
+                    """.formatted(counter, param.getIdentifier(), param.getIdentifier()));
+
+            }
+            counter-=paramType.getSize();
+
+
+        }
+        node.getBody().accept(this);
+        scopeStack.exitScope();
+    }
+    \end{lstlisting}
+
+
+    \subsection{Code complet de génération du code d'appel de fonction}
+
+
+    \begin{lstlisting}
+@Override
+public void visit(CallNode node) throws Exception {
+    Procedure symbol = (Procedure) scopeStack.findSymbolInScopes(node.getIdentifier());
+
+    if (symbol.getIdentifier().equals("put")) {
+        node.getArguments().forEach(arg -> {
+            try {
+                arg.accept(this);
+                this.output.append("""
+                        \t SUB SP, SP, #4   ; réservez 4 octets pour le 0
+                        \t MOV R1, #0
+                        \t STR R1, [SP]
+                        \t SUB SP, SP, #4   ; réservez 4 octets pour la valeur (ou plus)
+                        \t STR R0, [SP]     ; stockez la valeur
+                        \t MOV R0, SP       ; adresse de la valeur (ici SP, mais peut être n'importe quelle adresse)
+                        \t BL println
+                        \t ADD SP, SP, #8   ; libérez la pile
+                        """);
+
+            } catch (Exception ex) {
+                throw new RuntimeException(ex);
+            }
+        });
+        return;
+    }
+
+    if (symbol.getIdentifier().equals("putInt")) {
+        node.getArguments().forEach(arg -> {
+            try {
+                arg.accept(this);
+                this.output.append("""
+                        \t LDR R3, =STR_OUT       ; on charge l'adresse de la valeur
+                        \t BL to_ascii          ; on convertit l'entier en chaîne de caractères
+                        \t LDR R0, =STR_OUT       ; on charge l'adresse de la chaîne de caractères
+                        \t BL println           ; on affiche la chaîne de caractères
+                        """);
+            } catch (Exception ex) {
+                throw new RuntimeException(ex);
+            }
+        });
+        return;
+    }
+
+    node.getArguments().forEach(arg -> {
+        try {
+            arg.accept(this);
+            if((Type) scopeStack.findSymbolInScopes(arg.getType(scopeStack)) instanceof Record record) {
+                this.output.append("""
+                        \t MOV     R1, R9 ; Load field in R0
+                        \t SUB   R2, R13, #4 ; Store argument for %s in stack-frame
+                        """.formatted(symbol.getIdentifier()));
+                this.output.append(saveRecordInStack(record, 0));
+                this.output.append("""
+                        \t SUB   R13, R13, #%s ; Save space for argument
+                        """.formatted(record.getSize()));
+            } else {
+                this.output.append("""
+                        \t STMFD   R13!, {R0} ; Save argument
+                        """);
+            }
+
+        } catch (Exception ex) {
+            throw new RuntimeException(ex);
+        }
+    });
+
+    if(symbol instanceof Function function) {
+        Type type = (Type) scopeStack.findSymbolInScopes(function.getReturnType());
+        this.output.append("""
+                \t SUB     R13, R13, #%s ; Save space for return value
+                """.formatted(type.getSize()));
+
+        this.output.append(findAddress(node.getIdentifier()));
+
+        this.output.append("""
+                \t BL      %s ; Branch link to %s (it will save the return address in LR)
+                """.formatted(symbol.getIdentifier(), symbol.getIdentifier()));
+
+        int shift = ASMUtils.getVariableReferenceShift(function.getReturnType(), node.getNextExpression());
+        this.output.append("""
+                \t ADD     R9, R13, #%s ; Store the return value address in R0
+                \t LDR     R0, [R9] ; Load the return value in R0
+                """.formatted(type.getSize() - 4 - shift));
+
+        this.output.append("""
+                \t ADD     R13, R13, #%s ; Remove arguments and return value from stack
+                """.formatted(symbol.getParametersSize() + type.getSize()));
+    } else {
+        this.output.append(findAddress(node.getIdentifier()));
+        this.output.append("""
+                \t BL      %s ; Branch link to %s (it will save the return address in LR)
+                """.formatted(symbol.getIdentifier(), symbol.getIdentifier()));
+        this.output.append("""
+                \t ADD     R13, R13, #%s ; Remove arguments and return value from stack
+                """.formatted(symbol.getParametersSize()));
+    }
+}
+    \end{lstlisting}
+
+    \subsection{Programme de démonstration}
+    \begin{lstlisting}
+with Ada.Text_IO; use Ada.Text_IO;
+procedure CombatSimulator is
+    type Weapon is record
+        damage : integer;
+    end record;
+
+    type Armor is record
+        defense : integer;
+    end record;
+
+    type Character is record
+        name : character;
+        hp : integer;
+        attack : integer;
+        defense : integer;
+        weapon : Weapon;
+        armor : Armor;
+    end record;
+
+
+
+    Player1 : Character;
+    Player2 : Character;
+
+    function Attack (Player1 : in out Character; Player2 : in out Character) return Character is
+    begin
+        Player2.hp := Player2.hp - Player1.attack;
+        return Player2;
+    end Attack;
+
+    function IsDead (Player : Character) return boolean is
+    begin
+        if Player.hp <= 0 then
+            return True;
+        else
+            return False;
+        end if;
+    end IsDead;
+
+    procedure printStats(Player : Character) is
+    begin
+        put(Player.name);
+        putInt(Player.hp);
+        return;
+    end printStats;
+
+    function initCharacter(name : character) return Character is
+    player : Character;
+    begin
+        player.name := name;
+        player.hp := 20;
+        player.attack := 10;
+        player.defense := 5;
+        return player;
+    end initCharacter;
+
+
+
+begin
+    Player1 := initCharacter('A');
+    Player2 := initCharacter('B');
+
+    printStats(Player1);
+    printStats(Player2);
+
+    Player2 := Attack(Player1, Player2);
+
+    printStats(Player1);
+    printStats(Player2);
+
+    if IsDead(Player2) then
+        put('D');
+    else
+        put('A');
+    end if;
+
+    Player2 := Attack(Player1, Player2);
+
+    printStats(Player1);
+    printStats(Player2);
+
+    if IsDead(Player2) then
+        put('D');
+    else
+        put('A');
+    end if;
+
+end CombatSimulator;
+
+    \end{lstlisting}
 \end{document}
