@@ -24,7 +24,7 @@ procedure CombatSimulator is
 
     function Attack (Player1 : in out Character; Player2 : in out Character) return Character is
     begin
-        Player2.hp := Player2.hp - Player1.attack;
+        Player2.hp := Player2.hp - Player1.attack * Player1.weapon.damage / Player2.armor.defense;
         return Player2;
     end Attack;
 
@@ -48,11 +48,16 @@ procedure CombatSimulator is
     player : Character;
     begin
         player.name := name;
-        player.hp := 20;
+        player.hp := 40;
         player.attack := 10;
         player.defense := 5;
+        player.weapon.damage := 2;
+        player.armor.defense := 2;
         return player;
     end initCharacter;
+
+    i : integer;
+    dead : boolean;
 
 
 
@@ -63,26 +68,22 @@ begin
     printStats(Player1);
     printStats(Player2);
 
-    Player2 := Attack(Player1, Player2);
+    dead := False;
 
-    printStats(Player1);
-    printStats(Player2);
-
-    if IsDead(Player2) then
-        put('D');
+    while not dead and i < 5 loop
+            Player2 := Attack(Player1, Player2);
+            printStats(Player1);
+            printStats(Player2);
+            if IsDead(Player2) then
+                dead := True;
+            else
+                i := i + 1;
+            end if;
+        end loop;
+    if dead then
+        putInt(1);
     else
-        put('A');
-    end if;
-
-    Player2 := Attack(Player1, Player2);
-
-    printStats(Player1);
-    printStats(Player2);
-
-    if IsDead(Player2) then
-        put('D');
-    else
-        put('A');
+        putInt(2);
     end if;
 
 end CombatSimulator;
