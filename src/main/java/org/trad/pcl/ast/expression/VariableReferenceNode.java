@@ -8,6 +8,7 @@ import org.trad.pcl.ast.statement.IdentifiableStatement;
 import org.trad.pcl.semantic.ASTNodeVisitor;
 import org.trad.pcl.semantic.SemanticAnalysisVisitor;
 import org.trad.pcl.semantic.StackTDS;
+import org.trad.pcl.semantic.symbol.Function;
 import org.trad.pcl.semantic.symbol.Record;
 import org.trad.pcl.semantic.symbol.Symbol;
 import org.trad.pcl.semantic.symbol.Variable;
@@ -58,9 +59,15 @@ public class VariableReferenceNode extends ASTNode implements IdentifiableExpres
 
     @Override
     public String getType(StackTDS stack) throws UndefinedVariableException {
-        Variable variableExpression = (Variable) stack.findSymbolInScopes(this.getIdentifier(), this.getConcernedLine());
+        Symbol symbol =  stack.findSymbolInScopes(this.getIdentifier(), this.getConcernedLine());
 
-        String type = variableExpression.getType();
+        String type;
+
+        if (symbol instanceof Variable var) {
+            type = var.getType();
+        } else {
+            type = ((Function) symbol).getReturnType();
+        }
 
         if (this.nextExpression != null) {
 

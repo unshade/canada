@@ -164,6 +164,7 @@ public class SemanticAnalysisVisitor implements ASTNodeVisitor {
             statementNode.accept(this);
             } catch (Exception e) {
                 errorService.registerSemanticError(e);
+
             }
         }
     }
@@ -303,11 +304,17 @@ public class SemanticAnalysisVisitor implements ASTNodeVisitor {
     public void visit(VariableReferenceNode node) throws Exception {
         // Check if the variable is defined
         Symbol var = scopeStack.findSymbolInScopes(node.getIdentifier(), node.getConcernedLine());
-        if (!(var instanceof Variable variable)) {
+        String type;
+        if (var instanceof Variable variable ) {
+            type = variable.getType();
+        } else if (var instanceof Function function) {
+            type = function.getReturnType();
+
+        } else {
             throw new InvalidVariableReferenceException(node.getIdentifier(), var.getClass().getSimpleName(), node.getConcernedLine());
         }
 
-        node.checkVariableReferenceAccess(variable.getType());
+        node.checkVariableReferenceAccess(type);
     }
 
     @Override

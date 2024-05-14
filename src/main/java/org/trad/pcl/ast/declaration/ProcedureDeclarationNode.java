@@ -56,18 +56,7 @@ public final class ProcedureDeclarationNode extends ASTNode implements Declarati
         return parameters;
     }
 
-    /*public void initTDS(SymbolTable tdsBefore) {
-        body.initTDS(tdsBefore);
-        SymbolTable tds = body.getTDS();
-        for (ParameterNode parameter : parameters) {
-            tds.addSymbol(parameter.toSymbol());
-        }
-    }
 
-    public void displayTDS() {
-        System.out.println("TDS pour la fonction : " + this.identifier);
-        this.body.displayTDS();
-    }*/
 
     public void setBody(BlockNode body) {
         this.body = body;

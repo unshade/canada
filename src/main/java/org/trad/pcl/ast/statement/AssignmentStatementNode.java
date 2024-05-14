@@ -12,6 +12,7 @@ import org.trad.pcl.ast.expression.VariableReferenceNode;
 import org.trad.pcl.semantic.ASTNodeVisitor;
 import org.trad.pcl.semantic.SemanticAnalysisVisitor;
 import org.trad.pcl.semantic.symbol.Parameter;
+import org.trad.pcl.semantic.symbol.Symbol;
 import org.trad.pcl.semantic.symbol.Variable;
 
 public final class AssignmentStatementNode extends ASTNode implements IdentifiableStatement{
@@ -45,17 +46,22 @@ public final class AssignmentStatementNode extends ASTNode implements Identifiab
     }
 
     public void checkIfAssignable() throws UndefinedVariableException {
-        Variable reference = (Variable) SemanticAnalysisVisitor.scopeStack.findSymbolInScopes(this.variableReference.getIdentifier(), this.variableReference.getConcernedLine());
+        Symbol symbol = SemanticAnalysisVisitor.scopeStack.findSymbolInScopes(this.variableReference.getIdentifier(), this.variableReference.getConcernedLine());
+        if(!(symbol instanceof Variable)){
+            ErrorService.getInstance().registerSemanticError(new TypeMismatchException("Variable", symbol.getClass().getSimpleName(), this.variableReference.getConcernedLine()));
+            return;
+        }
+        System.out.println(symbol.getIdentifier());
 
-        if (reference instanceof Parameter) {
-            if (((Parameter) reference).getMode().equals(ParameterMode.IN)) {
+        if (symbol instanceof Parameter param) {
+            if (param.getMode().equals(ParameterMode.IN)) {
                 ErrorService.getInstance().registerSemanticError(new InParameterModificationException(this.getVariableReference().getIdentifier(), this.getVariableReference().getConcernedLine()));
                 return;
             }
         }
 
         if (!this.variableReference.getType(SemanticAnalysisVisitor.scopeStack).equals(expression.getType(SemanticAnalysisVisitor.scopeStack))) {
-            ErrorService.getInstance().registerSemanticError(new TypeMismatchException(reference.getType(), expression.getType(SemanticAnalysisVisitor.scopeStack), this.variableReference.getConcernedLine()));
+            ErrorService.getInstance().registerSemanticError(new TypeMismatchException(((Variable) symbol).getType(), expression.getType(SemanticAnalysisVisitor.scopeStack), this.variableReference.getConcernedLine()));
         }
 
     }
