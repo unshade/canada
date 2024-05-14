@@ -81,7 +81,7 @@ public final class ASMGenerator implements ASTNodeVisitor {
     @Override
     public void visit(ProcedureDeclarationNode node) throws Exception {
         enterScope();
-        Symbol symbol = scopeStack.findSymbolInScopes(node.getIdentifier());
+        Procedure symbol = (Procedure) scopeStack.findSymbolInScopes(node.getIdentifier());
 
         this.output.append(symbol.getIdentifier()).append("\n").append("""
                 \t STMFD   R13!, {R10, LR} ; Save caller's frame pointer and return ASM address
@@ -90,15 +90,29 @@ public final class ASMGenerator implements ASTNodeVisitor {
                 \t STR     R11, [R13]
                 \t MOV     R11, R13 ; Set up new frame pointer
                 """);
-        Context.background().setCounter(node.getParameters().size());
-        node.getParameters().forEach(param -> {
-            try {
-                param.accept(this);
-                Context.background().setCounter(Context.background().getCounter() - 1);
-            } catch (Exception ex) {
-                throw new RuntimeException(ex);
+        int counter = symbol.getParametersSize() + 2 *4 ;
+        for (ParameterNode param : node.getParameters()) {
+            Type paramType = (Type) scopeStack.findSymbolInScopes(param.getType().getIdentifier());
+            if(paramType instanceof Record record) {
+                this.output.append("""
+                            \t ADD     R1, R11, #%s ; Load field in R0
+                            \t SUB   R2, R13, #4 ; Store argument for %s in stack-frame
+                            """.formatted(counter,symbol.getIdentifier()));
+                this.output.append(saveRecordInStack(record, 0));
+                this.output.append("""
+                            \t SUB   R13, R13, #%s ;
+                            """.formatted(record.getSize()));
+            } else {
+                this.output.append("""
+                    \t LDR     R0, [R11, #%s] ; Load parameter %s in R0
+                    \t STMFD   R13!, {R0} ; Store parameter %s in stack-frame
+                    """.formatted(counter, param.getIdentifier(), param.getIdentifier()));
+
             }
-        });
+            counter-=paramType.getSize();
+
+
+        }
         node.getBody().accept(this);
         scopeStack.exitScope();
     }
@@ -266,7 +280,7 @@ public final class ASMGenerator implements ASTNodeVisitor {
                     \t BL      %s ; Branch link to %s (it will save the return address in LR)
                     """.formatted(symbol.getIdentifier(), symbol.getIdentifier()));
             this.output.append("""
-                    \t ADD     R13, R13, #4 * %s ; Remove arguments and return value from stack
+                    \t ADD     R13, R13, #%s ; Remove arguments and return value from stack
                     """.formatted(symbol.getParametersSize()));
         }
     }
@@ -390,25 +404,26 @@ public final class ASMGenerator implements ASTNodeVisitor {
 
     @Override
     public void visit(ReturnStatementNode node) throws Exception {
-        node.getExpression().accept(this);
-        Type type = (Type) scopeStack.findSymbolInScopes(node.getExpression().getType(scopeStack));
-        int shift = 2 * 4 + type.getSize();
-        if (type instanceof Record record) {
-            this.output.append("""
-                    \t MOV     R1, R9 ; Load field in R0
-                    \t ADD   R2, R11, #%s ; Store return value for in stack-frame
-                    """.formatted(shift));
-            this.output.append(saveRecordInStack(record, 0));
-        } else {
-            this.output.append("""
-                    \t STR     R0, [R11, #%s] ; Store return value for in stack-frame
-                    """.formatted(shift));
+        if(node.getExpression() != null) {
+            node.getExpression().accept(this);
+            Type type = (Type) scopeStack.findSymbolInScopes(node.getExpression().getType(scopeStack));
+            int shift = 2 * 4 + type.getSize();
+            if (type instanceof Record record) {
+                this.output.append("""
+                        \t MOV     R1, R9 ; Load field in R0
+                        \t ADD   R2, R11, #%s ; Store return value for in stack-frame
+                        """.formatted(shift));
+                this.output.append(saveRecordInStack(record, 0));
+            } else {
+                this.output.append("""
+                        \t STR     R0, [R11, #%s] ; Store return value for in stack-frame
+                        """.formatted(shift));
+            }
         }
-
         this.output.append("""
                 \t MOV     R13, R11 ; Restore frame pointer
                 \t LDR     R11, [R13] ; Restore caller's frame pointer
-                \t ADD     R13, R13, #4 ; Remove return value from stack
+                \t ADD     R13, R13, #4 ;
                 \t LDMFD   R13!, {R10, PC} ; Restore caller's frame pointer and return ASM address
                 """);
 
