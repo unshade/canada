@@ -203,6 +203,28 @@ public final class ASMGenerator implements ASTNodeVisitor {
                             \t SUB SP, SP, #4   ; réservez 4 octets pour la valeur (ou plus)
                             \t STR R0, [SP]     ; stockez la valeur
                             \t MOV R0, SP       ; adresse de la valeur (ici SP, mais peut être n'importe quelle adresse)
+                            \t BL print
+                            \t ADD SP, SP, #8   ; libérez la pile
+                            """);
+
+                } catch (Exception ex) {
+                    throw new RuntimeException(ex);
+                }
+            });
+            return;
+        }
+
+        if (symbol.getIdentifier().equals("putLn")) {
+            node.getArguments().forEach(arg -> {
+                try {
+                    arg.accept(this);
+                    this.output.append("""
+                            \t SUB SP, SP, #4   ; réservez 4 octets pour le 0
+                            \t MOV R1, #0
+                            \t STR R1, [SP]
+                            \t SUB SP, SP, #4   ; réservez 4 octets pour la valeur (ou plus)
+                            \t STR R0, [SP]     ; stockez la valeur
+                            \t MOV R0, SP       ; adresse de la valeur (ici SP, mais peut être n'importe quelle adresse)
                             \t BL println
                             \t ADD SP, SP, #8   ; libérez la pile
                             """);
@@ -639,6 +661,26 @@ public final class ASMGenerator implements ASTNodeVisitor {
                     throw new RuntimeException(ex);
                 }
             });
+            this.output.append("""
+                    print
+                    \t STMFD   SP!, {LR, R0-R3}
+                    \t MOV     R3, R0
+                    \t LDR     R1, =STR_OUT ; address of the output buffer
+                    PRINT_LOOP
+                    \t LDRB    R2, [R0], #1
+                    \t STRB    R2, [R1], #1
+                    \t TST     R2, R2
+                    \t BNE     PRINT_LOOP
+                    \t MOV     R2, #0
+                    \t STRB    R2, [R1, #-1]
+                    \t MOV     R2, #0
+                    \t STRB    R2, [R1]
+                                       \s
+                    ;  we need to clear the output buffer
+                    \t LDR     R1, =STR_OUT
+                    \t MOV     R0, R3
+                    \t B       CLEAN
+                   \s""");
 
             this.output.append("""
                     println
