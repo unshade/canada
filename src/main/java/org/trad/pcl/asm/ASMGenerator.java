@@ -1,6 +1,5 @@
 package org.trad.pcl.asm;
 
-import org.aspectj.weaver.ast.Call;
 import org.trad.pcl.Exceptions.Semantic.UndefinedVariableException;
 import org.trad.pcl.Helpers.TypeEnum;
 import org.trad.pcl.ast.ParameterNode;
@@ -22,9 +21,8 @@ import static org.trad.pcl.asm.ASMUtils.*;
 
 public final class ASMGenerator implements ASTNodeVisitor {
 
-    private final List<SymbolTable> symbolTables;
-
     public final static StackTDS scopeStack = new StackTDS();
+    private final List<SymbolTable> symbolTables;
     private final StringBuilder output;
     private int currentTableIndex;
 
@@ -53,26 +51,26 @@ public final class ASMGenerator implements ASTNodeVisitor {
                 """);
 
         Type type = (Type) scopeStack.findSymbolInScopes(symbol.getReturnType());
-        int counter = symbol.getParametersSize() + 2 *4 + type.getSize();
+        int counter = symbol.getParametersSize() + 2 * 4 + type.getSize();
         for (ParameterNode param : node.getParameters()) {
             Type paramType = (Type) scopeStack.findSymbolInScopes(param.getType().getIdentifier());
-            if(paramType instanceof Record record) {
+            if (paramType instanceof Record record) {
                 this.output.append("""
-                            \t ADD     R1, R11, #%s ; Load field in R0
-                            \t SUB     R2, R13, #4 ; Store argument for %s in stack-frame
-                            """.formatted(counter,symbol.getIdentifier()));
+                        \t ADD     R1, R11, #%s ; Load field in R0
+                        \t SUB     R2, R13, #4 ; Store argument for %s in stack-frame
+                        """.formatted(counter, symbol.getIdentifier()));
                 this.output.append(saveRecordInStack(record, 0));
                 this.output.append("""
-                            \t SUB     R13, R13, #%s ;
-                            """.formatted(record.getSize()));
+                        \t SUB     R13, R13, #%s ;
+                        """.formatted(record.getSize()));
             } else {
                 this.output.append("""
-                    \t LDR     R0, [R11, #%s] ; Load parameter %s in R0
-                    \t STMFD   R13!, {R0} ; Store parameter %s in stack-frame
-                    """.formatted(counter, param.getIdentifier(), param.getIdentifier()));
+                        \t LDR     R0, [R11, #%s] ; Load parameter %s in R0
+                        \t STMFD   R13!, {R0} ; Store parameter %s in stack-frame
+                        """.formatted(counter, param.getIdentifier(), param.getIdentifier()));
 
             }
-            counter-=paramType.getSize();
+            counter -= paramType.getSize();
 
 
         }
@@ -92,26 +90,26 @@ public final class ASMGenerator implements ASTNodeVisitor {
                 \t STR     R11, [R13]
                 \t MOV     R11, R13 ; Set up new frame pointer
                 """);
-        int counter = symbol.getParametersSize() + 2 *4 ;
+        int counter = symbol.getParametersSize() + 2 * 4;
         for (ParameterNode param : node.getParameters()) {
             Type paramType = (Type) scopeStack.findSymbolInScopes(param.getType().getIdentifier());
-            if(paramType instanceof Record record) {
+            if (paramType instanceof Record record) {
                 this.output.append("""
-                            \t ADD     R1, R11, #%s ; Load field in R0
-                            \t SUB     R2, R13, #4 ; Store argument for %s in stack-frame
-                            """.formatted(counter,symbol.getIdentifier()));
+                        \t ADD     R1, R11, #%s ; Load field in R0
+                        \t SUB     R2, R13, #4 ; Store argument for %s in stack-frame
+                        """.formatted(counter, symbol.getIdentifier()));
                 this.output.append(saveRecordInStack(record, 0));
                 this.output.append("""
-                            \t SUB     R13, R13, #%s ;
-                            """.formatted(record.getSize()));
+                        \t SUB     R13, R13, #%s ;
+                        """.formatted(record.getSize()));
             } else {
                 this.output.append("""
-                    \t LDR     R0, [R11, #%s] ; Load parameter %s in R0
-                    \t STMFD   R13!, {R0} ; Store parameter %s in stack-frame
-                    """.formatted(counter, param.getIdentifier(), param.getIdentifier()));
+                        \t LDR     R0, [R11, #%s] ; Load parameter %s in R0
+                        \t STMFD   R13!, {R0} ; Store parameter %s in stack-frame
+                        """.formatted(counter, param.getIdentifier(), param.getIdentifier()));
 
             }
-            counter-=paramType.getSize();
+            counter -= paramType.getSize();
 
 
         }
@@ -214,25 +212,25 @@ public final class ASMGenerator implements ASTNodeVisitor {
             return;
         }
 
-        if (symbol.getIdentifier().equals("putLn")) {
-            node.getArguments().forEach(arg -> {
-                try {
-                    arg.accept(this);
-                    this.output.append("""
-                            \t SUB SP, SP, #4   ; réservez 4 octets pour le 0
-                            \t MOV R1, #0
-                            \t STR R1, [SP]
-                            \t SUB SP, SP, #4   ; réservez 4 octets pour la valeur (ou plus)
-                            \t STR R0, [SP]     ; stockez la valeur
-                            \t MOV R0, SP       ; adresse de la valeur (ici SP, mais peut être n'importe quelle adresse)
-                            \t BL println
-                            \t ADD SP, SP, #8   ; libérez la pile
-                            """);
 
-                } catch (Exception ex) {
-                    throw new RuntimeException(ex);
-                }
-            });
+        if (symbol.getIdentifier().equals("new_line")) {
+            try {
+                this.output.append("""
+                        \t ; new_line
+                        \t SUB SP, SP, #4   ; réservez 4 octets pour le 0
+                        \t MOV R1, #0
+                        \t STR R1, [SP]
+                        \t SUB SP, SP, #4   ; réservez 4 octets pour la valeur (ou plus)
+                        \t MOV R0, #32
+                        \t STR R0, [SP]     ; stockez la valeur
+                        \t MOV R0, SP       ; adresse de la valeur (ici SP, mais peut être n'importe quelle adresse)
+                        \t BL println
+                        \t ADD SP, SP, #8   ; libérez la pile
+                        """);
+
+            } catch (Exception ex) {
+                throw new RuntimeException(ex);
+            }
             return;
         }
 
@@ -244,7 +242,7 @@ public final class ASMGenerator implements ASTNodeVisitor {
                             \t LDR R3, =STR_OUT       ; on charge l'adresse de la valeur
                             \t BL to_ascii          ; on convertit l'entier en chaîne de caractères
                             \t LDR R0, =STR_OUT       ; on charge l'adresse de la chaîne de caractères
-                            \t BL println           ; on affiche la chaîne de caractères
+                            \t BL print           ; on affiche la chaîne de caractères
                             """);
                 } catch (Exception ex) {
                     throw new RuntimeException(ex);
@@ -256,7 +254,7 @@ public final class ASMGenerator implements ASTNodeVisitor {
         node.getArguments().forEach(arg -> {
             try {
                 arg.accept(this);
-                if((Type) scopeStack.findSymbolInScopes(arg.getType(scopeStack)) instanceof Record record) {
+                if ((Type) scopeStack.findSymbolInScopes(arg.getType(scopeStack)) instanceof Record record) {
                     this.output.append("""
                             \t MOV     R1, R9 ; Load field in R0
                             \t SUB     R2, R13, #4 ; Store argument for %s in stack-frame
@@ -276,7 +274,7 @@ public final class ASMGenerator implements ASTNodeVisitor {
             }
         });
 
-        if(symbol instanceof Function function) {
+        if (symbol instanceof Function function) {
             Type type = (Type) scopeStack.findSymbolInScopes(function.getReturnType());
             this.output.append("""
                     \t SUB     R13, R13, #%s ; Save space for return value
@@ -427,7 +425,7 @@ public final class ASMGenerator implements ASTNodeVisitor {
 
     @Override
     public void visit(ReturnStatementNode node) throws Exception {
-        if(node.getExpression() != null) {
+        if (node.getExpression() != null) {
             node.getExpression().accept(this);
             Type type = (Type) scopeStack.findSymbolInScopes(node.getExpression().getType(scopeStack));
             int shift = 2 * 4 + type.getSize();
@@ -564,11 +562,10 @@ public final class ASMGenerator implements ASTNodeVisitor {
 
     @Override
     public void visit(LiteralNode node) {
-        if(node.getType(scopeStack).equals(TypeEnum.BOOL.toString())) {
+        if (node.getType(scopeStack).equals(TypeEnum.BOOL.toString())) {
             int bool = (boolean) node.getValue() ? 1 : 0;
             this.output.append("\t MOV     R0, #%s ; Load literal value in R0\n".formatted(bool));
-        }
-        else if (node.getType(scopeStack).equals(TypeEnum.CHAR.toString())) {
+        } else if (node.getType(scopeStack).equals(TypeEnum.CHAR.toString())) {
             this.output.append("\t LDR     R0, =%s ; Load literal value in R0\n".formatted((int) String.valueOf(node.getValue()).charAt(0)));
         } else {
             this.output.append("\t LDR     R0, =%s ; Load literal value in R0\n".formatted(node.getValue()));
@@ -577,7 +574,7 @@ public final class ASMGenerator implements ASTNodeVisitor {
 
     @Override
     public void visit(VariableReferenceNode node) throws Exception {
-        if(scopeStack.findSymbolInScopes(node.getIdentifier()) instanceof Function){
+        if (scopeStack.findSymbolInScopes(node.getIdentifier()) instanceof Function) {
             CallNode callNode = new CallNode();
             callNode.setIdentifier(node.getIdentifier());
             callNode.setNextExpression(node.getNextExpression());
@@ -662,90 +659,90 @@ public final class ASMGenerator implements ASTNodeVisitor {
                 }
             });
             this.output.append("""
-                    print
-                    \t STMFD   SP!, {LR, R0-R3}
-                    \t MOV     R3, R0
-                    \t LDR     R1, =STR_OUT ; address of the output buffer
-                    PRINT_LOOP
-                    \t LDRB    R2, [R0], #1
-                    \t STRB    R2, [R1], #1
-                    \t TST     R2, R2
-                    \t BNE     PRINT_LOOP
-                    \t MOV     R2, #0
-                    \t STRB    R2, [R1, #-1]
-                    \t MOV     R2, #0
-                    \t STRB    R2, [R1]
-                                       \s
-                    ;  we need to clear the output buffer
-                    \t LDR     R1, =STR_OUT
-                    \t MOV     R0, R3
-                    \t B       CLEAN
-                   \s""");
+                     print
+                     \t STMFD   SP!, {LR, R0-R3}
+                     \t MOV     R3, R0
+                     \t LDR     R1, =STR_OUT ; address of the output buffer
+                     PRINT_LOOP
+                     \t LDRB    R2, [R0], #1
+                     \t STRB    R2, [R1], #1
+                     \t TST     R2, R2
+                     \t BNE     PRINT_LOOP
+                     \t MOV     R2, #0
+                     \t STRB    R2, [R1, #-1]
+                     \t MOV     R2, #0
+                     \t STRB    R2, [R1]
+                                        \s
+                     ;  we need to clear the output buffer
+                     \t LDR     R1, =STR_OUT
+                     \t MOV     R0, R3
+                     \t B       CLEAN
+                    \s""");
 
             this.output.append("""
-                    println
-                    \t STMFD   SP!, {LR, R0-R3}
-                    \t MOV     R3, R0
-                    \t LDR     R1, =STR_OUT ; address of the output buffer
-                    PRINTLN_LOOP
-                    \t LDRB    R2, [R0], #1
-                    \t STRB    R2, [R1], #1
-                    \t TST     R2, R2
-                    \t BNE     PRINTLN_LOOP
-                    \t MOV     R2, #10
-                    \t STRB    R2, [R1, #-1]
-                    \t MOV     R2, #0
-                    \t STRB    R2, [R1]
-                                       \s
-                    ;  we need to clear the output buffer
-                    \t LDR     R1, =STR_OUT
-                    \t MOV     R0, R3
-                    CLEAN
-                    \t LDRB    R2, [R0], #1
-                    \t MOV     R3, #0
-                    \t STRB    R3, [R1], #1
-                    \t TST     R2, R2
-                    \t BNE     CLEAN
-                    ;  clear 3 more
-                    \t STRB    R3, [R1], #1
-                    \t STRB    R3, [R1], #1
-                    \t STRB    R3, [R1], #1
-                                       \s
-                    \t LDMFD   SP!, {PC, R0-R3}
-                   \s""");
+                     println
+                     \t STMFD   SP!, {LR, R0-R3}
+                     \t MOV     R3, R0
+                     \t LDR     R1, =STR_OUT ; address of the output buffer
+                     PRINTLN_LOOP
+                     \t LDRB    R2, [R0], #1
+                     \t STRB    R2, [R1], #1
+                     \t TST     R2, R2
+                     \t BNE     PRINTLN_LOOP
+                     \t MOV     R2, #10
+                     \t STRB    R2, [R1, #-1]
+                     \t MOV     R2, #0
+                     \t STRB    R2, [R1]
+                                        \s
+                     ;  we need to clear the output buffer
+                     \t LDR     R1, =STR_OUT
+                     \t MOV     R0, R3
+                     CLEAN
+                     \t LDRB    R2, [R0], #1
+                     \t MOV     R3, #0
+                     \t STRB    R3, [R1], #1
+                     \t TST     R2, R2
+                     \t BNE     CLEAN
+                     ;  clear 3 more
+                     \t STRB    R3, [R1], #1
+                     \t STRB    R3, [R1], #1
+                     \t STRB    R3, [R1], #1
+                                        \s
+                     \t LDMFD   SP!, {PC, R0-R3}
+                    \s""");
 
             this.output.append("""
-                    to_ascii
-                    \t STMFD   SP!, {LR, R4-R7}
-                    \t ; make it positive
-                    \t MOV R7, R0
-                    \t CMP     R0, #0
-                    \t MOVGE   R6, R0
-                    \t RSBLT   R6, R0, #0
-                    \t MOV     R0, R6
-                                       \s
-                    \t MOV     R4, #0 ; Initialize digit counter
-                                       \s
-                    to_ascii_loop\s
-                    \t MOV     R1, R0
-                    \t MOV     R2, #10
-                    \t BL      div32 ; R0 = R0 / 10, R1 = R0 % 10
-                    \t ADD     R1, R1, #48 ; Convert digit to ASCII
-                    \t STRB    R1, [R3, R4] ; Store the ASCII digit
-                    \t ADD     R4, R4, #1 ; Increment digit counter
-                    \t CMP     R0, #0
-                    \t BNE     to_ascii_loop
-                                       \s
-                    \t ; add the sign if it was negative
-                    \t CMP     R7, #0
-                    \t MOVGE   R1, #0\t
-                    \t MOVLT   R1, #45
-                    \t STRB    R1, [R3, R4]
-                    \t ADD     R4, R4, #1
-                           \s
-                    \t LDMFD   SP!, {PC, R4-R7}
-                                       \s
-                   \s""");
+                     to_ascii
+                     \t STMFD   SP!, {LR, R4-R7}
+                     \t ; make it positive
+                     \t MOV R7, R0
+                     \t CMP     R0, #0
+                     \t MOVGE   R6, R0
+                     \t RSBLT   R6, R0, #0
+                     \t MOV     R0, R6
+                                        \s
+                     \t MOV     R4, #0 ; Initialize digit counter
+                                        \s
+                     to_ascii_loop\s
+                     \t MOV     R1, R0
+                     \t MOV     R2, #10
+                     \t BL      div32 ; R0 = R0 / 10, R1 = R0 % 10
+                     \t ADD     R1, R1, #48 ; Convert digit to ASCII
+                     \t STRB    R1, [R3, R4] ; Store the ASCII digit
+                     \t ADD     R4, R4, #1 ; Increment digit counter
+                     \t CMP     R0, #0
+                     \t BNE     to_ascii_loop
+                                        \s
+                     \t ; add the sign if it was negative
+                     \t CMP     R7, #0
+                     \t MOVGE   R1, #0\t
+                     \t MOVLT   R1, #45
+                     \t STRB    R1, [R3, R4]
+                     \t ADD     R4, R4, #1
+                            \s
+                     \t LDMFD   SP!, {PC, R4-R7}
+                                        \s
+                    \s""");
 
             this.output.append("""
                     ;       Integer division routine
