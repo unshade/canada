@@ -71,6 +71,8 @@ public class SemanticAnalysisVisitor implements ASTNodeVisitor {
             parameter.accept(this);
         }
 
+        node.getReturnType().accept(this);
+
         node.getBody().accept(this);
         //StringFormatHelper.printTDS(scopeStack.peek(), "FUNCTION", node.getIdentifier());
 
