@@ -51,9 +51,10 @@ public final class ASMGenerator implements ASTNodeVisitor {
                 """);
 
         Type type = (Type) scopeStack.findSymbolInScopes(symbol.getReturnType());
-        int counter = node.getParemetersSize(scopeStack) + 2 *4 + type.getSize();
+        int counter = symbol.getParametersSize() + 2 *4 + type.getSize();
         for (ParameterNode param : node.getParameters()) {
-            if((Type) scopeStack.findSymbolInScopes(param.getType().getIdentifier()) instanceof Record record) {
+            Type paramType = (Type) scopeStack.findSymbolInScopes(param.getType().getIdentifier());
+            if(paramType instanceof Record record) {
                 this.output.append("""
                             \t ADD     R1, R11, #%s ; Load field in R0
                             \t SUB   R2, R13, #4 ; Store argument for %s in stack-frame
@@ -62,14 +63,14 @@ public final class ASMGenerator implements ASTNodeVisitor {
                 this.output.append("""
                             \t SUB   R13, R13, #%s ;
                             """.formatted(record.getSize()));
-                counter-=record.getSize();
             } else {
                 this.output.append("""
                     \t LDR     R0, [R11, #%s] ; Load parameter %s in R0
                     \t STMFD   R13!, {R0} ; Store parameter %s in stack-frame
                     """.formatted(counter, param.getIdentifier(), param.getIdentifier()));
-                counter-=4;
+
             }
+            counter-=paramType.getSize();
 
 
         }
@@ -174,7 +175,7 @@ public final class ASMGenerator implements ASTNodeVisitor {
 
     @Override
     public void visit(CallNode node) throws Exception {
-        Function symbol = (Function) scopeStack.findSymbolInScopes(node.getIdentifier());
+        Procedure symbol = (Procedure) scopeStack.findSymbolInScopes(node.getIdentifier());
 
         if (symbol.getIdentifier().equals("put")) {
             node.getArguments().forEach(arg -> {
@@ -238,24 +239,35 @@ public final class ASMGenerator implements ASTNodeVisitor {
             }
         });
 
-        Type type = (Type) scopeStack.findSymbolInScopes(symbol.getReturnType());
-        this.output.append("""
-                \t SUB     R13, R13, #%s ; Save space for return value
-                """.formatted(type.getSize()));
+        if(symbol instanceof Function function) {
+            Type type = (Type) scopeStack.findSymbolInScopes(function.getReturnType());
+            this.output.append("""
+                    \t SUB     R13, R13, #%s ; Save space for return value
+                    """.formatted(type.getSize()));
 
-        this.output.append(findAddress(node.getIdentifier()));
+            this.output.append(findAddress(node.getIdentifier()));
 
-        this.output.append("""
-                \t BL      %s ; Branch link to %s (it will save the return address in LR)
-                """.formatted(symbol.getIdentifier(), symbol.getIdentifier()));
+            this.output.append("""
+                    \t BL      %s ; Branch link to %s (it will save the return address in LR)
+                    """.formatted(symbol.getIdentifier(), symbol.getIdentifier()));
 
-        this.output.append("""
-                \t ADD     R0, R13, #%s ; Remove arguments and return value from stack
-                """.formatted(type.getSize() - 4));
+            this.output.append("""
+                    \t ADD     R9, R13, #%s ; Store the return value address in R0
+                    \t LDR     R0, [R9] ; Load the return value in R0
+                    """.formatted(type.getSize() - 4));
 
-        this.output.append("""
-                \t ADD     R13, R13, #4 * %s ; Remove arguments and return value from stack
-                """.formatted(node.getArguments().size() + type.getSize() / 4));
+            this.output.append("""
+                    \t ADD     R13, R13, #%s ; Remove arguments and return value from stack
+                    """.formatted(symbol.getParametersSize() + type.getSize()));
+        } else {
+            this.output.append(findAddress(node.getIdentifier()));
+            this.output.append("""
+                    \t BL      %s ; Branch link to %s (it will save the return address in LR)
+                    """.formatted(symbol.getIdentifier(), symbol.getIdentifier()));
+            this.output.append("""
+                    \t ADD     R13, R13, #4 * %s ; Remove arguments and return value from stack
+                    """.formatted(symbol.getParametersSize()));
+        }
     }
 
     @Override

@@ -25,5 +25,5 @@ choix : point;
 begin
 choix.x := 3;
 choix.y := 4;
-choix := perimetreRectangle(choix, 10).hautGauche;
+choix := perimetreRectangle(choix, 10).basDroite;
 end unDebut ;

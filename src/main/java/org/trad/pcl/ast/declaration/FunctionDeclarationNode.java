@@ -88,15 +88,6 @@ public final class FunctionDeclarationNode extends ASTNode implements Declaratio
         return parameters;
     }
 
-    public int getParemetersSize(StackTDS stack) throws UndefinedVariableException {
-        int size = 0;
-        for (ParameterNode parameter : parameters) {
-            size += parameter.getSize(stack);
-        }
-        return size;
-    }
-
-
     public TypeNode getReturnType() {
         return returnType;
     }

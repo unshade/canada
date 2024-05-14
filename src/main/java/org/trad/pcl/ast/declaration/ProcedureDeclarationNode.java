@@ -6,6 +6,7 @@ import org.trad.pcl.ast.ASTNode;
 import org.trad.pcl.ast.ParameterNode;
 import org.trad.pcl.ast.statement.BlockNode;
 import org.trad.pcl.semantic.ASTNodeVisitor;
+import org.trad.pcl.semantic.symbol.Function;
 import org.trad.pcl.semantic.symbol.Procedure;
 import org.trad.pcl.semantic.symbol.Symbol;
 
@@ -77,7 +78,11 @@ public final class ProcedureDeclarationNode extends ASTNode implements Declarati
     }
 
     public Symbol toSymbol() {
-        return new Procedure(this.identifier, 0);
+        Procedure f = new Procedure(this.identifier, 0);
+        for (ParameterNode parameter : parameters) {
+            f.addParameter(parameter.getType().getIdentifier());
+        }
+        return f;
     }
 
     public void checkEndIdentifier(){

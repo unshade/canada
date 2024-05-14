@@ -39,10 +39,6 @@ public final class ParameterNode extends ASTNode {
         return type;
     }
 
-    public int getSize(StackTDS stack) throws UndefinedVariableException {
-        return ((Type) stack.findSymbolInScopes(this.type.getIdentifier(), getConcernedLine())).getSize();
-    }
-
     public Symbol toSymbol() throws UndefinedVariableException {
         Type type = (Type) SemanticAnalysisVisitor.scopeStack.findSymbolInScopes(this.type.getIdentifier(), getConcernedLine());
         Parameter parem = new Parameter(this.identifier, type.getSize());

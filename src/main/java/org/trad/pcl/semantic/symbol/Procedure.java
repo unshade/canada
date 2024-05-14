@@ -1,6 +1,7 @@
 package org.trad.pcl.semantic.symbol;
 
 import com.diogonunes.jcolor.Attribute;
+import org.trad.pcl.asm.ASMGenerator;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -18,6 +19,15 @@ public class Procedure extends Symbol {
 
     public void addParameter(String parameterType) {
         indexedParametersTypes.add(parameterType);
+    }
+
+    public int getParametersSize() {
+        int size = 0;
+        for (String parameterType : indexedParametersTypes) {
+            Type type = (Type) ASMGenerator.scopeStack.findSymbolInScopes(parameterType);
+            size += type.getSize();
+        }
+        return size;
     }
 
     public List<String> getIndexedParametersTypes() {
