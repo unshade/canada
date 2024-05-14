@@ -15,7 +15,7 @@ rect : rectangle;
 begin
     rect.hautGauche.x := 0;
     rect.hautGauche.y := 0;
-    rect.basDroite.x := larg.x;
+    rect.basDroite.x := larg.x + larg.y;
     rect.basDroite.y := long;
     return rect;
 end perimetreRectangle;

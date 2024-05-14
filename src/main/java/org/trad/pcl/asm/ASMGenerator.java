@@ -251,10 +251,11 @@ public final class ASMGenerator implements ASTNodeVisitor {
                     \t BL      %s ; Branch link to %s (it will save the return address in LR)
                     """.formatted(symbol.getIdentifier(), symbol.getIdentifier()));
 
+            int shift = ASMUtils.getVariableReferenceShift(function.getReturnType(), node.getNextExpression());
             this.output.append("""
                     \t ADD     R9, R13, #%s ; Store the return value address in R0
                     \t LDR     R0, [R9] ; Load the return value in R0
-                    """.formatted(type.getSize() - 4));
+                    """.formatted(type.getSize() - 4 - shift));
 
             this.output.append("""
                     \t ADD     R13, R13, #%s ; Remove arguments and return value from stack
@@ -401,7 +402,7 @@ public final class ASMGenerator implements ASTNodeVisitor {
         } else {
             this.output.append("""
                     \t STR     R0, [R11, #%s] ; Store return value for in stack-frame
-                    """).append(shift);
+                    """.formatted(shift));
         }
 
         this.output.append("""

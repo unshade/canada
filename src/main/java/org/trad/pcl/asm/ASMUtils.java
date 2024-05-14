@@ -83,9 +83,17 @@ public class ASMUtils {
                     """);
         }
         Variable variable = (Variable) scopeStack.findSymbolInScopes(identifier);
-        assert variable != null;
         int shift = variable.getShift();
         String typeIdent = variable.getType();
+        shift += getVariableReferenceShift(typeIdent, nextExpression);
+        sb.append("""
+                \t SUB     R9, R9, #%s
+                """.formatted(shift));
+        return sb.toString();
+    }
+
+    public static int getVariableReferenceShift(String typeIdent, VariableReferenceNode nextExpression) {
+        int shift = 0;
         while (nextExpression != null) {
             Record record = (Record) scopeStack.findSymbolInScopes(typeIdent);
             assert record != null;
@@ -94,10 +102,7 @@ public class ASMUtils {
             typeIdent = field.getType();
             nextExpression = nextExpression.getNextExpression();
         }
-        sb.append("""
-                \t SUB     R9, R9, #%s
-                """.formatted(shift));
-        return sb.toString();
+        return shift;
     }
 
     public static int findDepthInScopes(String identifier) {
