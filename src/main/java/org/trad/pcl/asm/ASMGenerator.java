@@ -114,6 +114,15 @@ public final class ASMGenerator implements ASTNodeVisitor {
 
         }
         node.getBody().accept(this);
+        if(!node.checkHasReturn()){
+            this.output.append("""
+                \t MOV     R13, R11 ; Restore frame pointer
+                \t LDR     R11, [R13] ; Restore caller's frame pointer
+                \t ADD     R13, R13, #4 ;
+                \t LDMFD   R13!, {R10, PC} ; Restore caller's frame pointer and return ASM address
+                """);
+        }
+
         scopeStack.exitScope();
     }
 

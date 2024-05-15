@@ -26,7 +26,6 @@ procedure Tic_Tac_Toe is
         grid.g := ' ';
         grid.h := ' ';
         grid.i := ' ';
-        return;
     end init_grid;
 
     procedure print_grid is
@@ -34,7 +33,7 @@ procedure Tic_Tac_Toe is
         put(grid.a); put('|'); put(grid.b); put('|'); put(grid.c); new_line;
         put(grid.d); put('|'); put(grid.e); put('|'); put(grid.f); new_line;
         put(grid.g); put('|'); put(grid.h); put('|'); put(grid.i); new_line;
-        return;
+        new_line;
     end print_grid;
 
     function check_winner return character is

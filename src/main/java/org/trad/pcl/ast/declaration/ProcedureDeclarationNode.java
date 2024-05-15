@@ -1,6 +1,7 @@
 package org.trad.pcl.ast.declaration;
 
 import org.trad.pcl.Exceptions.Semantic.InvalidEndIdentifierException;
+import org.trad.pcl.Exceptions.Semantic.MissingReturnStatementException;
 import org.trad.pcl.Services.ErrorService;
 import org.trad.pcl.ast.ASTNode;
 import org.trad.pcl.ast.ParameterNode;
@@ -56,7 +57,9 @@ public final class ProcedureDeclarationNode extends ASTNode implements Declarati
         return parameters;
     }
 
-
+    public boolean checkHasReturn() {
+       return this.body.hasReturn();
+    }
 
     public void setBody(BlockNode body) {
         this.body = body;

@@ -24,7 +24,11 @@ procedure CombatSimulator is
 
     function Attack (Player1 : in out Character; Player2 : in out Character) return Character is
     begin
+        put(Player1.name); put(' '); put('A'); put('t'); put('t'); put('a'); put('c'); put('k'); put('s'); put(' '); put(Player2.name); new_line;
         Player2.hp := Player2.hp - Player1.attack * Player1.weapon.damage / Player2.armor.defense;
+        if Player2.hp < 0 then
+            Player2.hp := 0;
+        end if;
         return Player2;
     end Attack;
 

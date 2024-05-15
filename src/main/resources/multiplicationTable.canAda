@@ -1,0 +1,23 @@
+with Ada.Text_IO; use Ada.Text_IO;
+
+procedure Multiplication_Table is
+i : integer;
+j : integer;
+begin
+   for i in 1 .. 10 loop
+      for j in 1 .. 10 loop
+         putInt(i); put(' '); put('x'); put(' '); putInt(j); put(' '); put('=') ; put(' ');
+         putInt(i * j);
+         new_line;
+      end loop;
+
+      new_line;
+   end loop;
+
+    for j in reverse 1 .. 10 loop
+            putInt(j);
+            new_line;
+         end loop;
+   new_line;
+
+end Multiplication_Table;
