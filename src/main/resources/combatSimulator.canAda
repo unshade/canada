@@ -39,8 +39,9 @@ procedure CombatSimulator is
 
     procedure printStats(Player : Character) is
     begin
-        put(Player.name);
-        putInt(Player.hp);
+        put('N'); put('a'); put('m'); put('e'); put(':'); put(Player.name);
+        put(' '); put('H'); put('P'); put(':'); putInt(Player.hp);
+        new_line;
         return;
     end printStats;
 
@@ -81,9 +82,9 @@ begin
             end if;
         end loop;
     if dead then
-        putInt(1);
+        put(Player1.name); put(' '); put('W'); put('i'); put('n'); put('s');
     else
-        putInt(2);
+        put(Player2.name); put(' '); put('W'); put('i'); put('n'); put('s');
     end if;
 
 end CombatSimulator;
