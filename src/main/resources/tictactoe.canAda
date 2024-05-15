@@ -37,35 +37,123 @@ procedure Tic_Tac_Toe is
         return;
     end print_grid;
 
-    function check_winner return boolean is
+    function check_winner return character is
     begin
-        if (grid.a = 'X' and grid.b = 'X' and grid.c = 'X') then
+            if (grid.a = grid.b and grid.b = grid.c and grid.a /= ' ') then
+                return grid.a;
+            elsif (grid.d = grid.e and grid.e = grid.f and grid.d /= ' ') then
+                return grid.d;
+            elsif (grid.g = grid.h and grid.h = grid.i and grid.g /= ' ') then
+                return grid.g;
+            elsif (grid.a = grid.d and grid.d = grid.g and grid.a /= ' ') then
+                return grid.a;
+            elsif (grid.b = grid.e and grid.e = grid.h and grid.b /= ' ') then
+                return grid.b;
+            elsif (grid.c = grid.f and grid.f = grid.i and grid.c /= ' ') then
+                return grid.c;
+            elsif (grid.a = grid.e and grid.e = grid.i and grid.a /= ' ') then
+                return grid.a;
+            elsif (grid.c = grid.e and grid.e = grid.g and grid.c /= ' ') then
+                return grid.c;
+            else
+                return ' ';
+            end if;
+
+    end check_winner;
+
+    function check_draw return boolean is
+    begin
+        return grid.a /= ' ' and grid.b /= ' ' and grid.c /= ' ' and grid.d /= ' ' and grid.e /= ' ' and grid.f /= ' ' and grid.g /= ' ' and grid.h /= ' ' and grid.i /= ' ';
+    end check_draw;
+
+    function place_piece(n: integer; piece: character) return boolean is
+    begin
+        if n = 1 and grid.a = ' ' then
+            grid.a := piece;
             return true;
-        elsif (grid.d = 'X' and grid.e = 'X' and grid.f = 'X') then
+        elsif n = 2 and grid.b = ' ' then
+            grid.b := piece;
             return true;
-        elsif (grid.g = 'X' and grid.h = 'X' and grid.i = 'X') then
+        elsif n = 3 and grid.c = ' ' then
+            grid.c := piece;
             return true;
-        elsif (grid.a = 'X' and grid.d = 'X' and grid.g = 'X') then
+        elsif n = 4 and grid.d = ' ' then
+            grid.d := piece;
             return true;
-        elsif (grid.b = 'X' and grid.e = 'X' and grid.h = 'X') then
+        elsif n = 5 and grid.e = ' ' then
+            grid.e := piece;
             return true;
-        elsif (grid.c = 'X' and grid.f = 'X' and grid.i = 'X') then
+        elsif n = 6 and grid.f = ' ' then
+            grid.f := piece;
             return true;
-        elsif (grid.a = 'X' and grid.e = 'X' and grid.i = 'X') then
+        elsif n = 7 and grid.g = ' ' then
+            grid.g := piece;
             return true;
-        elsif (grid.c = 'X' and grid.e = 'X' and grid.g = 'X') then
+        elsif n = 8 and grid.h = ' ' then
+            grid.h := piece;
+            return true;
+        elsif n = 9 and grid.i = ' ' then
+            grid.i := piece;
             return true;
         else
             return false;
         end if;
-    end check_winner;
+    end place_piece;
 
+    function get_random_place return integer is
+    begin
+        if grid.a = ' ' then
+            return 1;
+        elsif grid.b = ' ' then
+            return 2;
+        elsif grid.c = ' ' then
+            return 3;
+        elsif grid.d = ' ' then
+            return 4;
+        elsif grid.e = ' ' then
+            return 5;
+        elsif grid.f = ' ' then
+            return 6;
+        elsif grid.g = ' ' then
+            return 7;
+        elsif grid.h = ' ' then
+            return 8;
+        elsif grid.i = ' ' then
+            return 9;
+        else
+            return 0;
+        end if;
+    end get_random_place;
+
+    place : integer;
+    turn : boolean := false;
 
 
 begin
+    init_grid;
 
-    if ( true = false ) then
-        put('Y');
+    while(check_winner = ' ' and not check_draw) loop
+        print_grid;
+
+        if turn then
+            place := get_random_place;
+            place_piece(place, 'O');
+            turn := false;
+        else
+            place := get_random_place;
+            place_piece(place, 'X');
+            turn := true;
+        end if;
+
+    end loop;
+
+    print_grid;
+
+    if check_draw then
+        put('D'); put('r'); put('a'); put('w'); put('!'); new_line;
+    else
+        put('P'); put('l'); put('a'); put('y'); put('e'); put('r'); put(' ');
+        put(check_winner); put(' '); put('w'); put('i'); put('n'); put('s'); put('!'); new_line;
     end if;
 
 end Tic_Tac_Toe;
