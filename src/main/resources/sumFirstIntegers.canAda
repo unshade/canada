@@ -1,17 +1,20 @@
 with Ada.Text_IO; use Ada.Text_IO;
 procedure unDebut is
 
-x : integer;
+x : integer := 0;
 
 function sum(a : integer) return integer is
 begin
   if a = 0 then
     return 0;
   else
+    x := x + a;
     return a + sum(a-1);
   end if;
 end sum;
 
 begin
-  x := sum(10);
+  putInt(sum(10));
+  new_line;
+  putInt(x);
 end unDebut;
