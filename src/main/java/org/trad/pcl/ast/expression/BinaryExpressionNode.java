@@ -1,6 +1,7 @@
 package org.trad.pcl.ast.expression;
 
 import org.trad.pcl.Exceptions.Semantic.BinaryTypeMismatchException;
+import org.trad.pcl.Exceptions.Semantic.TypeMismatchException;
 import org.trad.pcl.Exceptions.Semantic.UndefinedVariableException;
 import org.trad.pcl.Helpers.OperatorEnum;
 import org.trad.pcl.Helpers.TypeEnum;
@@ -106,12 +107,12 @@ public final class BinaryExpressionNode extends ASTNode implements ExpressionNod
         String leftType = left.getType(SemanticAnalysisVisitor.scopeStack);
         String rightType = right.getType(SemanticAnalysisVisitor.scopeStack);
         if (!leftType.equals(rightType)) {
-            ErrorService.getInstance().registerSemanticError(new BinaryTypeMismatchException(leftType, rightType, operator.getType(), this.getConcernedLine()));
+            ErrorService.getInstance().registerSemanticError(new TypeMismatchException(leftType, rightType, this.getConcernedLine()));
         }
 
         Type type = (Type) SemanticAnalysisVisitor.scopeStack.findSymbolInScopes(rightType, this.getConcernedLine());
         if (!operator.getEnterType().contains(type.getTypeEnum())) {
-            ErrorService.getInstance().registerSemanticError(new BinaryTypeMismatchException(type.getIdentifier(), rightType, operator.getType(), this.getConcernedLine()));
+            ErrorService.getInstance().registerSemanticError(new BinaryTypeMismatchException(type.getIdentifier(), rightType, operator.getEnterType(), this.getConcernedLine()));
         }
     }
     @Override

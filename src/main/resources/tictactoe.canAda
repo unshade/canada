@@ -1,0 +1,71 @@
+with Ada.Text_IO; use Ada.Text_IO;
+
+procedure Tic_Tac_Toe is
+    type grid_struct is record
+        a : character;
+        b : character;
+        c : character;
+        d : character;
+        e : character;
+        f : character;
+        g : character;
+        h : character;
+        i : character;
+    end record;
+
+    grid : grid_struct;
+
+    procedure init_grid is
+    begin
+        grid.a := ' ';
+        grid.b := ' ';
+        grid.c := ' ';
+        grid.d := ' ';
+        grid.e := ' ';
+        grid.f := ' ';
+        grid.g := ' ';
+        grid.h := ' ';
+        grid.i := ' ';
+        return;
+    end init_grid;
+
+    procedure print_grid is
+    begin
+        put(grid.a); put('|'); put(grid.b); put('|'); put(grid.c); new_line;
+        put(grid.d); put('|'); put(grid.e); put('|'); put(grid.f); new_line;
+        put(grid.g); put('|'); put(grid.h); put('|'); put(grid.i); new_line;
+        return;
+    end print_grid;
+
+    function check_winner return boolean is
+    begin
+        if (grid.a = 'X' and grid.b = 'X' and grid.c = 'X') then
+            return true;
+        elsif (grid.d = 'X' and grid.e = 'X' and grid.f = 'X') then
+            return true;
+        elsif (grid.g = 'X' and grid.h = 'X' and grid.i = 'X') then
+            return true;
+        elsif (grid.a = 'X' and grid.d = 'X' and grid.g = 'X') then
+            return true;
+        elsif (grid.b = 'X' and grid.e = 'X' and grid.h = 'X') then
+            return true;
+        elsif (grid.c = 'X' and grid.f = 'X' and grid.i = 'X') then
+            return true;
+        elsif (grid.a = 'X' and grid.e = 'X' and grid.i = 'X') then
+            return true;
+        elsif (grid.c = 'X' and grid.e = 'X' and grid.g = 'X') then
+            return true;
+        else
+            return false;
+        end if;
+    end check_winner;
+
+
+
+begin
+
+    if ( true = false ) then
+        put('Y');
+    end if;
+
+end Tic_Tac_Toe;

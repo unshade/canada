@@ -25,7 +25,7 @@ public final class OperatorNode extends ASTNode {
     public List<TypeEnum> getEnterType() {
         return switch (operator) {
             case  AND, ANDTHEN, OR, ORELSE -> List.of(TypeEnum.BOOL);
-            case EQUALS, NOT_EQUALS -> List.of(TypeEnum.INT, TypeEnum.RECORD);
+            case EQUALS, NOT_EQUALS -> List.of(TypeEnum.INT, TypeEnum.RECORD, TypeEnum.CHAR, TypeEnum.BOOL);
             default -> List.of(TypeEnum.INT);
         };
     }
