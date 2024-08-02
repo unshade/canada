@@ -1,4 +1,9 @@
-# compilation-marcel16u
+# CanAda
+"Because if you can, you canada", Sir. Bouthier.
+
+Ada Compiler from scratch. No lib, no doc, only us and our keyboard. Compiles ada files to ASM ARM 32 UAL (raspberry compatible).
+
+Follow every compilation steps with logs and graphs.
 
 # Setup
 
